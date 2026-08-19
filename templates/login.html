@@ -3,147 +3,492 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Portal Sign In - Admission & Management System</title>
+  <title>Gyanoday Rojgar Training Centre - Admission & Student Portal</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <style>
-    .login-container-wrapper {
-      min-height: calc(100vh - 70px);
+    :root {
+      --primary-navy: #1e3a8a;
+      --primary-blue: #2563eb;
+      --accent-green: #16a34a;
+      --bg-slate: #f8fafc;
+      --card-border: #e2e8f0;
+      --text-dark: #0f172a;
+    }
+    body.full-portal-page {
+      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: var(--text-dark);
+    }
+    .portal-navbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--card-border);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 0.75rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .navbar-inner {
+      max-width: 1350px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      font-size: 1.5rem;
     }
-    .login-box-card {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary-navy);
+      line-height: 1.2;
+    }
+    .brand-subtitle {
+      font-size: 0.76rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .main-wrapper {
+      max-width: 1350px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1.25rem;
+    }
+    
+    /* 2-Column Hero Grid */
+    .hero-split-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+      align-items: stretch;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 992px) {
+      .hero-split-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Left: Carousel */
+    .hero-slider-container {
+      position: relative;
       width: 100%;
-      max-width: 440px;
-      padding: 2rem;
+      height: 460px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--card-border);
+      background: #0f172a;
     }
     @media (max-width: 768px) {
-      .login-box-card {
-        padding: 1.4rem;
-        border-radius: 16px;
-        box-shadow: var(--shadow-md);
-      }
+      .hero-slider-container { height: 280px; }
+    }
+    .slide-item {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out, transform 0.8s ease;
+      transform: scale(1.02);
+    }
+    .slide-item.active {
+      opacity: 1;
+      transform: scale(1);
+      z-index: 1;
+    }
+    .slide-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.82);
+    }
+    .slide-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 3rem 2rem 1.75rem;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.6) 55%, transparent 100%);
+      color: #ffffff;
+    }
+    .slide-tag {
+      display: inline-block;
+      background: #16a34a;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .slide-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0 0 6px;
+      line-height: 1.3;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 768px) {
+      .slide-title { font-size: 1.1rem; }
+    }
+    .slide-desc {
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      margin: 0;
+      line-height: 1.4;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
+    /* Slider Controls */
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.3);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      z-index: 5;
+      transition: all 0.2s ease;
+    }
+    .slider-btn:hover { background: rgba(30, 58, 138, 0.85); transform: translateY(-50%) scale(1.1); }
+    .slider-btn.prev { left: 12px; }
+    .slider-btn.next { right: 12px; }
+    .slider-dots {
+      position: absolute;
+      bottom: 12px;
+      right: 18px;
+      display: flex;
+      gap: 6px;
+      z-index: 5;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.45);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .dot.active {
+      background: #38bdf8;
+      width: 22px;
+      border-radius: 4px;
+    }
+
+    /* Right: Sign-in & Admission Box */
+    .auth-right-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+    .sign-in-box {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1.8rem;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border-top: 4px solid var(--primary-navy);
+      flex: 1;
+    }
+    .admission-banner-box {
+      background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+      color: #ffffff;
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      box-shadow: 0 8px 20px rgba(22, 163, 74, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* 3 Program Highlights Cards */
+    .program-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .program-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1.4rem;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .program-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
   </style>
 </head>
-<body>
+<body class="full-portal-page">
 
-  <!-- Top Header -->
-  <header class="app-header">
-    <div class="header-brand">
-      <div class="header-logo-icon">🎓</div>
-      <div class="header-title">
-        <h1 class="inst-name-text">Gyanoday Rojgar Training Centre</h1>
-        <p class="inst-tagline-text">Khaspur Ramchandra pahalwan path near bajaj showroom patna 801503</p>
+  <!-- Top Sticky Navigation Bar -->
+  <header class="portal-navbar">
+    <div class="navbar-inner">
+      <div class="nav-brand">
+        <div class="brand-icon">🏛️</div>
+        <div>
+          <div class="brand-title">Gyanoday Rojgar Training Centre</div>
+          <div class="brand-subtitle">📍 Khaspur Ramchandra pahalwan path near bajaj showroom patna 801503</div>
+        </div>
       </div>
-    </div>
-    <div>
-      <a href="/register" class="btn btn-outline-primary btn-sm" style="color: white; border-color: rgba(255,255,255,0.4); text-decoration: none;">
-        📝 New Registration
-      </a>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="/register" class="btn btn-success btn-sm" style="font-weight: 700; text-decoration: none; padding: 7px 14px;">
+          📝 Online Admission Form ↗
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Login Main -->
-  <main class="login-container-wrapper">
-    <div class="login-box-card">
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div style="font-size: 2.8rem; margin-bottom: 4px;">🔐</div>
-        <h2 style="font-size: 1.35rem; color: var(--primary-dark); font-weight: 800;">Sign In to Portal</h2>
-        <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">Students, Center Managers & SuperAdmin</p>
-      </div>
-
-      <form id="form_login" onsubmit="event.preventDefault(); handleLogin(); return false;">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label for="login_id">Mobile Number / Email / User ID <span class="req">*</span></label>
-          <input type="text" class="form-control" id="login_id" placeholder="Enter Mobile Number / Email ID" required autofocus>
+  <!-- Main Content Wrapper (Full-Width Responsive 1350px) -->
+  <main class="main-wrapper">
+    
+    <!-- 2-Column Split Hero (Slider Left 60% + Sign-in Right 40%) -->
+    <div class="hero-split-grid">
+      
+      <!-- LEFT COLUMN: CAMPUS SLIDER -->
+      <div class="hero-slider-container">
+        <!-- Slide 1: Real Campus -->
+        <div class="slide-item active">
+          <img src="/static/img/campus_main.jpg" alt="GRTC Campus" class="slide-img">
+          <div class="slide-overlay">
+            <span class="slide-tag">🏛️ Main Campus</span>
+            <h2 class="slide-title">Welcome to Gyanoday Rojgar Training Centre</h2>
+            <p class="slide-desc">Premier Skill Development & Employment Training Campus in Patna, Bihar.</p>
+          </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 1.2rem;">
-          <label for="login_password">Password <span class="req">*</span></label>
-          <input type="password" class="form-control" id="login_password" placeholder="Enter your password" required>
+        <!-- Slide 2: IT Lab -->
+        <div class="slide-item">
+          <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop" alt="IT Lab" class="slide-img">
+          <div class="slide-overlay">
+            <span class="slide-tag" style="background:#2563eb;">💻 IT & Computer Lab</span>
+            <h2 class="slide-title">Advanced High-Tech Computer Lab</h2>
+            <p class="slide-desc">100% Practical Hands-on Training for Computer IT & Digital Skills.</p>
+          </div>
         </div>
 
-        <button type="button" onclick="handleLogin()" class="btn btn-primary" style="width: 100%; font-size: 1rem; font-weight: 700;">
-          🔓 Login to Portal
-        </button>
-      </form>
+        <!-- Slide 3: Hotel Management -->
+        <div class="slide-item">
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop" alt="Hotel Management" class="slide-img">
+          <div class="slide-overlay">
+            <span class="slide-tag" style="background:#7c3aed;">🏨 Hotel Management & GDA</span>
+            <h2 class="slide-title">Industry-Grade Hospitality & Healthcare Training</h2>
+            <p class="slide-desc">Practical skills for careers in leading hotels and medical centers.</p>
+          </div>
+        </div>
 
-      <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.2rem;">
-        <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 8px;">
-          Naya student account banana hai?
-        </p>
-        <a href="/register" class="btn btn-outline-primary" style="width: 100%; text-decoration: none;">
-          📝 Register as New Student
-        </a>
+        <!-- Slide 4: Admissions Banner -->
+        <div class="slide-item">
+          <img src="/static/img/campus_main.jpg" alt="Admissions Banner" class="slide-img">
+          <div class="slide-overlay">
+            <span class="slide-tag" style="background:#d97706;">🎓 Admissions Open 2026-27</span>
+            <h2 class="slide-title">Computer IT, IT CCE, Ecommerce, Hotel Management & GDA Enrolling Now</h2>
+            <p class="slide-desc">Join our job-oriented programs today. Verified certification upon completion.</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <button type="button" class="slider-btn prev" onclick="moveSlide(-1)">&lsaquo;</button>
+        <button type="button" class="slider-btn next" onclick="moveSlide(1)">&rsaquo;</button>
+        <div class="slider-dots">
+          <span class="dot active" onclick="setSlide(0)"></span>
+          <span class="dot" onclick="setSlide(1)"></span>
+          <span class="dot" onclick="setSlide(2)"></span>
+          <span class="dot" onclick="setSlide(3)"></span>
+        </div>
       </div>
 
+      <!-- RIGHT COLUMN: UNIFIED SIGN-IN & ADMISSION -->
+      <div class="auth-right-container">
+        
+        <!-- Sign-In Form Box -->
+        <div class="sign-in-box">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span style="font-size: 1.4rem;">🔐</span>
+            <h3 style="color: var(--primary-navy); font-size: 1.3rem; font-weight: 800; margin: 0;">
+              Unified Portal Sign In
+            </h3>
+          </div>
+          <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 1.2rem;">
+            SuperAdmin, Center Manager aur Student accounts yahan login karein.
+          </p>
+
+          <div id="login_error" class="alert alert-danger" style="display: none; margin-bottom: 1rem; font-size: 0.85rem;"></div>
+
+          <form id="unified_login_form" onsubmit="handleUnifiedLogin(event)">
+            <div class="form-group" style="margin-bottom: 0.9rem;">
+              <label for="login_identifier" style="font-weight: 700; font-size: 0.85rem;">Login ID (Email / 10-Digit Mobile) <span class="req">*</span></label>
+              <input type="text" class="form-control" id="login_identifier" placeholder="e.g. 7463914517 or email" required autofocus style="padding: 9px 12px; font-size: 0.95rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+              <label for="login_password" style="font-weight: 700; font-size: 0.85rem;">Password <span class="req">*</span></label>
+              <input type="password" class="form-control" id="login_password" placeholder="Enter your password" required style="padding: 9px 12px; font-size: 0.95rem;">
+            </div>
+
+            <button type="submit" id="btn_login_submit" class="btn btn-primary btn-lg" style="width: 100%; font-weight: 800; padding: 10px; font-size: 1rem; box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25);">
+              🔑 Sign In to Portal
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Admission Callout Banner -->
+        <div class="admission-banner-box">
+          <div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 2px;">📝 New Student Admission?</h4>
+            <p style="font-size: 0.8rem; margin: 0; opacity: 0.9;">Fill the 2026 registration form online in 2 minutes.</p>
+          </div>
+          <a href="/register" class="btn btn-light btn-sm" style="font-weight: 800; color: #15803d; white-space: nowrap; text-decoration: none; padding: 8px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+            Register Now ➔
+          </a>
+        </div>
+
+      </div>
 
     </div>
+
+    <!-- 3 Core Programs Highlights Grid -->
+    <div class="program-grid">
+      
+      <div class="program-card" style="border-left: 4px solid #2563eb;">
+        <div style="font-size: 1.8rem; margin-bottom: 6px;">💻</div>
+        <h4 style="color: #1e3a8a; font-size: 1.1rem; font-weight: 800; margin: 0 0 6px;">Computer IT & CCE</h4>
+        <p style="font-size: 0.83rem; color: #64748b; margin: 0 0 8px; line-height: 1.5;">
+          Practical computer training, IT basics, Office applications, and digital business operations.
+        </p>
+        <span class="badge badge-approved" style="font-size: 0.72rem;">🟢 Enrolling Active</span>
+      </div>
+
+      <div class="program-card" style="border-left: 4px solid #7c3aed;">
+        <div style="font-size: 1.8rem; margin-bottom: 6px;">🏨</div>
+        <h4 style="color: #5b21b6; font-size: 1.1rem; font-weight: 800; margin: 0 0 6px;">Hotel Management</h4>
+        <p style="font-size: 0.83rem; color: #64748b; margin: 0 0 8px; line-height: 1.5;">
+          Hospitality services, front office management, food & beverage operations, and guest relations.
+        </p>
+        <span class="badge badge-approved" style="font-size: 0.72rem;">🟢 Enrolling Active</span>
+      </div>
+
+      <div class="program-card" style="border-left: 4px solid #16a34a;">
+        <div style="font-size: 1.8rem; margin-bottom: 6px;">🏥</div>
+        <h4 style="color: #15803d; font-size: 1.1rem; font-weight: 800; margin: 0 0 6px;">General Duty Assistant (GDA)</h4>
+        <p style="font-size: 0.83rem; color: #64748b; margin: 0 0 8px; line-height: 1.5;">
+          Healthcare support, patient care assistance, hospital protocols, and first aid training.
+        </p>
+        <span class="badge badge-approved" style="font-size: 0.72rem;">🟢 Enrolling Active</span>
+      </div>
+
+    </div>
+
   </main>
 
   <script src="/static/js/app.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const idInput = document.getElementById("login_id");
-      const passInput = document.getElementById("login_password");
-      
-      [idInput, passInput].forEach(inp => {
-        if (inp) {
-          inp.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleLogin();
-            }
-          });
-        }
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-item');
+    const dots = document.querySelectorAll('.dot');
+    let slideTimer = null;
+
+    function showSlide(idx) {
+      if (idx >= slides.length) idx = 0;
+      if (idx < 0) idx = slides.length - 1;
+      currentSlide = idx;
+
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === idx);
       });
-    });
+      dots.forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+      });
+    }
 
-    async function handleLogin() {
-      const login_id = document.getElementById("login_id")?.value?.trim();
-      const password = document.getElementById("login_password")?.value?.trim();
-      const btn = document.querySelector(".login-box-card button");
+    function moveSlide(dir) {
+      clearInterval(slideTimer);
+      showSlide(currentSlide + dir);
+      startAutoSlide();
+    }
 
-      if (!login_id || !password) {
-        alert("⚠️ Kripya Mobile / Email / User ID aur Password enter karein.");
+    function setSlide(idx) {
+      clearInterval(slideTimer);
+      showSlide(idx);
+      startAutoSlide();
+    }
+
+    function startAutoSlide() {
+      slideTimer = setInterval(() => {
+        showSlide(currentSlide + 1);
+      }, 4500);
+    }
+
+    startAutoSlide();
+
+    async function handleUnifiedLogin(e) {
+      if (e) e.preventDefault();
+      const loginId = document.getElementById("login_identifier").value.trim();
+      const password = document.getElementById("login_password").value;
+      const errBox = document.getElementById("login_error");
+      const btn = document.getElementById("btn_login_submit");
+
+      if (!loginId || !password) {
+        errBox.style.display = "block";
+        errBox.innerText = "Please enter both Login ID and Password.";
         return;
       }
 
-      if (btn) {
-        btn.innerHTML = "⏳ Logging In...";
-        btn.disabled = true;
-      }
+      errBox.style.display = "none";
+      btn.innerHTML = "⏳ Signing In...";
+      btn.disabled = true;
 
       try {
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ login_id, password })
+          body: JSON.stringify({ login_id: loginId, password: password })
         });
-
         const data = await res.json();
-        if (res.ok) {
+
+        if (res.ok && data.token) {
           localStorage.setItem("agy_auth_token", data.token);
+          localStorage.setItem("authToken", data.token);
+          localStorage.setItem("userRole", data.user.role);
+          localStorage.setItem("userData", JSON.stringify(data.user));
           window.location.href = "/dashboard";
         } else {
-          alert("❌ Login Failed: " + (data.detail || "Invalid credentials"));
-          if (btn) {
-            btn.innerHTML = "🔓 Login to Portal";
-            btn.disabled = false;
-          }
+          errBox.style.display = "block";
+          errBox.innerText = data.detail || "Invalid Login ID or Password.";
         }
       } catch (err) {
-        alert("❌ Connection error: " + err.message);
-        if (btn) {
-          btn.innerHTML = "🔓 Login to Portal";
-          btn.disabled = false;
-        }
+        errBox.style.display = "block";
+        errBox.innerText = "Connection error. Please try again.";
+      } finally {
+        btn.innerHTML = "🔑 Sign In to Portal";
+        btn.disabled = false;
       }
     }
   </script>

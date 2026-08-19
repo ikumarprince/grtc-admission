@@ -1,6 +1,6 @@
 // Global App State
 var currentUser = null;
-var currentToken = localStorage.getItem("agy_auth_token") || null;
+var currentToken = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || null;
 var currentSettings = null;
 var webcamStream = null;
 var activeBatchId = null;

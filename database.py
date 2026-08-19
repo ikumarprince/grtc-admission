@@ -1,3 +1,4 @@
+import re
 import sqlite3
 import json
 import os
@@ -63,7 +64,9 @@ DEFAULT_SETTINGS = {
 }
 
 def hash_password(password: str) -> str:
-    return password.strip()
+    return str(password or '').strip()
+    return hashlib.sha256(password.strip().encode()).hexdigest()
+    return hashlib.sha256(password.strip().encode()).hexdigest()
 
 def get_db_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -296,67 +299,80 @@ def delete_user_session(token):
     conn.close()
 
 def authenticate_user(login_id, password):
+    if not login_id or not password:
+        return None
     conn = get_db_connection()
     cursor = conn.cursor()
-    p_hash = hash_password(password.strip())
-    clean_id = login_id.strip().lower()
+    p_raw = str(password).strip()
+    clean_id = str(login_id).strip().lower()
+    clean_raw_id = str(login_id).strip()
     
     cursor.execute("""
     SELECT * FROM users 
     WHERE (LOWER(username) = ? OR mobile = ? OR LOWER(email) = ?) 
       AND password_hash = ? 
-      AND status = 'active'
-    """, (clean_id, login_id.strip(), clean_id, p_hash))
+      AND (status = 'active' OR status IS NULL OR status = '')
+    """, (clean_id, clean_raw_id, clean_id, p_raw))
     
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
-
-def register_user(username=None, password="grtc@123", full_name="", mobile="", email="", role="student", center_name="Main Campus", candidate_id=None):
     conn = get_db_connection()
     cursor = conn.cursor()
+    p_raw = str(password).strip()
+    clean_id = str(login_id).strip().lower()
+    clean_raw_id = str(login_id).strip()
     
-    clean_mob = (mobile or "").strip()
-    clean_email = (email or "").strip().lower()
-    clean_user = (username or "").strip().lower()
+    cursor.execute("""
+    SELECT * FROM users 
+    WHERE (LOWER(username) = ? OR mobile = ? OR LOWER(email) = ?) 
+      AND password_hash = ? 
+      AND (status = 'active' OR status IS NULL OR status = '')
+    """, (clean_id, clean_raw_id, clean_id, p_raw))
     
-    # If no username provided, use mobile or email as login ID
-    if not clean_user:
-        clean_user = clean_mob if clean_mob else clean_email
-
-    if not clean_mob and not clean_email and not clean_user:
-        conn.close()
-        raise ValueError("Mobile number or Email address is required for registration.")
-        
-    cursor.execute('''
-    SELECT id FROM users 
-    WHERE (LOWER(username) = ? AND ? != '') 
-       OR (mobile = ? AND ? != '') 
-       OR (LOWER(email) = ? AND ? != '')
-    ''', (clean_user, clean_user, clean_mob, clean_mob, clean_email, clean_email))
-    
-    if cursor.fetchone():
-        conn.close()
-        raise ValueError("This Mobile number or Email is already registered. Please login with your password.")
-        
-    p_hash = hash_password(password)
-    cursor.execute('''
-    INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, candidate_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
-    ''', (clean_user, p_hash, full_name.strip(), clean_mob, email.strip(), role, center_name, candidate_id))
-    
-    uid = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return get_user_by_id(uid)
-
-def get_user_by_id(uid):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status, created_at FROM users WHERE id = ?", (uid,))
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    p_raw = str(password).strip()
+    clean_id = str(login_id).strip().lower()
+    clean_raw_id = str(login_id).strip()
+    
+    cursor.execute("""
+    SELECT * FROM users 
+    WHERE (LOWER(username) = ? OR mobile = ? OR LOWER(email) = ?) 
+      AND password_hash = ? 
+      AND (status = 'active' OR status IS NULL OR status = '')
+    """, (clean_id, clean_raw_id, clean_id, p_raw))
+    
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    p_raw = str(password).strip()
+    p_sha = hashlib.sha256(p_raw.encode()).hexdigest()
+    clean_id = str(login_id).strip().lower()
+    clean_raw_id = str(login_id).strip()
+    
+    cursor.execute("""
+    SELECT * FROM users 
+    WHERE (LOWER(username) = ? OR mobile = ? OR LOWER(email) = ?) 
+      AND (password_hash = ? OR password_hash = ?) 
+      AND (status = 'active' OR status IS NULL OR status = '')
+    """, (clean_id, clean_raw_id, clean_id, p_sha, p_raw))
+    
+    row = cursor.fetchone()
+    if row:
+        user_dict = dict(row)
+        if user_dict.get("password_hash") == p_raw:
+            cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (p_sha, user_dict["id"]))
+            conn.commit()
+        conn.close()
+        return user_dict
+    conn.close()
+    return None
 
 def get_all_users(role=None):
     conn = get_db_connection()
@@ -608,6 +624,13 @@ def update_settings(new_settings):
     return True
 
 def create_candidate(data, user_id=None):
+    clean_mob = re.sub(r'[^0-9]', '', str(data.get("mobile_no", "") or ""))
+    if len(clean_mob) >= 10:
+        clean_mob = clean_mob[-10:]
+        mob_check = check_mobile_registered(clean_mob)
+        if mob_check.get("registered"):
+            c = mob_check["candidate"]
+            raise ValueError(f"Mobile number {clean_mob} is already registered with student '{c.get('full_name')}' (Application No: {c.get('application_no')}). Duplicate registration not allowed.")
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -1002,3 +1025,59 @@ def get_stats(center=""):
         "total_fee_pending": total_fee_pending,
         "course_stats": course_stats
     }
+
+
+def check_mobile_registered(mobile_no):
+    clean_mob = re.sub(r'[^0-9]', '', str(mobile_no or ''))
+    if len(clean_mob) < 10:
+        return {"registered": False}
+    clean_mob = clean_mob[-10:]
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT id, application_no, full_name, mobile_no, course, admission_status, created_at 
+    FROM candidates 
+    WHERE mobile_no = ? OR mobile_no LIKE ?
+    """, (clean_mob, f"%{clean_mob}"))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        return {
+            "registered": True,
+            "candidate": dict(row)
+        }
+    return {"registered": False}
+    clean_mob = clean_mob[-10:]
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT id, application_no, full_name, mobile_no, course, admission_status, created_at 
+    FROM candidates 
+    WHERE mobile_no = ? OR mobile_no LIKE ?
+    """, (clean_mob, f"%{clean_mob}"))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        return {
+            "registered": True,
+            "candidate": dict(row)
+        }
+    return {"registered": False}
+
+def get_user_by_id(uid):
+    if not uid:
+        return None
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status 
+    FROM users 
+    WHERE id = ?
+    """, (uid,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None

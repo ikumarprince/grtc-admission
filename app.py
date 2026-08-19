@@ -140,15 +140,34 @@ async def api_logout(authorization: str = Header(None)):
     return {"status": "success"}
 
 
+@app.get("/api/candidates/check-mobile")
+@app.get("/api/public/check-mobile")
+async def api_check_mobile(mobile: str = ""):
+    return database.check_mobile_registered(mobile)
+
+@app.get("/api/candidates/check-mobile")
+@app.get("/api/public/check-mobile")
+async def api_check_mobile(mobile: str = ""):
+    return database.check_mobile_registered(mobile)
+
 @app.post("/api/public/register-admission")
 async def api_public_register_admission(payload: dict = Body(...)):
     full_name = payload.get("full_name", "").strip()
     mobile = payload.get("mobile_no", "").strip()
     email = payload.get("email", "").strip()
-    password = payload.get("password", "").strip() or "grtc@123" or "grtc@123"
+    password = payload.get("password", "").strip() or "grtc@123"
 
     if not full_name or not mobile or not password:
         raise HTTPException(status_code=400, detail="Full Name, Mobile Number and Password are required.")
+
+    # Duplicate mobile check
+    mob_check = database.check_mobile_registered(mobile)
+    if mob_check.get("registered"):
+        c = mob_check["candidate"]
+        raise HTTPException(
+            status_code=400, 
+            detail=f"⚠️ Mobile number {mobile} is already registered with student '{c.get('full_name')}' (Application No: {c.get('application_no')}). Duplicate registration not allowed."
+        )
 
     # 1. Register or find user account
     try:
@@ -161,7 +180,6 @@ async def api_public_register_admission(payload: dict = Body(...)):
             role="student"
         )
     except ValueError as e:
-        # If user exists, authenticate to verify password or return error
         existing_user = database.authenticate_user(mobile, password)
         if existing_user:
             user = existing_user
@@ -169,7 +187,11 @@ async def api_public_register_admission(payload: dict = Body(...)):
             raise HTTPException(status_code=400, detail=str(e))
 
     # 2. Create Candidate record linked to user
-    candidate = database.create_candidate(payload, user_id=user["id"])
+    try:
+        candidate = database.create_candidate(payload, user_id=user["id"])
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
     token = database.create_user_session(user["id"])
     
     return {

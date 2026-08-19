@@ -483,7 +483,57 @@
     </div>
   </div>
 
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/app.js">// ================= REAL-TIME DUPLICATE MOBILE CHECK =================
+var isMobileDuplicate = false;
+
+async function checkMobileDuplication(val) {
+  const clean = val.replace(/[^0-9]/g, "");
+  const msgBox = document.getElementById("mobile_duplicate_msg");
+  const inputField = document.getElementById("mobile_no");
+  const submitBtn = document.getElementById("btn_submit_admission") || document.querySelector("button[type='submit']");
+  
+  if (!msgBox) return;
+
+  if (clean.length < 10) {
+    msgBox.style.display = "none";
+    inputField.style.borderColor = "";
+    isMobileDuplicate = false;
+    if (submitBtn) submitBtn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/candidates/check-mobile?mobile=${clean}`);
+    const data = await res.json();
+    
+    if (data.registered) {
+      isMobileDuplicate = true;
+      inputField.style.borderColor = "#dc2626";
+      inputField.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#dc2626";
+      msgBox.innerHTML = `❌ <strong>Yeh Mobile Number pehle se registered hai!</strong><br>Student: <strong>${data.candidate.full_name}</strong> | App No: <strong>${data.candidate.application_no}</strong> | Course: ${data.candidate.course}<br><span style="color:#b91c1c;">(Ek mobile number se 2 student register nahi ho sakte.)</span>`;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.title = "Duplicate mobile number detected. Please use a unique mobile number.";
+      }
+    } else {
+      isMobileDuplicate = false;
+      inputField.style.borderColor = "#16a34a";
+      inputField.style.boxShadow = "0 0 0 3px rgba(22, 163, 74, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#16a34a";
+      msgBox.innerHTML = `✅ <strong>Mobile Number Available</strong> (Valid for Registration)`;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.title = "";
+      }
+    }
+  } catch(e) {
+    console.error("Mobile check error:", e);
+  }
+}
+</script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       await loadSettings();
@@ -977,6 +1027,56 @@
     function printAdmissionSlip() {
       window.print();
     }
-  </script>
+  // ================= REAL-TIME DUPLICATE MOBILE CHECK =================
+var isMobileDuplicate = false;
+
+async function checkMobileDuplication(val) {
+  const clean = val.replace(/[^0-9]/g, "");
+  const msgBox = document.getElementById("mobile_duplicate_msg");
+  const inputField = document.getElementById("mobile_no");
+  const submitBtn = document.getElementById("btn_submit_admission") || document.querySelector("button[type='submit']");
+  
+  if (!msgBox) return;
+
+  if (clean.length < 10) {
+    msgBox.style.display = "none";
+    inputField.style.borderColor = "";
+    isMobileDuplicate = false;
+    if (submitBtn) submitBtn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/candidates/check-mobile?mobile=${clean}`);
+    const data = await res.json();
+    
+    if (data.registered) {
+      isMobileDuplicate = true;
+      inputField.style.borderColor = "#dc2626";
+      inputField.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#dc2626";
+      msgBox.innerHTML = `❌ <strong>Yeh Mobile Number pehle se registered hai!</strong><br>Student: <strong>${data.candidate.full_name}</strong> | App No: <strong>${data.candidate.application_no}</strong> | Course: ${data.candidate.course}<br><span style="color:#b91c1c;">(Ek mobile number se 2 student register nahi ho sakte.)</span>`;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.title = "Duplicate mobile number detected. Please use a unique mobile number.";
+      }
+    } else {
+      isMobileDuplicate = false;
+      inputField.style.borderColor = "#16a34a";
+      inputField.style.boxShadow = "0 0 0 3px rgba(22, 163, 74, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#16a34a";
+      msgBox.innerHTML = `✅ <strong>Mobile Number Available</strong> (Valid for Registration)`;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.title = "";
+      }
+    }
+  } catch(e) {
+    console.error("Mobile check error:", e);
+  }
+}
+</script>
 </body>
 </html>
