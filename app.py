@@ -40,10 +40,16 @@ def get_current_user_from_token(auth_token: str):
 
 # ================= PAGES & NAVIGATION =================
 
+@app.head("/")
 @app.get("/", response_class=HTMLResponse)
 async def serve_home():
     with open(os.path.join(TEMPLATES_DIR, "login.html"), "r", encoding="utf-8") as f:
         return f.read()
+
+@app.head("/healthz")
+@app.get("/healthz")
+async def health_check():
+    return {"status": "healthy"}
 
 @app.get("/login", response_class=HTMLResponse)
 async def serve_login():
