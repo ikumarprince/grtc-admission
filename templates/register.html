@@ -379,24 +379,23 @@
           <div class="form-section" id="sec_fee">
             <div class="section-title">💳 5. Fee & Payment Details</div>
 
-            <!-- UPI QR CODE PAYMENT CARD -->
-            <div style="background: #eff6ff; border: 2px dashed #3b82f6; border-radius: 12px; padding: 14px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-              <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                <div style="background: #ffffff; padding: 8px; border-radius: 10px; border: 1.5px solid #cbd5e1; box-shadow: var(--shadow-sm); text-align: center;">
-                  <img id="upi_qr_img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi%3A%2F%2Fpay%3Fpa%3D9304474574%40ybl%26pn%3DGyanoday%2520Rojgar%2520Training%2520Centre%26cu%3DINR" alt="UPI QR Code" style="width: 130px; height: 130px; display: block; border-radius: 4px;" onerror="renderOfflineQrFallback(this)">
-                  <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: bold; margin-top: 4px; display: block;">SCAN TO PAY</span>
+            <!-- UPI QR CODE & PAYMENT PLACEHOLDER BOX (BLANK SPACE) -->
+            <div style="background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 12px; padding: 16px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div style="width: 120px; height: 120px; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); padding: 6px;">
+                  <span style="font-size: 2rem; opacity: 0.6;">📲</span>
+                  <span style="font-size: 0.7rem; font-weight: 700; color: #64748b; margin-top: 4px;">QR Code Space</span>
                 </div>
                 <div>
-                  <h4 style="font-size: 1.05rem; font-weight: 800; color: #1e3a8a; margin-bottom: 4px;">📲 Scan & Pay via any UPI App</h4>
-                  <p style="font-size: 0.82rem; color: #334155; margin-bottom: 6px;">Google Pay, PhonePe, Paytm, BHIM ya kisi bhi UPI App se pay karein.</p>
-                  <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; padding: 6px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">
-                    <strong style="font-size: 0.88rem; color: #1e40af;">UPI ID: <span id="display_upi_id">9304474574@ybl</span></strong>
-                    <button type="button" class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 0.75rem; min-height: 26px;" onclick="copyUpiId()">📋 Copy</button>
+                  <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--primary); margin-bottom: 4px;">💳 Online Fee Payment (UPI / QR Code)</h4>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">Google Pay, PhonePe, Paytm ya Bank UPI ke through admission fee pay karein.</p>
+                  <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    <strong style="font-size: 0.88rem; color: #334155;">UPI ID: <span id="display_upi_id" style="color: #64748b; font-style: italic;">[ ____________________ ]</span></strong>
                   </div>
                 </div>
               </div>
-              <div style="font-size: 0.8rem; color: #15803d; font-weight: 700; background: #dcfce7; padding: 6px 12px; border-radius: 20px; border: 1px solid #86efac;">
-                ⚡ Instant Verification
+              <div style="font-size: 0.8rem; color: #475569; font-weight: 700; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; border: 1px solid #cbd5e1;">
+                🏦 Payment Counter / Online
               </div>
             </div>
 
@@ -419,7 +418,7 @@
               <div class="form-group">
                 <label for="reg_payment_mode">Payment Mode</label>
                 <select class="form-control" id="reg_payment_mode" name="payment_mode">
-                  <option value="UPI / QR Code">UPI / QR Code (9304474574@ybl)</option>
+                  <option value="UPI / QR Code">UPI / QR Code (Online Payment)</option>
                   <option value="Cash">Cash</option>
                   <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
                   <option value="Cheque / DD">Cheque / Demand Draft</option>
@@ -690,7 +689,7 @@ async function checkMobileDuplication(val) {
     }
 
     function copyUpiId() {
-      const upiId = document.getElementById("display_upi_id")?.innerText || "9304474574@ybl";
+      const upiId = document.getElementById("display_upi_id")?.innerText || "";
       navigator.clipboard.writeText(upiId).then(() => {
         alert("✅ UPI ID Copied: " + upiId);
       }).catch(() => {
