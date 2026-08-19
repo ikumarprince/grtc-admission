@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Student Admission & Registration - Excellence Institute</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo-icon">🎓</div>
+      <div class="header-title">
+        <h1 class="inst-name-text">Gyanoday Rojgar Training Centre</h1>
+        <p class="inst-tagline-text">Khaspur Ramchandra pahalwan path near bajaj showroom patna 801503</p>
+      </div>
+    </div>
+    <div>
+      <a href="/login" class="btn btn-outline-primary btn-sm" style="color: white; border-color: rgba(255,255,255,0.4); text-decoration: none;">
+        🔐 Login
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Mobile Stepper Quick Jump Bar -->
+    <div class="mobile-stepper-bar">
+      <a href="#sec_course" class="stepper-pill active">📌 Course</a>
+      <a href="#sec_personal" class="stepper-pill">👤 Personal</a>
+      <a href="#sec_contact" class="stepper-pill">📞 Contact</a>
+      <a href="#sec_docs" class="stepper-pill">📄 Documents</a>
+      <a href="#sec_parents" class="stepper-pill">👨‍👩‍👦 Parents</a>
+      
+      <a href="#sec_fee" class="stepper-pill">💳 Fees</a>
+    </div>
+
+    <div class="card" style="margin-top: 0.5rem;">
+      <div class="card-header">
+        <h2>📝 Candidate Admission & Registration Form</h2>
+        <a href="/login" class="btn btn-secondary btn-sm" style="text-decoration: none;">🔐 Login Here</a>
+      </div>
+      <div class="card-body">
+        <form id="full_registration_form" onsubmit="event.preventDefault(); submitFullRegistration(event); return false;">
+          <input type="hidden" id="reg_photo_url" name="reg_photo_url">
+          
+          <!-- Hidden Inputs for Uploaded Documents -->
+          <input type="hidden" id="url_aadhaar_front" name="aadhaar_front_url">
+          <input type="hidden" id="url_aadhaar_back" name="aadhaar_back_url">
+          <input type="hidden" id="url_marksheet_10th" name="marksheet_10th_url">
+          <input type="hidden" id="url_marksheet_12th" name="marksheet_12th_url">
+          <input type="hidden" id="url_caste_cert" name="caste_cert_url">
+          <input type="hidden" id="url_other_docs_json" name="other_documents_json" value="[]">
+
+          <!-- SECTION 1: COURSE & SESSION -->
+                              <!-- SECTION 1: COURSE & ADMISSION DETAILS -->
+          <div class="form-section" id="sec_course">
+            <div class="section-title">📌 1. Course & Batch Details</div>
+            <div class="form-grid-4">
+              <div class="form-group">
+                <label for="reg_admission_date">Admission Date <span class="req">*</span></label>
+                <input type="date" class="form-control" id="reg_admission_date" name="admission_date" required>
+              </div>
+
+              <div class="form-group">
+                <label for="batch_id">Batch No (2-Digit) <span class="req">*</span></label>
+                <input type="text" class="form-control" id="batch_id" name="batch_id" placeholder="e.g. 01" maxlength="2" required>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label for="reg_course">Program / Course Applied <span class="req">*</span></label>
+                <select class="form-control" id="reg_course" name="course" required>
+                  <option value="">-- Select Course / Program --</option>
+                  <option value="Computer">Computer</option>
+                  <option value="Hotel Management">Hotel Management</option>
+                  <option value="GDA">GDA</option>
+                </select>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label for="reg_reference">Reference <span class="req">*</span></label>
+                <input type="text" list="reference_list" class="form-control" id="reg_reference" name="reference" placeholder="Type or select reference (e.g. Newspaper, Friend, Social Media...)" required>
+                <datalist id="reference_list">
+                  <option value="Newspaper / Banner / Ad">
+                  <option value="Social Media / Online">
+                  <option value="Friend / Student Referral">
+                  <option value="Direct Walk-in / Center Visit">
+                </datalist>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label for="reg_admission_category">Category / Quota</label>
+                <select class="form-control" id="reg_admission_category" name="admission_category">
+                  <option value="General">General / Open</option>
+                  <option value="OBC">OBC</option>
+                  <option value="SC">SC</option>
+                  <option value="ST">ST</option>
+                  <option value="EWS">EWS</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: PERSONAL INFORMATION & PHOTO -->
+          <div class="form-section" id="sec_personal">
+            <div class="section-title">👤 2. Candidate Personal Information</div>
+            <div class="candidate-photo-container" id="reg_photo_container">
+              <div class="passport-photo-frame" id="reg_photo_preview" onclick="document.getElementById('reg_photo_file').click()" style="cursor: pointer;">
+                <div class="photo-placeholder-text">
+                  <div style="font-size: 2.4rem; margin-bottom: 4px;">📷</div>
+                  <span>Tap to Upload / Capture Photo</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+                <h4 style="font-size: 0.96rem; font-weight: 700; color: var(--primary);">Candidate Photograph <span class="req">*</span></h4>
+                <p style="font-size: 0.82rem; color: var(--text-muted);">
+                  Gallery se select karein ya Phone Camera se live photo khinchein.
+                </p>
+                <!-- File Input for Gallery -->
+                <input type="file" id="reg_photo_file" accept="image/*" style="display: none;" onchange="handleRegPhotoUpload(this)">
+                <!-- File Input for Native Phone Camera -->
+                <input type="file" id="reg_camera_file" accept="image/*" capture="user" style="display: none;" onchange="handleRegPhotoUpload(this)">
+                
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('reg_photo_file').click()">
+                    📁 Choose from Gallery
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="triggerCameraCapture()">
+                    📸 Open Live Camera
+                  </button>
+                </div>
+                <div id="photo_status_badge" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 2px;">
+                  ⚠️ No photo selected yet
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="reg_full_name">Candidate Full Name / Pura Naam <span class="req">*</span></label>
+                <input type="text" class="form-control" id="reg_full_name" name="full_name" placeholder="e.g. Rahul Sharma" required>
+              </div>
+              <div class="form-group">
+                <label for="reg_gender">Gender <span class="req">*</span></label>
+                <select class="form-control" id="reg_gender" name="gender" required>
+                  <option value="">-- Select Gender --</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+                            <div class="form-group">
+                <label for="reg_dob">Date of Birth <span class="req">*</span></label>
+                <input type="date" class="form-control" id="reg_dob" name="dob" onchange="calculateCandidateAge()" required>
+              </div>
+              <div class="form-group">
+                <label for="reg_age">Calculated Age (on Admission Date)</label>
+                <input type="text" class="form-control" id="reg_age" name="age" readonly placeholder="Auto Calculated Age" style="font-weight: bold; background: #f8fafc;">
+                <div id="age_warning_box" style="margin-top: 4px; font-size: 0.76rem; font-weight: bold; display: none;"></div>
+              </div>
+              <div class="form-group">
+                <label for="reg_blood_group">Blood Group</label>
+                <select class="form-control" id="reg_blood_group" name="blood_group">
+                  <option value="">-- Select --</option>
+                  <option value="A+">A+</option><option value="A-">A-</option>
+                  <option value="B+">B+</option><option value="B-">B-</option>
+                  <option value="O+">O+</option><option value="O-">O-</option>
+                  <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="reg_aadhaar_no">Aadhaar / National ID No <span class="req">*</span></label>
+                <input type="text" class="form-control" id="reg_aadhaar_no" name="aadhaar_no" placeholder="12 Digit Aadhaar Number" required maxlength="12">
+              </div>
+              <div class="form-group">
+                <label for="reg_nationality">Nationality</label>
+                <input type="text" class="form-control" id="reg_nationality" name="nationality" value="Indian">
+              </div>
+              <div class="form-group">
+                <label for="reg_religion">Religion</label>
+                <input type="text" class="form-control" id="reg_religion" name="religion" placeholder="e.g. Hindu, Muslim, Christian, Sikh">
+              </div>
+              <div class="form-group">
+                <label for="reg_mother_tongue">Mother Tongue</label>
+                <input type="text" class="form-control" id="reg_mother_tongue" name="mother_tongue" placeholder="e.g. Hindi, English, Bengali">
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: CONTACT & ACCOUNT PASSWORD -->
+          <div class="form-section" id="sec_contact">
+            <div class="section-title">📞 3. Contact Details & Account Password</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="reg_mobile_no">Mobile Number (Primary Login ID) <span class="req">*</span></label>
+                <input type="tel" class="form-control" id="reg_mobile_no" name="mobile_no" placeholder="10-digit Mobile" required maxlength="10">
+                <small style="font-size: 0.75rem; color: var(--text-muted);">Ye number aapka Login ID banega.</small>
+              </div>
+              <div class="form-group">
+                <label for="reg_email">Email Address (Alternative Login ID)</label>
+                <input type="email" class="form-control" id="reg_email" name="email" placeholder="candidate@example.com">
+              </div>
+              <div class="form-group">
+                <label for="reg_password">Set Login Password <span class="req">*</span></label>
+                <input type="password" class="form-control" id="reg_password" name="password" value="grtc@123" placeholder="Default: grtc@123" required>
+              </div>
+            </div>
+
+            <!-- SAME AS CURRENT ADDRESS TOGGLE CARD -->
+            <div class="same-address-toggle-bar" onclick="document.getElementById('reg_same_as_current').click()">
+              <label onclick="event.stopPropagation()">
+                <input type="checkbox" id="reg_same_as_current" onchange="toggleRegSameAddress()">
+                <span>☑️ Permanent Address is same as Current Address (Same as Current)</span>
+              </label>
+            </div>
+
+            <div class="address-layout-grid">
+              <!-- Current Address Card -->
+              <div class="address-sub-card">
+                <h4>📍 Current / Correspondence Address</h4>
+                <div class="form-group">
+                  <label for="reg_current_address">Street / Flat / Area Address <span class="req">*</span></label>
+                  <textarea class="form-control" id="reg_current_address" name="current_address" rows="2" placeholder="House No, Street, Area" oninput="syncAddressIfSame()"></textarea>
+                </div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="reg_current_city">City / District <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="reg_current_city" name="current_city" placeholder="City" oninput="syncAddressIfSame()">
+                  </div>
+                  <div class="form-group">
+                    <label for="reg_current_state">State <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="reg_current_state" name="current_state" placeholder="State" oninput="syncAddressIfSame()">
+                  </div>
+                  <div class="form-group">
+                    <label for="reg_current_pincode">PIN Code <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="reg_current_pincode" name="current_pincode" placeholder="6-digit PIN" maxlength="6" oninput="syncAddressIfSame()">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Permanent Address Card -->
+              <div class="address-sub-card" id="perm_address_card">
+                <h4>🏠 Permanent Address</h4>
+                <div class="form-group">
+                  <label for="reg_permanent_address">Permanent Street Address</label>
+                  <textarea class="form-control" id="reg_permanent_address" name="permanent_address" rows="2" placeholder="Permanent House No, Street"></textarea>
+                </div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="reg_permanent_city">City / District</label>
+                    <input type="text" class="form-control" id="reg_permanent_city" name="permanent_city" placeholder="Permanent City">
+                  </div>
+                  <div class="form-group">
+                    <label for="reg_permanent_state">State</label>
+                    <input type="text" class="form-control" id="reg_permanent_state" name="permanent_state" placeholder="Permanent State">
+                  </div>
+                  <div class="form-group">
+                    <label for="reg_permanent_pincode">PIN Code</label>
+                    <input type="text" class="form-control" id="reg_permanent_pincode" name="permanent_pincode" placeholder="6-digit PIN" maxlength="6">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: DOCUMENT UPLOADS -->
+          <div class="form-section" id="sec_docs">
+            <div class="section-title">📄 4. Required & Supporting Documents Upload</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Supported formats: JPG, PNG, PDF. Tap below to capture with camera or select from files.
+            </p>
+
+            <div class="form-grid-3" style="margin-bottom: 1.5rem;">
+              <!-- 1. Aadhaar Front -->
+              <div class="doc-card required" id="card_aadhaar_front">
+                <label style="font-weight: 700; font-size: 0.84rem; color: var(--primary);">
+                  🪪 Aadhaar Card (Front Side) <span class="req">*</span>
+                </label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadSingleDoc(this, 'url_aadhaar_front', 'prev_aadhaar_front', 'card_aadhaar_front')" required>
+                <div class="doc-preview-thumb" id="prev_aadhaar_front">
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Front Preview</span>
+                </div>
+              </div>
+
+              <!-- 2. Aadhaar Back -->
+              <div class="doc-card required" id="card_aadhaar_back">
+                <label style="font-weight: 700; font-size: 0.84rem; color: var(--primary);">
+                  🪪 Aadhaar Card (Back Side) <span class="req">*</span>
+                </label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadSingleDoc(this, 'url_aadhaar_back', 'prev_aadhaar_back', 'card_aadhaar_back')" required>
+                <div class="doc-preview-thumb" id="prev_aadhaar_back">
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Back Preview</span>
+                </div>
+              </div>
+
+              <!-- 3. 10th Marksheet -->
+              <div class="doc-card required" id="card_marksheet_10th">
+                <label style="font-weight: 700; font-size: 0.84rem; color: var(--primary);">
+                  📜 10th Class Marksheet <span class="req">*</span>
+                </label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadSingleDoc(this, 'url_marksheet_10th', 'prev_marksheet_10th', 'card_marksheet_10th')" required>
+                <div class="doc-preview-thumb" id="prev_marksheet_10th">
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">10th Marksheet Preview</span>
+                </div>
+              </div>
+
+              <!-- 4. 12th Marksheet -->
+              <div class="doc-card optional" id="card_marksheet_12th">
+                <label style="font-weight: 600; font-size: 0.84rem; color: #334155;">
+                  📜 12th / Intermediate Marksheet <small style="color: var(--text-muted);">(Optional)</small>
+                </label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadSingleDoc(this, 'url_marksheet_12th', 'prev_marksheet_12th', 'card_marksheet_12th')">
+                <div class="doc-preview-thumb" id="prev_marksheet_12th">
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">12th Marksheet Preview</span>
+                </div>
+              </div>
+
+              <!-- 5. Caste Certificate -->
+              <div class="doc-card optional" id="card_caste_cert">
+                <label style="font-weight: 600; font-size: 0.84rem; color: #334155;">
+                  🏛️ Caste Certificate / Quota Proof <small style="color: var(--text-muted);">(Optional)</small>
+                </label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadSingleDoc(this, 'url_caste_cert', 'prev_caste_cert', 'card_caste_cert')">
+                <div class="doc-preview-thumb" id="prev_caste_cert">
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Caste Cert Preview</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Other Documents -->
+            <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                  <strong style="font-size: 0.9rem; color: var(--primary);">📁 Additional / Other Documents</strong>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">Transfer Certificate, Income, Domicile, Graduation, etc.</p>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOtherDocumentRow()">
+                  ➕ Add Document
+                </button>
+              </div>
+
+              <div id="other_documents_container"></div>
+            </div>
+          </div>
+
+          <!-- SECTION 5: PARENT / GUARDIAN DETAILS -->
+          <div class="form-section" id="sec_parents">
+            <div class="section-title">👨‍👩‍👦 5. Parent & Guardian Details</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="reg_father_name">Father's Name</label>
+                <input type="text" class="form-control" id="reg_father_name" name="father_name" placeholder="Father's Full Name">
+              </div>
+              <div class="form-group">
+                <label for="reg_father_occupation">Father's Occupation</label>
+                <input type="text" class="form-control" id="reg_father_occupation" name="father_occupation" placeholder="e.g. Business / Service">
+              </div>
+              <div class="form-group">
+                <label for="reg_father_mobile">Father's Mobile No</label>
+                <input type="tel" class="form-control" id="reg_father_mobile" name="father_mobile">
+              </div>
+              <div class="form-group">
+                <label for="reg_mother_name">Mother's Name</label>
+                <input type="text" class="form-control" id="reg_mother_name" name="mother_name" placeholder="Mother's Full Name">
+              </div>
+              <div class="form-group">
+                <label for="reg_mother_occupation">Mother's Occupation</label>
+                <input type="text" class="form-control" id="reg_mother_occupation" name="mother_occupation" placeholder="e.g. Homemaker">
+              </div>
+              <div class="form-group">
+                <label for="reg_annual_income">Annual Family Income (₹)</label>
+                <input type="number" class="form-control" id="reg_annual_income" name="annual_income" placeholder="e.g. 350000">
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 5: FEE & PAYMENT DETAILS WITH UPI QR -->
+          <div class="form-section" id="sec_fee">
+            <div class="section-title">💳 5. Fee & Payment Details</div>
+
+            <!-- UPI QR CODE & PAYMENT PLACEHOLDER BOX (BLANK SPACE) -->
+            <div style="background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 12px; padding: 16px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div style="width: 120px; height: 120px; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); padding: 6px;">
+                  <span style="font-size: 2rem; opacity: 0.6;">📲</span>
+                  <span style="font-size: 0.7rem; font-weight: 700; color: #64748b; margin-top: 4px;">QR Code Space</span>
+                </div>
+                <div>
+                  <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--primary); margin-bottom: 4px;">💳 Online Fee Payment (UPI / QR Code)</h4>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">Google Pay, PhonePe, Paytm ya Bank UPI ke through admission fee pay karein.</p>
+                  <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    <strong style="font-size: 0.88rem; color: #334155;">UPI ID: <span id="display_upi_id" style="color: #64748b; font-style: italic;">[ ____________________ ]</span></strong>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.8rem; color: #475569; font-weight: 700; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; border: 1px solid #cbd5e1;">
+                🏦 Payment Counter / Online
+              </div>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="reg_total_course_fee">Total Course Fee (₹)</label>
+                <input type="number" class="form-control" id="reg_total_course_fee" name="total_course_fee" value="4000" oninput="calcRegFee()" style="font-weight: bold;">
+              </div>
+              <div class="form-group">
+                <label for="reg_fee_paid">Admission Fee Paid (₹) <span class="req">*</span></label>
+                <input type="number" class="form-control" id="reg_fee_paid" name="fee_paid" value="0" required oninput="calcRegFee()" style="font-weight: bold; color: var(--success);">
+              </div>
+              <div class="form-group">
+                <label for="reg_fee_balance">Balance Amount (₹)</label>
+                <input type="number" class="form-control" id="reg_fee_balance" name="fee_balance" value="4000" readonly style="font-weight: bold; background: #fef2f2; color: #b91c1c;">
+              </div>
+            </div>
+
+            <div class="form-grid-3" style="margin-top: 0.85rem;">
+              <div class="form-group">
+                <label for="reg_payment_mode">Payment Mode</label>
+                <select class="form-control" id="reg_payment_mode" name="payment_mode">
+                  <option value="UPI / QR Code">UPI / QR Code (Online Payment)</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+                  <option value="Cheque / DD">Cheque / Demand Draft</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="reg_payment_ref">Transaction / UTR / Receipt No</label>
+                <input type="text" class="form-control" id="reg_payment_ref" name="payment_ref" placeholder="UPI Ref ID / Receipt No">
+              </div>
+              <div class="form-group">
+                <label for="reg_payment_date">Payment Date</label>
+                <input type="date" class="form-control" id="reg_payment_date" name="payment_date">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.85rem;">
+              <label for="reg_remarks">Remarks / Notes</label>
+              <input type="text" class="form-control" id="reg_remarks" name="remarks" placeholder="Optional notes / remark">
+            </div>
+          </div>
+
+          <!-- SUBMIT ACTIONS -->
+          <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <a href="/login" class="btn btn-secondary" style="text-decoration: none;">🔐 Back to Login</a>
+            <button type="button" id="submit_reg_btn" onclick="submitFullRegistration(event)" class="btn btn-primary" style="padding: 0.85rem 1.8rem; font-size: 1rem; font-weight: 700;">🚀 Submit Admission & Generate Slip</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- PRINT SLIP MODAL -->
+  <div class="modal-overlay" id="slip_modal">
+    <div class="modal-box">
+      <div class="modal-header no-print">
+        <h3>📄 Official Admission Receipt & Slip</h3>
+        <button class="modal-close-btn" onclick="closeSlipModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="slip_content"></div>
+      <div class="modal-footer no-print">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/login'">Go to Login</button>
+        <button type="button" class="btn btn-primary" onclick="printAdmissionSlip()">🖨️ Print Slip / Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEBCAM MODAL -->
+  <div class="modal-overlay" id="webcam_modal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>📷 Take Candidate Photo</h3>
+        <button class="modal-close-btn" onclick="closeRegWebcam()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <video id="webcam_video" autoplay playsinline style="width: 100%; border-radius: 8px; background: #000;"></video>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeRegWebcam()">Cancel</button>
+        <button class="btn btn-success" onclick="captureRegWebcam()">📸 Capture Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js">// ================= REAL-TIME DUPLICATE MOBILE CHECK =================
+var isMobileDuplicate = false;
+
+async function checkMobileDuplication(val) {
+  const clean = val.replace(/[^0-9]/g, "");
+  const msgBox = document.getElementById("mobile_duplicate_msg");
+  const inputField = document.getElementById("mobile_no");
+  const submitBtn = document.getElementById("btn_submit_admission") || document.querySelector("button[type='submit']");
+  
+  if (!msgBox) return;
+
+  if (clean.length < 10) {
+    msgBox.style.display = "none";
+    inputField.style.borderColor = "";
+    isMobileDuplicate = false;
+    if (submitBtn) submitBtn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/candidates/check-mobile?mobile=${clean}`);
+    const data = await res.json();
+    
+    if (data.registered) {
+      isMobileDuplicate = true;
+      inputField.style.borderColor = "#dc2626";
+      inputField.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#dc2626";
+      msgBox.innerHTML = `❌ <strong>Yeh Mobile Number pehle se registered hai!</strong><br>Student: <strong>${data.candidate.full_name}</strong> | App No: <strong>${data.candidate.application_no}</strong> | Course: ${data.candidate.course}<br><span style="color:#b91c1c;">(Ek mobile number se 2 student register nahi ho sakte.)</span>`;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.title = "Duplicate mobile number detected. Please use a unique mobile number.";
+      }
+    } else {
+      isMobileDuplicate = false;
+      inputField.style.borderColor = "#16a34a";
+      inputField.style.boxShadow = "0 0 0 3px rgba(22, 163, 74, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#16a34a";
+      msgBox.innerHTML = `✅ <strong>Mobile Number Available</strong> (Valid for Registration)`;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.title = "";
+      }
+    }
+  } catch(e) {
+    console.error("Mobile check error:", e);
+  }
+}
+</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadSettings();
+      if (currentSettings && currentSettings.upi_id) {
+        const activeUpi = currentSettings.upi_id;
+        const upiSpan = document.getElementById("display_upi_id");
+        if (upiSpan) upiSpan.innerText = activeUpi;
+        const qrImg = document.getElementById("upi_qr_img");
+        if (qrImg) {
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi%3A%2F%2Fpay%3Fpa%3D${encodeURIComponent(activeUpi)}%26pn%3DGyanoday%2520Rojgar%2520Training%2520Centre%26cu%3DINR`;
+        }
+      }
+      populateRegCourses();
+      setupRegCalculations();
+      const admDateEl = document.getElementById("reg_admission_date"); if (admDateEl) admDateEl.addEventListener("change", calculateCandidateAge);
+      const today = new Date().toISOString().split("T")[0];
+      if (document.getElementById("reg_admission_date")) document.getElementById("reg_admission_date").value = today;
+      if (document.getElementById("reg_payment_date")) document.getElementById("reg_payment_date").value = today;
+    });
+
+    function populateRegCourses() {
+      if (!currentSettings || !currentSettings.courses) return;
+      const cSel = document.getElementById("reg_course");
+      if (cSel) {
+        cSel.innerHTML = '<option value="">-- Select Course / Program --</option>';
+        currentSettings.courses.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.name;
+          opt.innerText = c.name;
+          cSel.appendChild(opt);
+        });
+      }
+      const ySel = document.getElementById("reg_academic_year");
+      if (ySel && currentSettings.academic_years) {
+        ySel.innerHTML = "";
+        currentSettings.academic_years.forEach(y => {
+          const opt = document.createElement("option");
+          opt.value = y;
+          opt.innerText = y;
+          ySel.appendChild(opt);
+        });
+      }
+    }
+
+    function onRegCourseChange() {
+      const cName = document.getElementById("reg_course").value;
+      const bSel = document.getElementById("reg_stream_branch");
+      bSel.innerHTML = '<option value="">-- Select Branch --</option>';
+      if (!currentSettings || !cName) return;
+      const cObj = currentSettings.courses.find(c => c.name === cName);
+      if (cObj && cObj.branches) {
+        cObj.branches.forEach(b => {
+          const opt = document.createElement("option");
+          opt.value = b;
+          opt.innerText = b;
+          bSel.appendChild(opt);
+        });
+      }
+      if (cObj && cObj.default_fee) {
+        document.getElementById("reg_total_course_fee").value = cObj.default_fee;
+        calcRegFee();
+      }
+    }
+
+    function calculateCandidateAge() {
+      const dobVal = document.getElementById("reg_dob")?.value;
+      const admVal = document.getElementById("reg_admission_date")?.value || new Date().toISOString().split("T")[0];
+      const ageInput = document.getElementById("reg_age");
+      const warnBox = document.getElementById("age_warning_box");
+
+      if (!dobVal) {
+        if (ageInput) ageInput.value = "";
+        if (warnBox) warnBox.style.display = "none";
+        return;
+      }
+
+      const dob = new Date(dobVal);
+      const admDate = new Date(admVal);
+
+      if (dob > admDate) {
+        if (ageInput) {
+          ageInput.value = "Invalid (DOB after Admission Date)";
+          ageInput.style.borderColor = "var(--danger)";
+        }
+        if (warnBox) {
+          warnBox.style.display = "block";
+          warnBox.style.color = "var(--danger)";
+          warnBox.style.background = "#fee2e2";
+          warnBox.style.padding = "4px 8px";
+          warnBox.style.borderRadius = "4px";
+          warnBox.style.border = "1px solid #fca5a5";
+          warnBox.innerText = "❌ Date of Birth cannot be after Admission Date.";
+        }
+        return;
+      }
+
+      let years = admDate.getFullYear() - dob.getFullYear();
+      let months = admDate.getMonth() - dob.getMonth();
+      let days = admDate.getDate() - dob.getDate();
+
+      if (days < 0) {
+        months--;
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      const ageText = `${years} Years ${months} Months`;
+      if (ageInput) ageInput.value = ageText;
+
+      if (warnBox) {
+        warnBox.style.display = "block";
+        if (years < 18) {
+          warnBox.style.color = "#b91c1c";
+          warnBox.style.background = "#fee2e2";
+          warnBox.style.padding = "6px 10px";
+          warnBox.style.borderRadius = "6px";
+          warnBox.style.border = "1px solid #fca5a5";
+          warnBox.innerHTML = `⚠️ <b>Under 18 Warning:</b> Candidate is ${years} Years old (Minor/Below 18). Parent/Guardian details mandatory.`;
+          if (ageInput) ageInput.style.borderColor = "#dc2626";
+        } else {
+          warnBox.style.color = "#15803d";
+          warnBox.style.background = "#dcfce7";
+          warnBox.style.padding = "6px 10px";
+          warnBox.style.borderRadius = "6px";
+          warnBox.style.border = "1px solid #86efac";
+          warnBox.innerHTML = `✅ <b>Eligible:</b> ${years} Years old (18+ Adult)`;
+          if (ageInput) ageInput.style.borderColor = "#16a34a";
+        }
+      }
+    }
+
+    function setupRegCalculations() {
+      const maxM = document.getElementById("reg_prev_max_marks");
+      const obtM = document.getElementById("reg_prev_marks_obtained");
+      const perc = document.getElementById("reg_prev_percentage");
+      function calcP() {
+        const m = parseFloat(maxM.value) || 0;
+        const o = parseFloat(obtM.value) || 0;
+        if (m > 0 && o >= 0) perc.value = ((o / m) * 100).toFixed(2);
+      }
+      if (maxM && obtM) {
+        maxM.addEventListener("input", calcP);
+        obtM.addEventListener("input", calcP);
+      }
+
+      const totF = document.getElementById("reg_total_course_fee");
+      const paidF = document.getElementById("reg_fee_paid");
+      if (totF && paidF) {
+        totF.addEventListener("input", calcRegFee);
+        paidF.addEventListener("input", calcRegFee);
+      }
+    }
+
+    function copyUpiId() {
+      const upiId = document.getElementById("display_upi_id")?.innerText || "";
+      navigator.clipboard.writeText(upiId).then(() => {
+        alert("✅ UPI ID Copied: " + upiId);
+      }).catch(() => {
+        alert("UPI ID: " + upiId);
+      });
+    }
+
+    function renderOfflineQrFallback(img) {
+      // Offline fallback SVG if internet is unavailable
+      img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='130' height='130' viewBox='0 0 130 130'><rect width='130' height='130' fill='%23ffffff'/><rect x='10' y='10' width='35' height='35' fill='%231e3a8a'/><rect x='15' y='15' width='25' height='25' fill='%23ffffff'/><rect x='20' y='20' width='15' height='15' fill='%231e3a8a'/><rect x='85' y='10' width='35' height='35' fill='%231e3a8a'/><rect x='90' y='15' width='25' height='25' fill='%23ffffff'/><rect x='95' y='20' width='15' height='15' fill='%231e3a8a'/><rect x='10' y='85' width='35' height='35' fill='%231e3a8a'/><rect x='15' y='90' width='25' height='25' fill='%23ffffff'/><rect x='20' y='95' width='15' height='15' fill='%231e3a8a'/><text x='65' y='72' font-size='10' font-family='sans-serif' text-anchor='middle' fill='%231e3a8a' font-weight='bold'>UPI QR</text></svg>";
+    }
+
+    function calcRegFee() {
+      const t = parseFloat(document.getElementById("reg_total_course_fee")?.value) || 0;
+      const p = parseFloat(document.getElementById("reg_fee_paid")?.value) || 0;
+      const bal = Math.max(0, t - p);
+      const balEl = document.getElementById("reg_fee_balance");
+      if (balEl) {
+        balEl.value = bal;
+      }
+    }
+
+    function toggleRegSameAddress() {
+      const chk = document.getElementById("reg_same_as_current");
+      if (chk && chk.checked) {
+        syncAddressIfSame();
+      }
+    }
+
+    function syncAddressIfSame() {
+      const chk = document.getElementById("reg_same_as_current");
+      if (chk && chk.checked) {
+        document.getElementById("reg_permanent_address").value = document.getElementById("reg_current_address").value;
+        document.getElementById("reg_permanent_city").value = document.getElementById("reg_current_city").value;
+        document.getElementById("reg_permanent_state").value = document.getElementById("reg_current_state").value;
+        document.getElementById("reg_permanent_pincode").value = document.getElementById("reg_current_pincode").value;
+      }
+    }
+
+    // Single Document Uploader with Visual Card Status
+    function uploadSingleDoc(input, hiddenId, prevId, cardId) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const b64 = e.target.result;
+          const prevEl = document.getElementById(prevId);
+          if (file.type.startsWith("image/")) {
+            prevEl.innerHTML = `<img src="${b64}">`;
+          } else {
+            prevEl.innerHTML = `<span style="font-size:12px; color:var(--primary); font-weight:bold;">📄 PDF: ${file.name}</span>`;
+          }
+
+          try {
+            const res = await fetch("/api/upload-document", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ data: b64, filename: file.name })
+            });
+            const d = await res.json();
+            document.getElementById(hiddenId).value = d.url;
+            if (cardId) document.getElementById(cardId).classList.add("uploaded");
+          } catch (err) {
+            console.error("Doc upload error:", err);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function addOtherDocumentRow() {
+      const rowId = "other_doc_" + Date.now();
+      const container = document.getElementById("other_documents_container");
+      
+      const div = document.createElement("div");
+      div.className = "other-doc-row";
+      div.id = rowId;
+      div.innerHTML = `
+        <input type="text" class="form-control doc-title-input" placeholder="Document Name (e.g. TC / Migration)" required>
+        <input type="file" class="form-control doc-file-input" accept="image/*,application/pdf" onchange="uploadDynamicOtherDoc(this, '${rowId}')" required>
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeOtherDocRow('${rowId}')">❌ Remove</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function removeOtherDocRow(rowId) {
+      const row = document.getElementById(rowId);
+      if (row) row.remove();
+      updateOtherDocsJson();
+    }
+
+    function uploadDynamicOtherDoc(input, rowId) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const b64 = e.target.result;
+          try {
+            const res = await fetch("/api/upload-document", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ data: b64, filename: file.name })
+            });
+            const d = await res.json();
+            const row = document.getElementById(rowId);
+            row.setAttribute("data-url", d.url);
+            updateOtherDocsJson();
+          } catch(err) {
+            console.error("Dynamic doc upload error:", err);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function updateOtherDocsJson() {
+      const rows = document.querySelectorAll(".other-doc-row");
+      const list = [];
+      rows.forEach(r => {
+        const title = r.querySelector(".doc-title-input")?.value || "Document";
+        const url = r.getAttribute("data-url") || "";
+        if (url) list.push({ title, url });
+      });
+      document.getElementById("url_other_docs_json").value = JSON.stringify(list);
+    }
+
+    function handleRegPhotoUpload(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const b64 = e.target.result;
+          // Instant Live Preview in Passport Box
+          document.getElementById("reg_photo_preview").innerHTML = `<img src="${b64}">`;
+          document.getElementById("reg_photo_container").classList.add("has-photo");
+          document.getElementById("photo_status_badge").innerHTML = "✅ Photo Selected Successfully";
+          document.getElementById("photo_status_badge").style.color = "var(--success)";
+          
+          try {
+            const res = await fetch("/api/upload", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: b64 })
+            });
+            const d = await res.json();
+            document.getElementById("reg_photo_url").value = d.url;
+          } catch(err) {
+            console.error("Photo upload error:", err);
+          }
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    async function openRegWebcam() {
+      document.getElementById("webcam_modal").classList.add("active");
+      try {
+        webcamStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "user" } 
+        });
+        document.getElementById("webcam_video").srcObject = webcamStream;
+      } catch (err) {
+        alert("Camera error: " + err.message);
+        closeRegWebcam();
+      }
+    }
+    function closeRegWebcam() {
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(t => t.stop());
+        webcamStream = null;
+      }
+      document.getElementById("webcam_modal").classList.remove("active");
+    }
+    async function captureRegWebcam() {
+      const video = document.getElementById("webcam_video");
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      const b64 = canvas.toDataURL("image/jpeg", 0.9);
+      
+      // Instant Live Preview in Passport Box
+      document.getElementById("reg_photo_preview").innerHTML = `<img src="${b64}">`;
+      document.getElementById("reg_photo_container").classList.add("has-photo");
+      document.getElementById("photo_status_badge").innerHTML = "✅ Photo Captured Successfully";
+      document.getElementById("photo_status_badge").style.color = "var(--success)";
+      
+      closeRegWebcam();
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: b64 })
+        });
+        const d = await res.json();
+        document.getElementById("reg_photo_url").value = d.url;
+      } catch(err) {
+        console.error("Photo upload error:", err);
+      }
+    }
+
+    async function submitFullRegistration(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      const btn = document.getElementById("submit_reg_btn");
+      const origText = btn ? btn.innerHTML : "Submit";
+
+      // 1. Gather all form inputs
+      const form = document.getElementById("full_registration_form");
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.photo_url = document.getElementById("reg_photo_url")?.value || "";
+      data.aadhaar_front_url = document.getElementById("url_aadhaar_front")?.value || "";
+      data.aadhaar_back_url = document.getElementById("url_aadhaar_back")?.value || "";
+      data.marksheet_10th_url = document.getElementById("url_marksheet_10th")?.value || "";
+      data.marksheet_12th_url = document.getElementById("url_marksheet_12th")?.value || "";
+      data.caste_cert_url = document.getElementById("url_caste_cert")?.value || "";
+      data.other_documents_json = document.getElementById("url_other_docs_json")?.value || "[]";
+
+      // 2. Validate Compulsory Fields
+      if (!data.full_name || !data.full_name.trim()) {
+        alert("⚠️ Kripya Candidate ka Full Name enter karein.");
+        document.getElementById("reg_full_name")?.focus();
+        return;
+      }
+      if (!data.batch_id || !data.batch_id.trim()) {
+        alert("⚠️ Kripya Batch No (2-digit) enter karein.");
+        document.getElementById("batch_id")?.focus();
+        return;
+      }
+      if (!data.course) {
+        alert("⚠️ Kripya Program / Course select karein.");
+        document.getElementById("reg_course")?.focus();
+        return;
+      }
+      if (!data.mobile_no || !data.mobile_no.trim()) {
+        alert("⚠️ Kripya Candidate ka 10-digit Mobile Number enter karein.");
+        document.getElementById("reg_mobile_no")?.focus();
+        return;
+      }
+      if (!data.password || !data.password.trim()) {
+        alert("⚠️ Kripya Login Password enter karein (Default: grtc@123).");
+        document.getElementById("reg_password")?.focus();
+        return;
+      }
+      if (!data.aadhaar_front_url) {
+        alert("⚠️ Kripya Aadhaar Card ka Front side upload karein.");
+        document.getElementById("card_aadhaar_front")?.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+      if (!data.aadhaar_back_url) {
+        alert("⚠️ Kripya Aadhaar Card ka Back side upload karein.");
+        document.getElementById("card_aadhaar_back")?.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+      if (!data.marksheet_10th_url) {
+        alert("⚠️ Kripya 10th Class Marksheet upload karein.");
+        document.getElementById("card_marksheet_10th")?.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+
+      if (btn) { btn.innerHTML = "⏳ Submitting & Saving..."; btn.disabled = true; }
+
+      try {
+        const res = await fetch("/api/public/register-admission", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          alert(`🎉 Admission Registered Successfully!\n\nApplication No: ${result.candidate.application_no}\nBatch No: ${result.candidate.batch_id_num || data.batch_id}\nLogin ID: ${result.user.username}\nPassword: ${data.password}`);
+          
+          // Render Slip
+          renderRegistrationSlip(result.candidate);
+          document.getElementById("slip_modal").classList.add("active");
+        } else {
+          alert("❌ Error saving registration: " + (result.detail || "Unknown error"));
+        }
+      } catch (err) {
+        alert("❌ Connection error: " + err.message);
+      } finally {
+        if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+      }
+    }
+
+    function renderRegistrationSlip(c) {
+      const instName = "Gyanoday Rojgar Training Centre";
+      const instAddr = "Khaspur Ramchandra pahalwan path near bajaj showroom patna 801503";
+      
+      const html = `
+        <div class="print-slip" style="padding: 15px; border: 2px solid #1e3a8a; border-radius: 8px; background: #fff;">
+          <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 12px;">
+            <h2 style="color: #1e3a8a; font-size: 1.3rem; margin: 0;">${instName}</h2>
+            <p style="font-size: 0.8rem; color: #64748b; margin: 3px 0;">${instAddr}</p>
+            <h3 style="font-size: 0.95rem; color: #15803d; margin: 6px 0 0 0; text-transform: uppercase;">Official Candidate Admission Receipt</h3>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <p><strong>Application No:</strong> <span style="color: #1e3a8a; font-size: 1.1rem; font-weight: bold;">${c.application_no}</span></p>
+              <p><strong>Admission Date:</strong> ${c.admission_date || ''}</p>
+              <p><strong>Batch No:</strong> <span class="badge" style="background:#eff6ff; color:#1e3a8a; padding:3px 8px; border-radius:4px; font-weight:bold;">${c.batch_id_num || c.batch_id || '01'}</span></p>
+              <p><strong>Course:</strong> ${c.course || ''}</p>
+              <p><strong>Reference:</strong> ${c.reference || 'Direct'}</p>
+            </div>
+            <div style="width: 90px; height: 110px; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; background: #f8fafc; text-align: center;">
+              ${c.photo_url ? `<img src="${c.photo_url}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:10px; line-height:110px;">Photo</span>'}
+            </div>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-bottom: 12px;">
+            <tr style="background: #f8fafc;"><td style="padding: 6px; border: 1px solid #e2e8f0; font-weight: bold;">Candidate Name</td><td style="padding: 6px; border: 1px solid #e2e8f0;">${c.full_name}</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #e2e8f0; font-weight: bold;">Mobile No (Login ID)</td><td style="padding: 6px; border: 1px solid #e2e8f0;">${c.mobile_no}</td></tr>
+            <tr style="background: #f8fafc;"><td style="padding: 6px; border: 1px solid #e2e8f0; font-weight: bold;">Gender / DOB</td><td style="padding: 6px; border: 1px solid #e2e8f0;">${c.gender || ''} / ${c.dob || ''}</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #e2e8f0; font-weight: bold;">Father's Name</td><td style="padding: 6px; border: 1px solid #e2e8f0;">${c.father_name || 'N/A'}</td></tr>
+            <tr style="background: #f8fafc;"><td style="padding: 6px; border: 1px solid #e2e8f0; font-weight: bold;">Current Address</td><td style="padding: 6px; border: 1px solid #e2e8f0;">${c.current_address || ''}, ${c.current_city || ''}, ${c.current_state || ''} - ${c.current_pincode || ''}</td></tr>
+            <tr><td style="padding: 6px; border: 1px solid #e2e8f0; font-weight: bold;">Fee Details</td><td style="padding: 6px; border: 1px solid #e2e8f0;">Total: ₹${c.total_course_fee || 0} | Paid: ₹${c.fee_paid || 0} | Due Balance: ₹${c.fee_balance || 0}</td></tr>
+          </table>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 0.8rem;">
+            <div style="border-top: 1px dashed #94a3b8; width: 140px; text-align: center; padding-top: 4px;">Candidate Signature</div>
+            <div style="border-top: 1px dashed #94a3b8; width: 140px; text-align: center; padding-top: 4px;">Authorized Stamp</div>
+          </div>
+        </div>
+      `;
+      document.getElementById("slip_content").innerHTML = html;
+    }
+
+    function closeSlipModal() {
+      document.getElementById("slip_modal").classList.remove("active");
+    }
+
+    function printAdmissionSlip() {
+      window.print();
+    }
+  // ================= REAL-TIME DUPLICATE MOBILE CHECK =================
+var isMobileDuplicate = false;
+
+async function checkMobileDuplication(val) {
+  const clean = val.replace(/[^0-9]/g, "");
+  const msgBox = document.getElementById("mobile_duplicate_msg");
+  const inputField = document.getElementById("mobile_no");
+  const submitBtn = document.getElementById("btn_submit_admission") || document.querySelector("button[type='submit']");
+  
+  if (!msgBox) return;
+
+  if (clean.length < 10) {
+    msgBox.style.display = "none";
+    inputField.style.borderColor = "";
+    isMobileDuplicate = false;
+    if (submitBtn) submitBtn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/candidates/check-mobile?mobile=${clean}`);
+    const data = await res.json();
+    
+    if (data.registered) {
+      isMobileDuplicate = true;
+      inputField.style.borderColor = "#dc2626";
+      inputField.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#dc2626";
+      msgBox.innerHTML = `❌ <strong>Yeh Mobile Number pehle se registered hai!</strong><br>Student: <strong>${data.candidate.full_name}</strong> | App No: <strong>${data.candidate.application_no}</strong> | Course: ${data.candidate.course}<br><span style="color:#b91c1c;">(Ek mobile number se 2 student register nahi ho sakte.)</span>`;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.title = "Duplicate mobile number detected. Please use a unique mobile number.";
+      }
+    } else {
+      isMobileDuplicate = false;
+      inputField.style.borderColor = "#16a34a";
+      inputField.style.boxShadow = "0 0 0 3px rgba(22, 163, 74, 0.2)";
+      msgBox.style.display = "block";
+      msgBox.style.color = "#16a34a";
+      msgBox.innerHTML = `✅ <strong>Mobile Number Available</strong> (Valid for Registration)`;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.title = "";
+      }
+    }
+  } catch(e) {
+    console.error("Mobile check error:", e);
+  }
+}
+</script>
+</body>
+</html>
