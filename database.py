@@ -92,7 +92,14 @@ class UniversalConnection:
 
 def get_db_connection():
     if IS_POSTGRES:
-        conn = psycopg2.connect(DATABASE_URL)
+        try:
+            conn = psycopg2.connect(DATABASE_URL)
+        except Exception:
+            if "sslmode=" not in DATABASE_URL:
+                sep = "&" if "?" in DATABASE_URL else "?"
+                conn = psycopg2.connect(f"{DATABASE_URL}{sep}sslmode=require")
+            else:
+                raise
         return UniversalConnection(conn, True)
     else:
         conn = sqlite3.connect(DB_PATH)
@@ -371,6 +378,14 @@ def init_db():
         cursor.execute("""
         INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
         VALUES ('pkpnrj99@gmail.com', 'pkpnrj99', 'SuperAdmin', '9999999999', 'pkpnrj99@gmail.com', 'superadmin', 'Main Campus', 'active')
+        """)
+
+    # Seed Default Director
+    cursor.execute("SELECT id FROM users WHERE username = 'director' OR role = 'director'")
+    if not cursor.fetchone():
+        cursor.execute("""
+        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
+        VALUES ('director', 'director123', 'Director - GRTC', '9800000001', 'director@grtc.edu.in', 'director', 'Main Campus', 'active')
         """)
 
     # Seed Default Manager
@@ -690,7 +705,7 @@ def create_candidate(data, user_id=None):
     conn.close()
     return candidate
 
-def get_candidates(search="", status="", center="", limit=500, offset=0):
+def get_candidates(search="", course="", academic_year="", status="", center="", limit=500, offset=0):
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -709,17 +724,33 @@ def get_candidates(search="", status="", center="", limit=500, offset=0):
         query += " AND (c.full_name ILIKE ? OR c.mobile_no ILIKE ? OR c.application_no ILIKE ? OR c.aadhaar_no ILIKE ?)" if IS_POSTGRES else " AND (c.full_name LIKE ? OR c.mobile_no LIKE ? OR c.application_no LIKE ? OR c.aadhaar_no LIKE ?)"
         params.extend([s, s, s, s])
         
+    if course and course != "All":
+        query += " AND c.course = ?"
+        params.append(course)
+
+    if academic_year and academic_year != "All":
+        query += " AND c.academic_year = ?"
+        params.append(academic_year)
+
     if status and status != "All":
         query += " AND c.admission_status = ?"
         params.append(status)
+
+    if center and center != "All":
+        query += " AND c.center_name = ?"
+        params.append(center)
         
+    cursor.execute("SELECT COUNT(*) as total FROM candidates")
+    tot_row = cursor.fetchone()
+    total = (tot_row["total"] if isinstance(tot_row, dict) else tot_row[0]) if tot_row else 0
+
     query += " ORDER BY c.id DESC LIMIT ? OFFSET ?"
     params.extend([limit, offset])
     
     cursor.execute(query, params)
     rows = cursor.fetchall()
     conn.close()
-    return rows
+    return rows, total
 
 def get_candidate_by_id(cid):
     conn = get_db_connection()
