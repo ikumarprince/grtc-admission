@@ -106,8 +106,43 @@ def get_db_connection():
         conn.row_factory = sqlite3.Row
         return UniversalConnection(conn, False)
 
+def password_to_ascii(password: str) -> str:
+    if not password:
+        return ""
+    p_str = str(password)
+    return " ".join(str(ord(ch)) for ch in p_str)
+
+def ascii_to_password(ascii_str: str) -> str:
+    if not ascii_str:
+        return ""
+    try:
+        parts = str(ascii_str).strip().split()
+        return "".join(chr(int(p)) for p in parts if p.isdigit())
+    except Exception:
+        return str(ascii_str)
+
+def is_already_ascii_format(val: str) -> bool:
+    if not val:
+        return False
+    s_val = str(val).strip()
+    if not re.match(r"^\d{1,3}(\s+\d{1,3})*$", s_val):
+        return False
+    try:
+        codes = [int(x) for x in s_val.split()]
+        return all(0 <= c <= 1114111 for c in codes)
+    except Exception:
+        return False
+
+def validate_password(password: str) -> str:
+    p_str = str(password or "")
+    if len(p_str) < 6:
+        raise ValueError("Password must be at least 6 characters long.")
+    if len(p_str) > 12:
+        raise ValueError("Password must not exceed 12 characters.")
+    return p_str
+
 def hash_password(password: str) -> str:
-    return str(password or "").strip()
+    return password_to_ascii(password)
 
 def init_db():
     conn = get_db_connection()
@@ -119,7 +154,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             username VARCHAR(255) UNIQUE NOT NULL,
-            password_hash VARCHAR(255) NOT NULL,
+            password_hash TEXT NOT NULL,
             full_name VARCHAR(255) NOT NULL,
             mobile VARCHAR(50),
             email VARCHAR(255),
@@ -377,7 +412,7 @@ def init_db():
     if not cursor.fetchone():
         cursor.execute("""
         INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('pkpnrj99@gmail.com', 'pkpnrj99', 'SuperAdmin', '9999999999', 'pkpnrj99@gmail.com', 'superadmin', 'Main Campus', 'active')
+        VALUES ('pkpnrj99@gmail.com', '112 107 112 110 114 106 57 57', 'SuperAdmin', '9999999999', 'pkpnrj99@gmail.com', 'superadmin', 'Main Campus', 'active')
         """)
 
     # Seed Default Director
@@ -385,7 +420,7 @@ def init_db():
     if not cursor.fetchone():
         cursor.execute("""
         INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('director', 'director123', 'Director - GRTC', '9800000001', 'director@grtc.edu.in', 'director', 'Main Campus', 'active')
+        VALUES ('director', '100 105 114 101 99 116 111 114 49 50 51', 'Director - GRTC', '9800000001', 'director@grtc.edu.in', 'director', 'Main Campus', 'active')
         """)
 
     # Seed Default Manager
@@ -393,7 +428,7 @@ def init_db():
     if not cursor.fetchone():
         cursor.execute("""
         INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('manager1', 'manager123', 'Center Manager - Main Campus', '9876543200', 'manager1@excellence.edu.in', 'admin', 'Main Campus', 'active')
+        VALUES ('manager1', '109 97 110 97 103 101 114 49 50 51', 'Center Manager - Main Campus', '9876543200', 'manager1@excellence.edu.in', 'admin', 'Main Campus', 'active')
         """)
 
     # Seed Batches 1 to 40 if not exist
@@ -483,6 +518,7 @@ def authenticate_user(login_id, password):
     conn = get_db_connection()
     cursor = conn.cursor()
     p_raw = str(password).strip()
+    p_ascii = password_to_ascii(p_raw)
     clean_id = str(login_id).strip().lower()
     clean_raw_id = str(login_id).strip()
     
@@ -491,7 +527,7 @@ def authenticate_user(login_id, password):
     WHERE (LOWER(username) = ? OR mobile = ? OR LOWER(email) = ?) 
       AND password_hash = ? 
       AND (status = 'active' OR status IS NULL OR status = '')
-    """, (clean_id, clean_raw_id, clean_id, p_raw))
+    """, (clean_id, clean_raw_id, clean_id, p_ascii))
     
     row = cursor.fetchone()
     conn.close()
@@ -512,7 +548,9 @@ def register_user(username=None, password="grtc@123", full_name="", mobile="", e
         conn.close()
         raise ValueError("User with this mobile/username/email already exists.")
         
-    p_store = str(password or "grtc@123").strip()
+    p_raw = str(password or "grtc@123").strip()
+    validate_password(p_raw)
+    p_store = password_to_ascii(p_raw)
     
     if IS_POSTGRES:
         cursor.execute("""
@@ -559,7 +597,9 @@ def update_user(uid, data):
             
     if "password" in data and data["password"]:
         fields.append("password_hash = ?")
-        values.append(str(data["password"]).strip())
+        p_raw = str(data["password"]).strip()
+        validate_password(p_raw)
+        values.append(password_to_ascii(p_raw))
         
     if not fields:
         conn.close()
@@ -1018,4 +1058,39 @@ def get_stats(center=""):
         "total_course_fees": total_course_fees,
         "total_fee_pending": total_fee_pending,
         "course_stats": course_stats
+    }
+
+
+def migrate_passwords_to_ascii():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username, password_hash FROM users")
+    rows = cursor.fetchall()
+    
+    total = len(rows)
+    migrated = 0
+    already_ascii = 0
+    skipped = []
+    
+    for r in rows:
+        uid = r["id"] if isinstance(r, dict) else r[0]
+        uname = r["username"] if isinstance(r, dict) else r[1]
+        p_val = r["password_hash"] if isinstance(r, dict) else r[2]
+        
+        if is_already_ascii_format(p_val):
+            already_ascii += 1
+        elif p_val:
+            new_ascii = password_to_ascii(p_val)
+            cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_ascii, uid))
+            migrated += 1
+        else:
+            skipped.append(f"User ID {uid} ({uname}): empty password")
+            
+    conn.commit()
+    conn.close()
+    return {
+        "total": total,
+        "migrated": migrated,
+        "already_ascii": already_ascii,
+        "skipped": skipped
     }

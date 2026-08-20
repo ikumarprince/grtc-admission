@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline Admission & Batch Management System</title>
+  <title>Admission & Batch Management System</title>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -52,7 +52,7 @@
         </div>
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label for="login_password">Password <span class="req">*</span></label>
-          <input type="password" class="form-control" id="login_password" placeholder="Enter Password" required>
+          <input type="password" class="form-control" id="login_password" placeholder="Enter Password" required minlength="6" maxlength="12">
         </div>
         <button type="button" onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">🔓 Login to Portal</button>
   
@@ -785,7 +785,7 @@
               </div>
               <div class="form-group">
                 <label for="bem_password">Student Login Password <span class="req">*</span></label>
-                <input type="text" class="form-control" id="bem_password" name="password" value="grtc@123" required>
+                <input type="text" class="form-control" id="bem_password" name="password" value="grtc@123" required minlength="6" maxlength="12" minlength="6" maxlength="12">
               </div>
               <div class="form-group">
                 <label for="bem_email">Email Address</label>
@@ -1118,6 +1118,7 @@
             <select class="form-control" id="edit_role">
               <option value="student">Student / Candidate</option>
               <option value="admin">Center Manager / Admin</option>
+              <option value="director">⭐ Executive Director</option>
               <option value="superadmin">Master SuperAdmin</option>
             </select>
           </div>
