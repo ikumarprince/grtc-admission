@@ -92,19 +92,21 @@ class UniversalConnection:
 
 def get_db_connection():
     if IS_POSTGRES:
-        try:
-            conn = psycopg2.connect(DATABASE_URL)
-        except Exception:
-            if "sslmode=" not in DATABASE_URL:
-                sep = "&" if "?" in DATABASE_URL else "?"
-                conn = psycopg2.connect(f"{DATABASE_URL}{sep}sslmode=require")
-            else:
-                raise
-        return UniversalConnection(conn, True)
+        url = DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        
+        # Ensure SSL mode if connecting to Supabase
+        if "sslmode=" not in url and ("supabase.co" in url or "supabase.com" in url):
+            sep = "&" if "?" in url else "?"
+            url = f"{url}{sep}sslmode=require"
+            
+        conn = psycopg2.connect(url, cursor_factory=RealDictCursor)
+        return conn
     else:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
-        return UniversalConnection(conn, False)
+        return conn
 
 def password_to_ascii(password: str) -> str:
     if not password:
