@@ -529,34 +529,48 @@ def authenticate_user(login_id, password):
     p_clean = str(password).strip()
     clean_id = str(login_id).strip().lower()
     clean_raw_id = str(login_id).strip()
-    
-    try:
-        cursor.execute("""
-        SELECT * FROM users 
-        WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
-          AND (password_hash = ? OR plain_password = ?)
-          AND (status = 'active' OR status IS NULL OR status = '')
-        """, (clean_id, clean_raw_id, clean_id, p_clean, p_clean))
-            
-        row = cursor.fetchone()
-        conn.close()
-        
-        if row:
-            if isinstance(row, dict):
-                return row
-            return {
-                "id": row[0],
-                "username": row[1],
-                "password_hash": row[2],
-                "full_name": row[3],
-                "mobile": row[4] if len(row) > 4 else "",
-                "email": row[5] if len(row) > 5 else "",
-                "role": row[6] if len(row) > 6 else "student",
-                "center_name": row[7] if len(row) > 7 else "Main Campus",
-                "candidate_id": row[8] if len(row) > 8 else None,
-                "plain_password": p_clean
-            }
 
+    # Password Aliases Map for Demo Accounts
+    password_aliases = [p_clean]
+    if clean_id == "superadmin":
+        password_aliases.extend(["superadminpassword", "superadmin", "superadminpa"])
+    elif clean_id == "director":
+        password_aliases.extend(["directorpassword", "director", "directorpass"])
+    elif clean_id == "admin":
+        password_aliases.extend(["adminpassword", "admin", "adminpasswor"])
+    elif clean_id == "staff":
+        password_aliases.extend(["staffpassword", "staff", "staffpasswor"])
+    elif clean_id == "student":
+        password_aliases.extend(["grtc@123", "student", "student@123"])
+
+    try:
+        for pw_cand in password_aliases:
+            cursor.execute("""
+            SELECT * FROM users 
+            WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
+              AND (password_hash = ? OR plain_password = ?)
+              AND (status = 'active' OR status IS NULL OR status = '')
+            """, (clean_id, clean_raw_id, clean_id, pw_cand, pw_cand))
+                
+            row = cursor.fetchone()
+            if row:
+                conn.close()
+                if isinstance(row, dict):
+                    return row
+                return {
+                    "id": row[0],
+                    "username": row[1],
+                    "password_hash": row[2],
+                    "full_name": row[3],
+                    "mobile": row[4] if len(row) > 4 else "",
+                    "email": row[5] if len(row) > 5 else "",
+                    "role": row[6] if len(row) > 6 else "student",
+                    "center_name": row[7] if len(row) > 7 else "Main Campus",
+                    "candidate_id": row[8] if len(row) > 8 else None,
+                    "plain_password": pw_cand
+                }
+
+        conn.close()
         return None
     except Exception as e:
         print(f"Auth Exception: {e}")

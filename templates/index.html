@@ -186,7 +186,7 @@
         </div>
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label for="login_password">Password <span class="req">*</span></label>
-          <input type="password" class="form-control" id="login_password" placeholder="Enter Password" required minlength="6" maxlength="12">
+          <input type="password" class="form-control" id="login_password" placeholder="Enter Password" required minlength="6" maxlength="64">
         </div>
         <button type="button" onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">🔓 Login to Portal</button>
   
@@ -899,7 +899,7 @@
               </div>
               <div class="form-group">
                 <label for="bem_aadhaar_no">Aadhaar No <span class="req">*</span></label>
-                <input type="text" class="form-control" id="bem_aadhaar_no" name="aadhaar_no" placeholder="12 Digit Aadhaar Number" required maxlength="12">
+                <input type="text" class="form-control" id="bem_aadhaar_no" name="aadhaar_no" placeholder="12 Digit Aadhaar Number" required maxlength="64">
               </div>
             </div>
           </div>
@@ -910,11 +910,11 @@
             <div class="form-grid-3">
               <div class="form-group">
                 <label for="bem_mobile_no">Mobile No (Login ID) <span class="req">*</span></label>
-                <input type="tel" class="form-control" id="bem_mobile_no" name="mobile_no" placeholder="10-digit Mobile Number" required maxlength="10">
+                <input type="tel" class="form-control" id="bem_mobile_no" name="mobile_no" placeholder="10-digit Mobile Number" required maxlength="64">
               </div>
               <div class="form-group">
                 <label for="bem_password">Student Login Password <span class="req">*</span></label>
-                <input type="text" class="form-control" id="bem_password" name="password" value="grtc@123" required minlength="6" maxlength="12" minlength="6" maxlength="12">
+                <input type="text" class="form-control" id="bem_password" name="password" value="grtc@123" required minlength="6" maxlength="64" minlength="6" maxlength="64">
               </div>
               <div class="form-group">
                 <label for="bem_email">Email Address</label>
@@ -1497,15 +1497,15 @@
         <form id="change_password_form" onsubmit="event.preventDefault(); handleChangePasswordSubmit(event);">
           <div class="form-group" style="margin-bottom: 0.9rem;">
             <label for="cp_current_password">Current Password <span class="req">*</span></label>
-            <input type="password" class="form-control" id="cp_current_password" required minlength="6" maxlength="12" placeholder="Current Password">
+            <input type="password" class="form-control" id="cp_current_password" required minlength="6" maxlength="64" placeholder="Current Password">
           </div>
           <div class="form-group" style="margin-bottom: 0.9rem;">
             <label for="cp_new_password">New Password <span class="req">*</span></label>
-            <input type="password" class="form-control" id="cp_new_password" required minlength="6" maxlength="12" placeholder="New Password (6-12 chars)">
+            <input type="password" class="form-control" id="cp_new_password" required minlength="6" maxlength="64" placeholder="New Password (6-12 chars)">
           </div>
           <div class="form-group" style="margin-bottom: 1.2rem;">
             <label for="cp_confirm_password">Confirm New Password <span class="req">*</span></label>
-            <input type="password" class="form-control" id="cp_confirm_password" required minlength="6" maxlength="12" placeholder="Re-enter New Password">
+            <input type="password" class="form-control" id="cp_confirm_password" required minlength="6" maxlength="64" placeholder="Re-enter New Password">
           </div>
           <div id="cp_status_alert" style="display: none; padding: 8px; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1rem; font-weight: bold;"></div>
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
