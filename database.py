@@ -20,14 +20,14 @@ DEFAULT_SETTINGS = {
     "institution_name": "Gyanoday Rojgar Training Centre",
     "institution_tagline": "Approved by NSDC and SSC Recognized Institution",
     "institution_address": "Khaspur Ramchandra pahalwan path near bajaj showroom patna 801503",
-    "institution_phone": "",
+    "institution_phone": "+91 80021 43322",
     "institution_email": "",
     "institution_code": "GRTC-PATNA",
     "academic_years": ["2026-2027", "2025-2026", "2024-2025"],
     "courses": [
-        {"name": "Computer", "duration": "6 Months", "branches": [], "default_fee": 4000},
-        {"name": "Hotel Management", "duration": "1 Year", "branches": [], "default_fee": 4000},
-        {"name": "GDA", "duration": "6 Months", "branches": [], "default_fee": 4000}
+        {"name": "Computer", "duration": "6 Months", "branches": [], "default_fee": 400},
+        {"name": "Hotel Management", "duration": "1 Year", "branches": [], "default_fee": 400},
+        {"name": "GDA", "duration": "6 Months", "branches": [], "default_fee": 400}
     ],
     "upi_id": ""
 }
@@ -162,6 +162,7 @@ def init_db():
             center_name VARCHAR(255) DEFAULT 'Main Campus',
             candidate_id INTEGER,
             status VARCHAR(50) DEFAULT 'active',
+            profile_picture TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
@@ -267,6 +268,18 @@ def init_db():
         """)
 
         cursor.execute("""
+        CREATE TABLE IF NOT EXISTS enquiries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            mobile TEXT NOT NULL,
+            course TEXT NOT NULL,
+            district TEXT,
+            status TEXT DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
             config_data TEXT NOT NULL
@@ -286,6 +299,7 @@ def init_db():
             center_name TEXT DEFAULT 'Main Campus',
             candidate_id INTEGER,
             status TEXT DEFAULT 'active',
+            profile_picture TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         """)
@@ -391,11 +405,36 @@ def init_db():
         """)
 
         cursor.execute("""
+        CREATE TABLE IF NOT EXISTS enquiries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            mobile TEXT NOT NULL,
+            course TEXT NOT NULL,
+            district TEXT,
+            status TEXT DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
             config_data TEXT NOT NULL
         );
         """)
+
+    
+    # Ensure profile_picture column exists on users table
+    try:
+        if IS_POSTGRES:
+            cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture TEXT;")
+        else:
+            cursor.execute("PRAGMA table_info(users)")
+            cols = [c[1] for c in cursor.fetchall()]
+            if "profile_picture" not in cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN profile_picture TEXT;")
+    except Exception as e:
+        print("profile_picture column check note:", e)
 
     conn.commit()
 
@@ -420,7 +459,7 @@ def init_db():
     if not cursor.fetchone():
         cursor.execute("""
         INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('director', '100 105 114 101 99 116 111 114 49 50 51', 'Director - GRTC', '9800000001', 'director@grtc.edu.in', 'director', 'Main Campus', 'active')
+        VALUES ('director', '100 105 114 101 99 116 111 114 49 50 51', 'Director - GRTC', '9304474574', 'director@grtc.edu.in', 'director', 'Main Campus', 'active')
         """)
 
     # Seed Default Manager
@@ -504,7 +543,7 @@ def get_user_by_id(uid):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-    SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status 
+    SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status, profile_picture, created_at 
     FROM users 
     WHERE id = ?
     """, (uid,))
@@ -589,7 +628,7 @@ def update_user(uid, data):
     fields = []
     values = []
     
-    allowed = ["full_name", "mobile", "email", "role", "center_name", "status"]
+    allowed = ["full_name", "mobile", "email", "role", "center_name", "status", "profile_picture"]
     for k in allowed:
         if k in data:
             fields.append(f"{k} = ?")
@@ -690,7 +729,7 @@ def create_candidate(data, user_id=None):
             raise ValueError(f"Mobile number {clean_mob} is already registered with student '{c.get('full_name')}' (Application No: {c.get('application_no')}). Duplicate registration not allowed.")
 
     app_no = generate_application_no()
-    total_fee = float(data.get("total_course_fee", 4000) or 4000)
+    total_fee = float(data.get("total_course_fee", 400) or 400)
     fee_paid = float(data.get("fee_paid", 0) or 0)
     balance = max(0, total_fee - fee_paid)
     
@@ -1094,3 +1133,61 @@ def migrate_passwords_to_ascii():
         "already_ascii": already_ascii,
         "skipped": skipped
     }
+
+def create_enquiry(full_name: str, mobile: str, course: str, district: str) -> dict:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    ph = parse_placeholder(cursor)
+    query = f"INSERT INTO enquiries (full_name, mobile, course, district) VALUES ({ph}, {ph}, {ph}, {ph})"
+    cursor.execute(query, (full_name, mobile, course, district))
+    eid = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return {"id": eid, "full_name": full_name, "mobile": mobile, "course": course, "district": district, "status": "Pending"}
+
+def get_all_enquiries() -> list:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, full_name, mobile, course, district, status, created_at FROM enquiries ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    enquiries = []
+    for r in rows:
+        if isinstance(r, dict):
+            enquiries.append({
+                "id": r.get("id"),
+                "full_name": r.get("full_name") or "Applicant",
+                "mobile": r.get("mobile") or "",
+                "course": r.get("course") or "Skill Training",
+                "district": r.get("district") or "-",
+                "status": r.get("status") or "Pending",
+                "created_at": str(r.get("created_at") or "Recently")
+            })
+        else:
+            enquiries.append({
+                "id": r[0],
+                "full_name": r[1] or "Applicant",
+                "mobile": r[2] or "",
+                "course": r[3] or "Skill Training",
+                "district": r[4] or "-",
+                "status": r[5] or "Pending",
+                "created_at": str(r[6] or "Recently")
+            })
+    return enquiries
+
+def update_enquiry_status(eid: int, status: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    ph = parse_placeholder(cursor)
+    cursor.execute(f"UPDATE enquiries SET status = {ph} WHERE id = {ph}", (status, eid))
+    conn.commit()
+    conn.close()
+
+def delete_enquiry(eid: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    ph = parse_placeholder(cursor)
+    cursor.execute(f"DELETE FROM enquiries WHERE id = {ph}", (eid,))
+    conn.commit()
+    conn.close()

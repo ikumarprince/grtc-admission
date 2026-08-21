@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import database
 
-app = FastAPI(title="Multi-Role Offline Candidate Admission & Batch Management System")
+app = FastAPI(title="Multi-Role Candidate Admission & Batch Management System")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,12 +38,96 @@ def get_current_user_from_token(auth_token: str):
         return None
     return database.get_user_by_id(uid)
 
+# ================= USER PROFILE & SECURITY APIS =================
+
+@app.post("/api/user/change-password")
+async def api_change_user_password(payload: dict = Body(...), authorization: str = Header(None)):
+    token = authorization.replace("Bearer ", "") if authorization else None
+    user = get_current_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Session expired or invalid.")
+    
+    current_p = payload.get("current_password", "").strip()
+    new_p = payload.get("new_password", "").strip()
+    confirm_p = payload.get("confirm_password", "").strip()
+    
+    if not current_p or not new_p or not confirm_p:
+        raise HTTPException(status_code=400, detail="All password fields are required.")
+        
+    if new_p != confirm_p:
+        raise HTTPException(status_code=400, detail="New password and confirmation password do not match.")
+        
+    if current_p == new_p:
+        raise HTTPException(status_code=400, detail="New password must be different from current password.")
+        
+    # Verify current password server-side
+    auth_check = database.authenticate_user(user["username"], current_p)
+    if not auth_check:
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+        
+    # Validate length rules (6-12 chars) BEFORE ASCII conversion
+    try:
+        database.validate_password(new_p)
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+        
+    # Convert & Update
+    database.update_user(user["id"], {"password": new_p})
+    return {"status": "success", "message": "Password changed successfully."}
+
+@app.post("/api/user/avatar")
+async def api_upload_user_avatar(payload: dict = Body(...), authorization: str = Header(None)):
+    token = authorization.replace("Bearer ", "") if authorization else None
+    user = get_current_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Session expired or invalid.")
+        
+    try:
+        raw_url = payload.get("profile_picture") or payload.get("photo_url") or ""
+        if not raw_url:
+            raise HTTPException(status_code=400, detail="Invalid photo data.")
+            
+        if raw_url.startswith("data:image/"):
+            header, base64_str = raw_url.split(",", 1)
+            ext = ".jpg"
+            if "png" in header: ext = ".png"
+            elif "webp" in header: ext = ".webp"
+            elif "jpeg" in header or "jpg" in header: ext = ".jpg"
+            
+            img_data = base64.b64decode(base64_str)
+            if len(img_data) > 5 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="File size exceeds maximum limit of 5MB.")
+                
+            safe_fname = f"avatar_user_{user['id']}_{uuid.uuid4().hex[:8]}{ext}"
+            save_path = os.path.join(UPLOADS_DIR, safe_fname)
+            with open(save_path, "wb") as f:
+                f.write(img_data)
+            avatar_url = f"/static/uploads/{safe_fname}"
+        else:
+            avatar_url = raw_url
+
+        updated = database.update_user(user["id"], {"profile_picture": avatar_url})
+        return {"status": "success", "profile_picture": avatar_url, "user": updated}
+    except HTTPException as he:
+        raise he
+    except Exception as err:
+        return JSONResponse(status_code=500, content={"detail": f"Upload processing error: {str(err)}"})
+    except HTTPException as he:
+        raise he
+    except Exception as err:
+        return JSONResponse(status_code=500, content={"detail": f"Upload processing error: {str(err)}"})
+
 # ================= PAGES & NAVIGATION =================
 
 @app.head("/")
 @app.get("/", response_class=HTMLResponse)
 async def serve_home():
-    with open(os.path.join(TEMPLATES_DIR, "login.html"), "r", encoding="utf-8") as f:
+    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/home", response_class=HTMLResponse)
+async def serve_home_alias():
+    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
         return f.read()
 
 @app.head("/healthz")
@@ -228,7 +312,7 @@ async def api_get_batches(course: str = "", center: str = "", status: str = ""):
 async def api_create_batch(payload: dict = Body(...), authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["admin", "superadmin"]:
+    if not user or user["role"] not in ["admin", "superadmin", "director"]:
         raise HTTPException(status_code=403, detail="Admin permission required.")
     
     payload["created_by"] = user["full_name"]
@@ -239,7 +323,7 @@ async def api_create_batch(payload: dict = Body(...), authorization: str = Heade
 async def api_update_batch(bid: int, payload: dict = Body(...), authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["admin", "superadmin"]:
+    if not user or user["role"] not in ["admin", "superadmin", "director"]:
         raise HTTPException(status_code=403, detail="Admin permission required.")
     
     updated = database.update_batch(bid, payload)
@@ -249,7 +333,7 @@ async def api_update_batch(bid: int, payload: dict = Body(...), authorization: s
 async def api_delete_batch(bid: int, authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["admin", "superadmin"]:
+    if not user or user["role"] not in ["admin", "superadmin", "director"]:
         raise HTTPException(status_code=403, detail="Admin permission required.")
     
     database.delete_batch(bid)
@@ -263,7 +347,7 @@ async def api_get_batch_candidates(bid: int):
 async def api_enroll_candidate(bid: int, payload: dict = Body(...), authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["admin", "superadmin"]:
+    if not user or user["role"] not in ["admin", "superadmin", "director"]:
         raise HTTPException(status_code=403, detail="Admin permission required.")
     
     cid = payload.get("candidate_id")
@@ -277,7 +361,7 @@ async def api_enroll_candidate(bid: int, payload: dict = Body(...), authorizatio
 async def api_remove_candidate(bid: int, payload: dict = Body(...), authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["admin", "superadmin"]:
+    if not user or user["role"] not in ["admin", "superadmin", "director"]:
         raise HTTPException(status_code=403, detail="Admin permission required.")
     
     cid = payload.get("candidate_id")
@@ -290,10 +374,15 @@ async def api_remove_candidate(bid: int, payload: dict = Body(...), authorizatio
 async def api_get_superadmin_users(role: str = "", authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] != "superadmin":
-        raise HTTPException(status_code=403, detail="SuperAdmin permission required.")
+    if not user or user["role"] not in ["superadmin", "director"]:
+        raise HTTPException(status_code=403, detail="SuperAdmin or Director permission required.")
     
-    return database.get_all_users(role=role if role else None)
+    users = database.get_all_users(role=role if role else None)
+    if user["role"] == "director":
+        for u in users:
+            if isinstance(u, dict):
+                u["password_hash"] = "••••••••"
+    return users
 
 @app.post("/api/superadmin/users")
 async def api_create_admin_user(payload: dict = Body(...), authorization: str = Header(None)):
@@ -302,16 +391,19 @@ async def api_create_admin_user(payload: dict = Body(...), authorization: str = 
     if not user or user["role"] != "superadmin":
         raise HTTPException(status_code=403, detail="SuperAdmin permission required.")
     
-    new_user = database.register_user(
-        username=payload.get("username"),
-        password=payload.get("password"),
-        full_name=payload.get("full_name"),
-        mobile=payload.get("mobile", ""),
-        email=payload.get("email", ""),
-        role=payload.get("role", "admin"),
-        center_name=payload.get("center_name", "Main Campus")
-    )
-    return {"status": "success", "user": new_user}
+    try:
+        new_user = database.register_user(
+            username=payload.get("username"),
+            password=payload.get("password"),
+            full_name=payload.get("full_name"),
+            mobile=payload.get("mobile", ""),
+            email=payload.get("email", ""),
+            role=payload.get("role", "admin"),
+            center_name=payload.get("center_name", "Main Campus")
+        )
+        return {"status": "success", "user": new_user}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
 
 @app.put("/api/superadmin/users/{uid}")
 @app.post("/api/superadmin/users/{uid}")
@@ -321,8 +413,11 @@ async def api_update_admin_user(uid: int, payload: dict = Body(...), authorizati
     if not user or user["role"] != "superadmin":
         raise HTTPException(status_code=403, detail="SuperAdmin permission required.")
     
-    updated = database.update_user(uid, payload)
-    return {"status": "success", "user": updated}
+    try:
+        updated = database.update_user(uid, payload)
+        return {"status": "success", "user": updated}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
 
 @app.delete("/api/superadmin/users/{uid}")
 async def api_delete_admin_user(uid: int, authorization: str = Header(None)):
@@ -333,6 +428,60 @@ async def api_delete_admin_user(uid: int, authorization: str = Header(None)):
     
     database.delete_user(uid)
     return {"status": "success"}
+
+@app.get("/api/public/batches")
+async def api_get_public_batches():
+    try:
+        batches = database.get_all_batches()
+        public_list = []
+        for b in batches:
+            if isinstance(b, dict):
+                public_list.append({
+                    "batch_code": b.get("batch_code"),
+                    "batch_name": b.get("batch_name"),
+                    "course": b.get("course"),
+                    "timing": b.get("timing"),
+                    "days": b.get("days"),
+                    "status": b.get("status"),
+                    "center_name": b.get("center_name", "Main Campus")
+                })
+        return public_list
+    except Exception as e:
+        return []
+
+@app.post("/api/public/enquire")
+async def api_public_enquire(payload: dict = Body(...)):
+    full_name = payload.get("full_name", "").strip()
+    mobile = payload.get("mobile", "").strip()
+    course = payload.get("course", "").strip()
+    district = payload.get("district", "").strip()
+
+    if not full_name or not mobile or not course:
+        raise HTTPException(status_code=400, detail="Full name, mobile number, and course selection are required.")
+
+    try:
+        # Register inquiry candidate in database
+        username = mobile
+        password = "grtc@123"
+        user = database.register_user(
+            username=username,
+            password=password,
+            full_name=full_name,
+            mobile=mobile,
+            email=f"{mobile}@grtc.in",
+            role="student"
+        )
+        return {
+            "status": "success",
+            "message": "Thank you! Your enquiry has been received. Our admission team will contact you shortly.",
+            "user_id": user.get("id")
+        }
+    except Exception as ve:
+        # If user already exists, still return success for enquiry
+        return {
+            "status": "success",
+            "message": "Thank you! Your enquiry has been received. Our admission team will contact you shortly."
+        }
 
 # ================= CANDIDATES & SETTINGS =================
 
@@ -399,8 +548,8 @@ async def api_get_settings():
 async def api_update_upi_settings(payload: dict = Body(...), authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] != "superadmin":
-        raise HTTPException(status_code=403, detail="Unauthorized: Only SuperAdmin has authority to change Payment UPI ID and QR Code.")
+    if not user or user["role"] not in ["superadmin", "director"]:
+        raise HTTPException(status_code=403, detail="Unauthorized: Only SuperAdmin or Director has authority to change Payment UPI ID and QR Code.")
     
     new_upi = payload.get("upi_id", "").strip()
     if not new_upi:
@@ -505,3 +654,8 @@ async def api_export_csv(search: str = "", course: str = "", academic_year: str 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True)
+
+
+@app.get("/api/public/enquiries")
+async def api_get_public_enquiries():
+    return database.get_all_enquiries()

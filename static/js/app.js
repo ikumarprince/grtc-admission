@@ -1,3 +1,7 @@
+function getAuthToken() {
+  return localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || getAuthToken() || "";
+}
+
 // Global App State
 var currentUser = null;
 var currentToken = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || null;
@@ -91,6 +95,16 @@ function renderAppForRole(data) {
     if (document.getElementById("sa_upi_id") && currentSettings && currentSettings.upi_id) {
       document.getElementById("sa_upi_id").value = currentSettings.upi_id;
     }
+  } else if (role === "director") {
+    // ⭐ EXECUTIVE DIRECTOR PORTAL (Full Authority, Reports & UPI Settings)
+    if (portalSuperadmin) portalSuperadmin.style.display = "block";
+    loadSuperAdminDashboard();
+    if (document.getElementById("sa_upi_card")) document.getElementById("sa_upi_card").style.display = "block";
+  } else if (role === "director") {
+    // ⭐ EXECUTIVE DIRECTOR PORTAL (Full Authority, Reports & UPI Settings)
+    if (portalSuperadmin) portalSuperadmin.style.display = "block";
+    loadSuperAdminDashboard();
+    if (document.getElementById("sa_upi_card")) document.getElementById("sa_upi_card").style.display = "block";
   } else if (role === "admin" || role === "manager") {
     // 👔 CENTER MANAGER / ADMIN PORTAL
     if (portalAdmin) portalAdmin.style.display = "block";
@@ -741,7 +755,10 @@ async function loadSuperAdminUsers() {
         <td>${u.center_name || "Main"}</td>
         <td>${u.mobile || "N/A"}</td>
         <td>
-          ${u.role !== "superadmin" ? `<button class="btn btn-danger btn-sm" onclick="deleteUserRecord(${u.id})">🗑️ Delete</button>` : `<span style="color:var(--text-muted); font-size:0.75rem;">Master Account</span>`}
+          ${u.role !== "superadmin" ? `
+            <button class="btn btn-sm btn-outline-primary" style="padding:2px 8px; font-size:0.75rem;" onclick="openEditUserModal(${u.id})">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" style="padding:2px 8px; font-size:0.75rem;" onclick="deleteUserRecord(${u.id})">🗑️ Delete</button>
+          ` : `<span style="color:var(--text-muted); font-size:0.75rem;">Master Account</span>`}
         </td>
       `;
       tbody.appendChild(tr);
@@ -1738,34 +1755,833 @@ async function quickUpdateBatchStatus(newStatus) {
 async function syncAllPortalData() {
   if (!currentToken || !currentUser) return;
   try {
-    // 1. Sync Batches
+    // 1. Real-Time Sync Batches Across All Screens
     await loadAdminBatches();
 
-    // 2. Sync Candidates
+    // 2. Real-Time Sync Candidates Directory
     if (document.getElementById("adm_candidates_tbody") || document.getElementById("admin_candidates_tbody")) {
       await loadAdminCandidates();
     }
 
-    // 3. Sync SuperAdmin Views & Users
-    if (currentUser.role === "superadmin") {
+    // 3. Real-Time Sync Dashboard Stats & User Accounts Across Roles
+    const r = (currentUser.role || "").toLowerCase();
+    if (r === "superadmin" || r === "director") {
       await loadSuperAdminStats();
       if (typeof loadSuperAdminUsers === "function") {
         await loadSuperAdminUsers();
       }
-    } else if (currentUser.role === "admin" || currentUser.role === "manager") {
+    } else if (r === "admin" || r === "manager") {
       await loadAdminStats();
     }
   } catch (err) {
-    console.error("Auto-sync error:", err);
+    console.error("Real-time auto-sync error:", err);
   }
 }
 
-// Background auto-refresh heartbeat (Sync every 2 seconds across all devices)
+// Real-Time Background Auto-Sync Engine (Sync every 4 seconds across all devices & user roles)
 var autoSyncInterval = null;
 if (!autoSyncInterval) {
   autoSyncInterval = setInterval(() => {
     if (currentToken && currentUser) {
       syncAllPortalData();
     }
-  }, 8000);
+  }, 4000);
+}
+
+// ================= USER PROFILE MENU & DROPDOWN LOGIC =================
+function getUserInitials(name) {
+  if (!name) return "U";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return parts[0].substring(0, 2).toUpperCase();
+}
+
+function toggleUserProfileDropdown(e) {
+  if (e) e.stopPropagation();
+  const dropdown = document.getElementById("user_profile_dropdown");
+  if (!dropdown) return;
+  
+  if (dropdown.style.display === "block" || dropdown.classList.contains("show")) {
+    dropdown.style.display = "none";
+    dropdown.classList.remove("show");
+  } else {
+    dropdown.style.display = "block";
+    dropdown.classList.add("show");
+  }
+}
+
+document.addEventListener("click", function(e) {
+  const wrapper = document.getElementById("header_user_bar");
+  const dropdown = document.getElementById("user_profile_dropdown");
+  if (dropdown && wrapper && !wrapper.contains(e.target)) {
+    dropdown.style.display = "none";
+    dropdown.classList.remove("show");
+  }
+});
+
+async function loadAdminEnquiries() {
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch("/api/admin/enquiries", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (res.ok) {
+      const enquiries = await res.json();
+      renderEnquiriesTable(enquiries);
+    }
+  } catch(err) {
+    console.error("Error loading enquiries:", err);
+  }
+}
+
+function renderEnquiriesTable(enquiries) {
+  const tbody = document.getElementById("enquiries_tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (!enquiries || enquiries.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">No website admission enquiries received yet.</td></tr>`;
+    return;
+  }
+
+  enquiries.forEach(e => {
+    const tr = document.createElement("tr");
+    
+    let statusBadge = `<span style="background:#fef3c7; color:#b45309; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.75rem;">Pending</span>`;
+    if (e.status === 'Contacted') {
+      statusBadge = `<span style="background:#dbeafe; color:#1d4ed8; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.75rem;">Contacted</span>`;
+    } else if (e.status === 'Admitted') {
+      statusBadge = `<span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.75rem;">Admitted</span>`;
+    }
+
+    tr.innerHTML = `
+      <td>${e.created_at || 'Recently'}</td>
+      <td><strong>${e.full_name}</strong></td>
+      <td><a href="tel:${e.mobile}" style="color:#2563eb; font-weight:800; text-decoration:underline;">📞 ${e.mobile}</a></td>
+      <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-weight:700; font-size:0.8rem;">${e.course}</span></td>
+      <td>${e.district || '-'}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="updateEnquiryStatus(${e.id}, 'Contacted')">📞 Contacted</button>
+        <button class="btn btn-sm btn-success" onclick="updateEnquiryStatus(${e.id}, 'Admitted')">✅ Admitted</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteEnquiryRecord(${e.id})">🗑️ Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function updateEnquiryStatus(eid, newStatus) {
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/enquiries/${eid}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (res.ok) {
+      loadAdminEnquiries();
+    }
+  } catch(err) {
+    console.error("Error updating enquiry status:", err);
+  }
+}
+
+async function deleteEnquiryRecord(eid) {
+  if (!confirm("Are you sure you want to delete this admission enquiry?")) return;
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/enquiries/${eid}`, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (res.ok) {
+      loadAdminEnquiries();
+    }
+  } catch(err) {
+    console.error("Error deleting enquiry:", err);
+  }
+}
+
+function closeUserProfileDropdown() {
+  const dropdown = document.getElementById("user_profile_dropdown");
+  if (dropdown) dropdown.style.display = "none";
+  const trigger = document.getElementById("user_profile_trigger");
+  if (trigger) trigger.setAttribute("aria-expanded", "false");
+}
+
+// Close dropdown on outside click or Escape key
+document.addEventListener("click", (e) => {
+  const wrapper = document.getElementById("header_user_bar");
+  if (wrapper && !wrapper.contains(e.target)) {
+    closeUserProfileDropdown();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeUserProfileDropdown();
+    closeUserProfileModal();
+    closeChangePasswordModal();
+    closeChangeAvatarModal();
+  }
+});
+
+function renderUserAvatarAndHeader(user) {
+  if (!user) return;
+  const name = user.full_name || user.username || "User";
+  const initials = getUserInitials(name);
+  const pic = user.profile_picture;
+
+  // Header trigger
+  const hName = document.getElementById("header_user_name");
+  if (hName) hName.innerText = name;
+  const hInitials = document.getElementById("header_user_initials");
+  if (hInitials) hInitials.innerText = initials;
+  const hAvatar = document.getElementById("header_user_avatar");
+  if (hAvatar) {
+    if (pic) {
+      hAvatar.style.backgroundImage = `url("${pic}")`;
+      if (hInitials) hInitials.style.display = "none";
+    } else {
+      hAvatar.style.backgroundImage = "none";
+      if (hInitials) hInitials.style.display = "inline";
+    }
+  }
+
+  // Dropdown header
+  const dName = document.getElementById("dropdown_user_fullname");
+  if (dName) dName.innerText = name;
+  const dUser = document.getElementById("dropdown_user_username");
+  if (dUser) dUser.innerText = `@${user.username || user.mobile || "user"}`;
+  const dInitials = document.getElementById("dropdown_user_initials");
+  if (dInitials) dInitials.innerText = initials;
+  const dAvatar = document.getElementById("dropdown_user_avatar");
+  if (dAvatar) {
+    if (pic) {
+      dAvatar.style.backgroundImage = `url("${pic}")`;
+      if (dInitials) dInitials.style.display = "none";
+    } else {
+      dAvatar.style.backgroundImage = "none";
+      if (dInitials) dInitials.style.display = "inline";
+    }
+  }
+}
+
+// Modals
+function openUserProfileModal() {
+  closeUserProfileDropdown();
+  if (!currentUser) return;
+  
+  const initials = getUserInitials(currentUser.full_name);
+  const pic = currentUser.profile_picture;
+  
+  document.getElementById("modal_profile_fullname").innerText = currentUser.full_name || "User";
+  document.getElementById("modal_profile_username").innerText = currentUser.username || "N/A";
+  document.getElementById("modal_profile_mobile").innerText = currentUser.mobile || "N/A";
+  document.getElementById("modal_profile_email").innerText = currentUser.email || "N/A";
+  document.getElementById("modal_profile_center").innerText = currentUser.center_name || "Main Campus";
+  document.getElementById("modal_profile_role_pill").innerText = (currentUser.role || "USER").toUpperCase();
+  document.getElementById("modal_profile_initials").innerText = initials;
+  
+  const mAvatar = document.getElementById("modal_profile_avatar");
+  const mInitials = document.getElementById("modal_profile_initials");
+  if (mAvatar) {
+    if (pic) {
+      mAvatar.style.backgroundImage = `url("${pic}")`;
+      if (mInitials) mInitials.style.display = "none";
+    } else {
+      mAvatar.style.backgroundImage = "none";
+      if (mInitials) mInitials.style.display = "inline";
+    }
+  }
+  
+  document.getElementById("user_profile_modal").classList.add("active");
+}
+
+function closeUserProfileModal() {
+  document.getElementById("user_profile_modal").classList.remove("active");
+}
+
+function openChangePasswordModal() {
+  closeUserProfileDropdown();
+  document.getElementById("cp_current_password").value = "";
+  document.getElementById("cp_new_password").value = "";
+  document.getElementById("cp_confirm_password").value = "";
+  const alertBox = document.getElementById("cp_status_alert");
+  if (alertBox) alertBox.style.display = "none";
+  document.getElementById("change_password_modal").classList.add("active");
+}
+
+function closeChangePasswordModal() {
+  document.getElementById("change_password_modal").classList.remove("active");
+}
+
+async function handleChangePasswordSubmit(e) {
+  if (e) e.preventDefault();
+  const cp = document.getElementById("cp_current_password").value.trim();
+  const np = document.getElementById("cp_new_password").value.trim();
+  const cnp = document.getElementById("cp_confirm_password").value.trim();
+  const alertBox = document.getElementById("cp_status_alert");
+
+  if (!cp || !np || !cnp) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#fef2f2";
+    alertBox.style.color = "#dc2626";
+    alertBox.innerText = "❌ Please fill all password fields.";
+    return;
+  }
+
+  if (np.length < 6 || np.length > 12) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#fef2f2";
+    alertBox.style.color = "#dc2626";
+    alertBox.innerText = "❌ New password must be between 6 and 12 characters.";
+    return;
+  }
+
+  if (np !== cnp) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#fef2f2";
+    alertBox.style.color = "#dc2626";
+    alertBox.innerText = "❌ New password and confirmation do not match.";
+    return;
+  }
+
+  if (cp === np) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#fef2f2";
+    alertBox.style.color = "#dc2626";
+    alertBox.innerText = "❌ New password must be different from current password.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/user/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${currentToken}`
+      },
+      body: JSON.stringify({ current_password: cp, new_password: np, confirm_password: cnp })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alertBox.style.display = "block";
+      alertBox.style.background = "#f0fdf4";
+      alertBox.style.color = "#16a34a";
+      alertBox.innerText = "✅ Password changed successfully!";
+      document.getElementById("cp_current_password").value = "";
+      document.getElementById("cp_new_password").value = "";
+      document.getElementById("cp_confirm_password").value = "";
+      setTimeout(() => closeChangePasswordModal(), 1800);
+    } else {
+      alertBox.style.display = "block";
+      alertBox.style.background = "#fef2f2";
+      alertBox.style.color = "#dc2626";
+      alertBox.innerText = "❌ " + (data.detail || "Failed to change password.");
+    }
+  } catch (err) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#fef2f2";
+    alertBox.style.color = "#dc2626";
+    alertBox.innerText = "❌ Connection error: " + err.message;
+  }
+}
+
+// Avatar Upload Modal
+var selectedAvatarFile = null;
+
+function openChangeAvatarModal() {
+  closeUserProfileDropdown();
+  selectedAvatarFile = null;
+  document.getElementById("avatar_file_input").value = "";
+  document.getElementById("avatar_upload_status").innerText = "No new photo selected.";
+  document.getElementById("btn_submit_avatar").disabled = true;
+
+  if (currentUser) {
+    const initials = getUserInitials(currentUser.full_name);
+    const pic = currentUser.profile_picture;
+    const pCircle = document.getElementById("avatar_preview_circle");
+    const pInitials = document.getElementById("avatar_preview_initials");
+    if (pCircle) {
+      if (pic) {
+        pCircle.style.backgroundImage = `url("${pic}")`;
+        if (pInitials) pInitials.style.display = "none";
+      } else {
+        pCircle.style.backgroundImage = "none";
+        if (pInitials) pInitials.style.display = "inline";
+      }
+    }
+    if (pInitials) pInitials.innerText = initials;
+  }
+
+  document.getElementById("change_avatar_modal").classList.add("active");
+}
+
+function closeChangeAvatarModal() {
+  document.getElementById("change_avatar_modal").classList.remove("active");
+}
+
+function handleAvatarFileSelected(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Selected photo exceeds maximum 5MB size limit.");
+      input.value = "";
+      return;
+    }
+    selectedAvatarFile = file;
+    document.getElementById("avatar_upload_status").innerText = `Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+    document.getElementById("btn_submit_avatar").disabled = false;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const pCircle = document.getElementById("avatar_preview_circle");
+      const pInitials = document.getElementById("avatar_preview_initials");
+      if (pCircle) pCircle.style.backgroundImage = `url("${e.target.result}")`;
+      if (pInitials) pInitials.style.display = "none";
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function compressAvatarFile(file, maxDimension = 400, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = (err) => reject(err);
+      img.src = event.target.result;
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function submitAvatarUpload() {
+  if (!selectedAvatarFile) return;
+  const statusDiv = document.getElementById("avatar_upload_status");
+  statusDiv.innerText = "⏳ Optimizing and uploading photo...";
+
+  try {
+    const compressedDataUrl = await compressAvatarFile(selectedAvatarFile, 400, 0.85);
+    const res = await fetch("/api/user/avatar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${currentToken}`
+      },
+      body: JSON.stringify({ profile_picture: compressedDataUrl })
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      data = { detail: `Server error (${res.status} ${res.statusText})` };
+    }
+
+    if (res.ok && data.profile_picture) {
+      statusDiv.innerText = "✅ Profile picture updated successfully!";
+      currentUser.profile_picture = data.profile_picture;
+      renderUserAvatarAndHeader(currentUser);
+      setTimeout(() => closeChangeAvatarModal(), 1200);
+    } else {
+      statusDiv.innerText = "❌ " + (data.detail || "Upload failed.");
+    }
+  } catch (err) {
+    statusDiv.innerText = "❌ Upload error: " + err.message;
+  }
+}
+
+let globalAllEnquiries = [];
+let showAllEnquiriesState = false;
+
+async function loadAdminEnquiries() {
+  const token = getAuthToken();
+  const tbody = document.getElementById("enquiries_tbody");
+  
+  try {
+    let res = null;
+    if (token) {
+      res = await fetch("/api/admin/enquiries", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+    }
+
+    if (!res || !res.ok) {
+      res = await fetch("/api/public/enquiries");
+    }
+
+    if (res && res.ok) {
+      globalAllEnquiries = await res.json();
+      renderEnquiriesTable();
+    } else {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #b45309; font-weight: 700;">Click "Refresh Enquiries" to reload latest leads.</td></tr>`;
+    }
+  } catch(err) {
+    console.error("Error loading enquiries:", err);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #ef4444; font-weight: 700;">Unable to connect to server. Please refresh.</td></tr>`;
+  }
+}
+
+function renderEnquiriesTable() {
+  const tbody = document.getElementById("enquiries_tbody");
+  const toggleWrap = document.getElementById("enquiries_toggle_wrap");
+  const toggleBtn = document.getElementById("enquiries_toggle_btn");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (!globalAllEnquiries || globalAllEnquiries.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">No website admission enquiries received yet.</td></tr>`;
+    if (toggleWrap) toggleWrap.style.display = "none";
+    return;
+  }
+
+  const totalCount = globalAllEnquiries.length;
+  const listToRender = showAllEnquiriesState ? globalAllEnquiries : globalAllEnquiries.slice(0, 5);
+
+  listToRender.forEach(e => {
+    const tr = document.createElement("tr");
+    
+    let statusBadge = `<span style="background:#fef3c7; color:#b45309; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.75rem;">Pending</span>`;
+    if (e.status === 'Contacted') {
+      statusBadge = `<span style="background:#dbeafe; color:#1d4ed8; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.75rem;">Contacted</span>`;
+    } else if (e.status === 'Admitted') {
+      statusBadge = `<span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:800; font-size:0.75rem;">Admitted</span>`;
+    }
+
+    tr.innerHTML = `
+      <td>${e.created_at || 'Recently'}</td>
+      <td><strong>${e.full_name}</strong></td>
+      <td><a href="tel:${e.mobile}" style="color:#2563eb; font-weight:800; text-decoration:underline;">📞 ${e.mobile}</a></td>
+      <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-weight:700; font-size:0.8rem;">${e.course}</span></td>
+      <td>${e.district || '-'}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="updateEnquiryStatus(${e.id}, 'Contacted')">📞 Contacted</button>
+        <button class="btn btn-sm btn-success" onclick="updateEnquiryStatus(${e.id}, 'Admitted')">✅ Admitted</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteEnquiryRecord(${e.id})">🗑️ Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (totalCount > 5) {
+    if (toggleWrap) toggleWrap.style.display = "block";
+    if (toggleBtn) {
+      if (showAllEnquiriesState) {
+        toggleBtn.innerText = `🔼 Show Top 5 Enquiries`;
+      } else {
+        toggleBtn.innerText = `📂 Show All Enquiries (${totalCount})`;
+      }
+    }
+  } else {
+    if (toggleWrap) toggleWrap.style.display = "none";
+  }
+}
+
+function toggleAllEnquiriesDisplay() {
+  showAllEnquiriesState = !showAllEnquiriesState;
+  renderEnquiriesTable();
+}
+
+// 3-Line Hamburger Menu Toggle Function (100% Bulletproof Interactive)
+function toggleSidebarMenu(e) {
+  if (e) {
+    if (e.stopPropagation) e.stopPropagation();
+    if (e.preventDefault) e.preventDefault();
+  }
+
+  const drawer = document.getElementById("sidebar_drawer");
+  const overlay = document.getElementById("sidebar_overlay");
+  if (!drawer) return;
+
+  const isOpen = drawer.classList.contains("open") || drawer.style.left === "0px";
+
+  if (isOpen) {
+    drawer.classList.remove("open");
+    drawer.style.left = "-320px";
+    if (overlay) {
+      overlay.classList.remove("show");
+      overlay.style.display = "none";
+    }
+  } else {
+    drawer.classList.add("open");
+    drawer.style.left = "0px";
+    if (overlay) {
+      overlay.classList.add("show");
+      overlay.style.display = "block";
+    }
+  }
+}
+
+// 🔗 DYNAMIC SPA URL HASH ROUTING FOR MENU OPTIONS
+function updateUrlHash(hashName) {
+  if (window.history && window.history.pushState) {
+    window.history.pushState(null, "", "#" + hashName);
+  } else {
+    window.location.hash = "#" + hashName;
+  }
+}
+
+function handleHashRouting() {
+  const rawHash = window.location.hash.replace("#", "") || "overview";
+  
+  if (rawHash === "overview" || rawHash === "dashboard") {
+    switchDashboardView("dashboard", document.getElementById("nav_item_dashboard"), false);
+  } else if (rawHash === "enquiries") {
+    switchDashboardView("dashboard", document.getElementById("nav_item_dashboard"), false);
+    setTimeout(() => {
+      const tbody = document.getElementById("enquiries_tbody");
+      if (tbody) tbody.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 200);
+  } else if (rawHash.startsWith("batches")) {
+    switchDashboardView("batches", document.getElementById("nav_item_batches"), false);
+    if (rawHash === "batches-running") openBatchCategory("running", false);
+    else if (rawHash === "batches-upcoming") openBatchCategory("upcoming", false);
+    else if (rawHash === "batches-completed") openBatchCategory("completed", false);
+  } else if (rawHash === "students") {
+    switchDashboardView("students", document.getElementById("nav_item_students"), false);
+  } else if (rawHash.startsWith("users")) {
+    if (rawHash === "users-students") openSuperAdminUsersTab("students", false);
+    else if (rawHash === "users-superadmin") openSuperAdminUsersTab("superadmins", false);
+    else openSuperAdminUsersTab("managers", false);
+  }
+}
+
+// 100% Working Switch Dashboard View with Dynamic URL Hash Sync
+function switchDashboardView(viewTarget, element, updateHash = true) {
+  const views = document.querySelectorAll(".dashboard-view-panel");
+  views.forEach(v => v.style.display = "none");
+
+  const adminPortal = document.getElementById("portal_admin");
+  const superadminPortal = document.getElementById("portal_superadmin");
+  const studentPortal = document.getElementById("portal_student");
+
+  if (adminPortal) adminPortal.style.display = "block";
+  if (superadminPortal) superadminPortal.style.display = "none";
+  if (studentPortal) studentPortal.style.display = "none";
+
+  const targetPanel = document.getElementById("view_" + viewTarget);
+  if (targetPanel) {
+    targetPanel.style.display = "block";
+  }
+
+  // Sync Active class on nav item
+  const navItems = document.querySelectorAll(".sidebar-nav-item");
+  navItems.forEach(item => item.classList.remove("active"));
+  if (element) element.classList.add("active");
+
+  // Update Browser URL Hash
+  if (updateHash) {
+    if (viewTarget === "dashboard") updateUrlHash("overview");
+    else if (viewTarget === "batches") updateUrlHash("batches");
+    else if (viewTarget === "students") updateUrlHash("students");
+  }
+
+  // Load fresh data for the targeted view
+  if (viewTarget === 'dashboard') {
+    loadAdminEnquiries();
+  } else if (viewTarget === 'batches') {
+    loadAdminBatches();
+  } else if (viewTarget === 'students') {
+    loadAdminCandidates();
+  }
+
+  // Close sidebar drawer after selection
+  const drawer = document.getElementById("sidebar_drawer");
+  if (drawer && drawer.classList.contains("open")) {
+    toggleSidebarMenu();
+  }
+}
+
+// Open Specific Batch Category with URL Hash Update
+function openBatchCategory(category, updateHash = true) {
+  switchDashboardView("batches", document.getElementById("nav_item_batches"), false);
+  if (updateHash) updateUrlHash("batches-" + category);
+
+  if (category === "running") {
+    const grid = document.getElementById("grid_running_batches");
+    if (grid && (grid.style.display === "none" || grid.classList.contains("is-collapsed"))) {
+      toggleBatchSection("grid_running_batches", "arrow_running");
+    }
+  } else if (category === "upcoming") {
+    const grid = document.getElementById("grid_upcoming_batches");
+    if (grid && (grid.style.display === "none" || grid.classList.contains("is-collapsed"))) {
+      toggleBatchSection("grid_upcoming_batches", "arrow_upcoming");
+    }
+  } else if (category === "completed") {
+    const grid = document.getElementById("grid_completed_batches");
+    if (grid && (grid.style.display === "none" || grid.classList.contains("is-collapsed"))) {
+      toggleBatchSection("grid_completed_batches", "arrow_completed");
+    }
+  }
+}
+
+// Open SuperAdmin Users Tab with URL Hash Update
+function openSuperAdminUsersTab(tabName, updateHash = true) {
+  const drawer = document.getElementById("sidebar_drawer");
+  if (drawer && drawer.classList.contains("open")) toggleSidebarMenu();
+
+  const superadminPortal = document.getElementById("portal_superadmin");
+  const adminPortal = document.getElementById("portal_admin");
+  const studentPortal = document.getElementById("portal_student");
+
+  if (updateHash) updateUrlHash("users-" + tabName);
+
+  if (superadminPortal) {
+    if (adminPortal) adminPortal.style.display = "none";
+    if (studentPortal) studentPortal.style.display = "none";
+    superadminPortal.style.display = "block";
+    switchSuperAdminUserTab(tabName);
+  } else {
+    switchDashboardView("students", document.getElementById("nav_item_students"), false);
+  }
+}
+
+// Event Listeners for URL Hash Navigation
+window.addEventListener("hashchange", handleHashRouting);
+window.addEventListener("DOMContentLoaded", () => {
+  if (window.location.hash) {
+    setTimeout(handleHashRouting, 300);
+  }
+});
+
+function openBatchCategory(category) {
+  switchDashboardView("batches", document.getElementById("nav_item_batches"));
+
+  if (category === "running") {
+    const grid = document.getElementById("grid_running_batches");
+    const arrow = document.getElementById("arrow_running");
+    if (grid && (grid.style.display === "none" || grid.classList.contains("is-collapsed"))) {
+      toggleBatchSection("grid_running_batches", "arrow_running");
+    }
+  } else if (category === "upcoming") {
+    const grid = document.getElementById("grid_upcoming_batches");
+    const arrow = document.getElementById("arrow_upcoming");
+    if (grid && (grid.style.display === "none" || grid.classList.contains("is-collapsed"))) {
+      toggleBatchSection("grid_upcoming_batches", "arrow_upcoming");
+    }
+  } else if (category === "completed") {
+    const grid = document.getElementById("grid_completed_batches");
+    const arrow = document.getElementById("arrow_completed");
+    if (grid && (grid.style.display === "none" || grid.classList.contains("is-collapsed"))) {
+      toggleBatchSection("grid_completed_batches", "arrow_completed");
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', loadAdminEnquiries);
+
+
+function openSuperAdminUsersTab(tabName) {
+  toggleSidebarMenu();
+  const superadminPortal = document.getElementById("portal_superadmin");
+  const adminPortal = document.getElementById("portal_admin");
+  const studentPortal = document.getElementById("portal_student");
+
+  if (superadminPortal) {
+    if (adminPortal) adminPortal.style.display = "none";
+    if (studentPortal) studentPortal.style.display = "none";
+    superadminPortal.style.display = "block";
+    switchSuperAdminUserTab(tabName);
+  } else {
+    switchDashboardView("students", document.getElementById("nav_item_students"));
+  }
+}
+
+// 🔗 DYNAMIC SPA URL HASH ROUTING FOR ALL USER ROLES
+function updateUrlHash(hashName) {
+  if (window.history && window.history.pushState) {
+    window.history.pushState(null, "", "#" + hashName);
+  } else {
+    window.location.hash = "#" + hashName;
+  }
+}
+
+function handleHashRouting() {
+  const rawHash = window.location.hash.replace("#", "") || "overview";
+  const userRole = (currentUser && currentUser.role) ? currentUser.role.toLowerCase() : "";
+
+  // 1. STUDENT PORTAL HASH ROUTING
+  if (userRole === "student") {
+    if (rawHash === "student-fees" || rawHash === "fees") {
+      switchStudentTab("fees");
+    } else if (rawHash === "student-batch" || rawHash === "batch") {
+      switchStudentTab("batch");
+    } else if (rawHash === "student-idcard" || rawHash === "idcard") {
+      switchStudentTab("idcard");
+    } else {
+      switchStudentTab("status");
+    }
+    return;
+  }
+
+  // 2. ADMIN / MANAGER / DIRECTOR / SUPERADMIN ROUTING
+  if (rawHash === "overview" || rawHash === "dashboard") {
+    switchDashboardView("dashboard", document.getElementById("nav_item_dashboard"), false);
+  } else if (rawHash === "enquiries") {
+    switchDashboardView("dashboard", document.getElementById("nav_item_dashboard"), false);
+    setTimeout(() => {
+      const tbody = document.getElementById("enquiries_tbody");
+      if (tbody) tbody.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 200);
+  } else if (rawHash.startsWith("batches")) {
+    switchDashboardView("batches", document.getElementById("nav_item_batches"), false);
+    if (rawHash === "batches-running") openBatchCategory("running", false);
+    else if (rawHash === "batches-upcoming") openBatchCategory("upcoming", false);
+    else if (rawHash === "batches-completed") openBatchCategory("completed", false);
+  } else if (rawHash === "students") {
+    switchDashboardView("students", document.getElementById("nav_item_students"), false);
+  } else if (rawHash.startsWith("users")) {
+    if (rawHash === "users-students") openSuperAdminUsersTab("students", false);
+    else if (rawHash === "users-superadmin") openSuperAdminUsersTab("superadmins", false);
+    else openSuperAdminUsersTab("managers", false);
+  } else if (rawHash === "profile") {
+    openUserProfileModal();
+  }
+}
+
+// Student Tab Switcher with URL Hash Support
+function switchStudentTab(tabName) {
+  updateUrlHash("student-" + tabName);
+  const tabs = document.querySelectorAll(".student-tab-panel");
+  tabs.forEach(t => t.style.display = "none");
+
+  const target = document.getElementById("student_tab_" + tabName);
+  if (target) target.style.display = "block";
 }
