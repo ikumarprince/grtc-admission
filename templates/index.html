@@ -643,143 +643,54 @@
 
       </div>
 
-      <!-- ================= PORTAL C: SUPERADMIN (OWNER) ================= -->
+      <!-- ================= PORTAL C: SUPERADMIN (OWNER MASTER CONTROL) ================= -->
       <div id="portal_superadmin" class="portal-section" style="display: none;">
-        
-        <!-- Global Stats -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">🏛️</div>
-            <div class="stat-details">
-              <h4>Total Global Admissions</h4>
-              <div class="stat-val" id="sa_stat_total">0</div>
-            </div>
-          </div>
-          <div class="stat-card success">
-            <div class="stat-icon"><img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 24px; width: auto; border-radius: 4px; vertical-align: middle; margin-right: 6px;"></div>
-            <div class="stat-details">
-              <h4>Active Students</h4>
-              <div class="stat-val" id="sa_stat_enrolled">0</div>
-            </div>
-          </div>
-          <div class="stat-card accent">
-            <div class="stat-icon">📅</div>
-            <div class="stat-details">
-              <h4>Total Batches</h4>
-              <div class="stat-val" id="sa_stat_batches">0</div>
-            </div>
-          </div>
-          <div class="stat-card warning">
-            <div class="stat-icon">💰</div>
-            <div class="stat-details">
-              <h4>Total Revenue (INR)</h4>
-              <div class="stat-val" id="sa_stat_fee">₹0</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- USER MANAGEMENT: 3 SEPARATE SECTIONS -->
         <div class="card" style="margin-top: 1.5rem;">
-          <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button type="button" class="btn btn-primary btn-sm" id="tab_btn_managers" onclick="switchSuperAdminUserTab('managers')">👔 Center Managers & Admins (<span id="count_managers">0</span>)</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="tab_btn_students" onclick="switchSuperAdminUserTab('students')">👨‍🎓 Students / Candidates (<span id="count_students">0</span>)</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="tab_btn_superadmins" onclick="switchSuperAdminUserTab('superadmins')">👑 SuperAdmins (<span id="count_superadmins">0</span>)</button>
+          <div class="card-header" style="background: #0f172a; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="color: #fbbf24; font-size: 1.2rem; font-weight: 900; margin: 0;">👑 Master User Accounts Control Center</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Manage accounts, passwords, and permissions across all 5 roles (SuperAdmin, Director, Manager, Staff, Student).</p>
             </div>
-            <button class="btn btn-success btn-sm" onclick="openCreateAdminModal()">➕ Add New Center Manager</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-warning btn-sm" onclick="openCreateUserModal()" style="font-weight: 800; color: #0f172a;">➕ Create New User Account</button>
+              <button class="btn btn-outline-light btn-sm" onclick="loadSuperAdminUsers()">🔄 Refresh Users</button>
+            </div>
           </div>
 
-          <div class="card-body" style="padding: 1.2rem;">
-
-            <!-- 1. CENTER MANAGERS & ADMINS SECTION -->
-            <div id="section_managers_view" style="display: block;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="color: #1e3a8a; font-size: 1.05rem; font-weight: 700;">👔 Active Center Managers & Admissions Staff</h4>
-                <input type="text" class="form-control" id="search_managers_input" placeholder="Search Manager name, mobile, center..." oninput="filterManagerTable()" style="max-width: 280px; padding: 4px 10px;">
-              </div>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr style="background: #eff6ff;">
-                      <th>ID</th>
-                      <th>Login ID / Mobile</th>
-                      <th>Full Name</th>
-                      <th>Role</th>
-                      <th>Assigned Center</th>
-                      <th>Password</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="sa_managers_tbody">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-              </div>
+          <div class="card-body">
+            <!-- Filter Bar for User Roles -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center;">
+              <button class="btn btn-outline-primary btn-sm active" id="btn_role_all" onclick="filterSuperAdminUsersRole('all', this)">All Roles (<span id="cnt_role_all">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_superadmin" onclick="filterSuperAdminUsersRole('superadmin', this)">👑 SuperAdmins (<span id="cnt_role_superadmin">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_director" onclick="filterSuperAdminUsersRole('director', this)">👔 Directors (<span id="cnt_role_director">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_admin" onclick="filterSuperAdminUsersRole('admin', this)">🏛️ Managers (<span id="cnt_role_admin">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_staff" onclick="filterSuperAdminUsersRole('staff', this)">🧑‍💼 Staff Executives (<span id="cnt_role_staff">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_student" onclick="filterSuperAdminUsersRole('student', this)">👨‍🎓 Students (<span id="cnt_role_student">0</span>)</button>
+              
+              <input type="text" class="form-control" id="superadmin_user_search" placeholder="🔍 Search Name, Username, Mobile..." oninput="renderSuperAdminUsersTable()" style="flex: 1; min-width: 200px;">
             </div>
 
-            <!-- 2. STUDENTS / CANDIDATES SECTION -->
-            <div id="section_students_view" style="display: none;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-                <h4 style="color: #15803d; font-size: 1.05rem; font-weight: 700;">👨‍🎓 Registered Students & Candidates Accounts</h4>
-                <input type="text" class="form-control" id="search_students_input" placeholder="Search student name, mobile..." oninput="filterStudentTable()" style="max-width: 280px; padding: 4px 10px;">
-              </div>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr style="background: #f0fdf4;">
-                      <th>ID</th>
-                      <th>Login ID (Mobile)</th>
-                      <th>Student Full Name</th>
-                      <th>Role</th>
-                      <th>Default Password</th>
-                      <th>Center</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="sa_students_tbody">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-              </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr style="background: #f1f5f9;">
+                    <th>ID</th>
+                    <th>User Details</th>
+                    <th>User Role</th>
+                    <th>Mobile / Contact</th>
+                    <th>Account Password (SuperAdmin View)</th>
+                    <th>Created On</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="superadmin_users_tbody">
+                  <tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">Loading user accounts...</td></tr>
+                </tbody>
+              </table>
             </div>
-
-            <!-- 3. SUPERADMIN MASTER ACCOUNTS SECTION -->
-            <div id="section_superadmins_view" style="display: none;">
-              <div style="margin-bottom: 12px;">
-                <h4 style="color: #7c3aed; font-size: 1.05rem; font-weight: 700;">👑 Master SuperAdmin Accounts</h4>
-              </div>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr style="background: #faf5ff;">
-                      <th>ID</th>
-                      <th>Master Email ID</th>
-                      <th>SuperAdmin Name</th>
-                      <th>Role</th>
-                      <th>Location</th>
-                      <th>Mobile</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="sa_superadmins_tbody">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
           </div>
         </div>
-
-        <!-- Quick Launch to Admin Tools -->
-        <div style="text-align: center; margin-top: 1.5rem; margin-bottom: 2rem;">
-          <button type="button" class="btn btn-secondary btn-lg" onclick="switchToManagerView()" style="font-weight: 700; box-shadow: var(--shadow-md);">
-            ⚙️ Switch to Center Batches & Candidate Manager View
-          </button>
-        </div>
-
-    </div>
-
+      </div>
   </main>
 
   <!-- ================= MODALS ================= -->
@@ -1639,6 +1550,88 @@
     </div>
   </div>
 
+<!-- MODAL: UNIVERSAL CREATE NEW USER ACCOUNT -->
+  <div class="modal-backdrop" id="modal_create_user">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background: #0f172a; color: #ffffff;">
+        <h3 style="color: #fbbf24; margin: 0; font-size: 1.1rem; font-weight: 800;">➕ Create New System User Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal_create_user')" style="color: #ffffff;">&times;</button>
+      </div>
+      <form onsubmit="submitCreateUser(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Select User Role *</label>
+            <select class="form-control" id="new_user_role" required style="font-weight: 800; color: #1e293b;">
+              <option value="staff">🧑‍💼 Staff Executive</option>
+              <option value="admin">🏛️ Center Manager / Admin</option>
+              <option value="director">👔 Executive Director</option>
+              <option value="superadmin">👑 Master SuperAdmin</option>
+              <option value="student">👨‍🎓 Student Candidate</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Username (Login ID) *</label>
+            <input type="text" class="form-control" id="new_user_username" required placeholder="e.g. patna_staff1, director2">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-control" id="new_user_fullname" required placeholder="e.g. Rajesh Kumar">
+          </div>
+
+          <div class="form-row" style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Mobile Number</label>
+              <input type="tel" class="form-control" id="new_user_mobile" placeholder="10-digit mobile">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="new_user_email" placeholder="user@grtc.in">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Account Password *</label>
+            <input type="text" class="form-control" id="new_user_password" required value="grtc@123" placeholder="Enter password">
+            <small style="color: #64748b;">SuperAdmin will be able to see and reset this password anytime.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal_create_user')">Cancel</button>
+          <button type="submit" class="btn btn-warning" style="font-weight: 800;">🚀 Create Account Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SUPERADMIN RESET USER PASSWORD -->
+  <div class="modal-backdrop" id="modal_superadmin_reset_password">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background: #0f172a; color: #ffffff;">
+        <h3 style="color: #fbbf24; margin: 0; font-size: 1.1rem; font-weight: 800;">🔑 SuperAdmin Reset User Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal_superadmin_reset_password')" style="color: #ffffff;">&times;</button>
+      </div>
+      <form onsubmit="submitSuperAdminResetPassword(event)">
+        <input type="hidden" id="reset_pw_user_id">
+        <div class="modal-body">
+          <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 0.88rem; color: #475569;">Target User: <strong id="reset_pw_target_name" style="color: #0f172a;">User</strong></p>
+            <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">Role: <span id="reset_pw_target_role" class="badge">Role</span></p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">New Password *</label>
+            <input type="text" class="form-control" id="reset_pw_new_password" required placeholder="Enter new password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal_superadmin_reset_password')">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="font-weight: 800;">💾 Save New Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 
 </html>

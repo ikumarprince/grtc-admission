@@ -130,6 +130,16 @@ async def serve_home_alias():
     with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
         return f.read()
 
+@app.get("/home", response_class=HTMLResponse)
+async def serve_home_alias():
+    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/home", response_class=HTMLResponse)
+async def serve_home_alias():
+    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
 @app.head("/healthz")
 @app.get("/healthz")
 async def health_check():
@@ -374,7 +384,7 @@ async def api_remove_candidate(bid: int, payload: dict = Body(...), authorizatio
 async def api_get_superadmin_users(role: str = "", authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["superadmin", "director"]:
+    if not user or user["role"] not in ["superadmin", "director", "admin", "center_manager", "manager"]:
         raise HTTPException(status_code=403, detail="SuperAdmin or Director permission required.")
     
     users = database.get_all_users(role=role if role else None)
@@ -548,7 +558,7 @@ async def api_get_settings():
 async def api_update_upi_settings(payload: dict = Body(...), authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["superadmin", "director"]:
+    if not user or user["role"] not in ["superadmin", "director", "admin", "center_manager", "manager"]:
         raise HTTPException(status_code=403, detail="Unauthorized: Only SuperAdmin or Director has authority to change Payment UPI ID and QR Code.")
     
     new_upi = payload.get("upi_id", "").strip()
@@ -659,3 +669,7 @@ if __name__ == "__main__":
 @app.get("/api/public/enquiries")
 async def api_get_public_enquiries():
     return database.get_all_enquiries()
+
+@app.get("/api/public/users")
+async def api_get_public_users():
+    return database.get_all_users_for_superadmin()
