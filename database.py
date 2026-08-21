@@ -163,9 +163,15 @@ def init_db():
             candidate_id INTEGER,
             status VARCHAR(50) DEFAULT 'active',
             profile_picture TEXT,
+            plain_password TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
+
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS plain_password TEXT;")
+        except Exception:
+            pass
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS candidates (
@@ -269,22 +275,23 @@ def init_db():
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS enquiries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            full_name TEXT NOT NULL,
-            mobile TEXT NOT NULL,
-            course TEXT NOT NULL,
-            district TEXT,
-            status TEXT DEFAULT 'Pending',
+            id SERIAL PRIMARY KEY,
+            full_name VARCHAR(255) NOT NULL,
+            mobile VARCHAR(50) NOT NULL,
+            course VARCHAR(255) NOT NULL,
+            district VARCHAR(100),
+            status VARCHAR(50) DEFAULT 'Pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
-            id INTEGER PRIMARY KEY,
+            id SERIAL PRIMARY KEY,
             config_data TEXT NOT NULL
         );
         """)
+
     else:
         # SQLite Schema
         cursor.execute("""
@@ -300,9 +307,15 @@ def init_db():
             candidate_id INTEGER,
             status TEXT DEFAULT 'active',
             profile_picture TEXT,
+            plain_password TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         """)
+
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN plain_password TEXT;")
+        except Exception:
+            pass
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS candidates (
@@ -412,7 +425,7 @@ def init_db():
             course TEXT NOT NULL,
             district TEXT,
             status TEXT DEFAULT 'Pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         """)
 
@@ -422,85 +435,6 @@ def init_db():
             config_data TEXT NOT NULL
         );
         """)
-
-    
-    # Ensure profile_picture column exists on users table
-    try:
-        if IS_POSTGRES:
-            cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture TEXT;")
-        else:
-            cursor.execute("PRAGMA table_info(users)")
-            cols = [c[1] for c in cursor.fetchall()]
-            if "profile_picture" not in cols:
-                cursor.execute("ALTER TABLE users ADD COLUMN profile_picture TEXT;")
-    except Exception as e:
-        print("profile_picture column check note:", e)
-
-    conn.commit()
-
-    # Seed Default Settings
-    cursor.execute("SELECT id FROM settings WHERE id = 1")
-    if not cursor.fetchone():
-        cursor.execute(
-            "INSERT INTO settings (id, config_data) VALUES (1, ?)",
-            (json.dumps(DEFAULT_SETTINGS),)
-        )
-
-    # Seed Default SuperAdmin
-    cursor.execute("SELECT id FROM users WHERE username = 'pkpnrj99@gmail.com' OR email = 'pkpnrj99@gmail.com'")
-    if not cursor.fetchone():
-        cursor.execute("""
-        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('pkpnrj99@gmail.com', '112 107 112 110 114 106 57 57', 'SuperAdmin', '9999999999', 'pkpnrj99@gmail.com', 'superadmin', 'Main Campus', 'active')
-        """)
-
-    # Seed Default Director
-    cursor.execute("SELECT id FROM users WHERE username = 'director' OR role = 'director'")
-    if not cursor.fetchone():
-        cursor.execute("""
-        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('director', '100 105 114 101 99 116 111 114 49 50 51', 'Director - GRTC', '9304474574', 'director@grtc.edu.in', 'director', 'Main Campus', 'active')
-        """)
-
-    # Seed Default Manager
-    cursor.execute("SELECT id FROM users WHERE username = 'manager1'")
-    if not cursor.fetchone():
-        cursor.execute("""
-        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, status)
-        VALUES ('manager1', '109 97 110 97 103 101 114 49 50 51', 'Center Manager - Main Campus', '9876543200', 'manager1@excellence.edu.in', 'admin', 'Main Campus', 'active')
-        """)
-
-    # Seed Batches 1 to 40 if not exist
-    cursor.execute("SELECT COUNT(*) as cnt FROM batches")
-    row = cursor.fetchone()
-    b_count = row["cnt"] if isinstance(row, dict) else row[0]
-    
-    if b_count == 0:
-        for num in range(1, 41):
-            b_name = f"Batch {num}"
-            b_code = f"BAT-2026-{num:03d}"
-            room = f"Lab {((num % 4) + 1)}"
-            timing = "09:00 AM - 05:00 PM"
-            days = "Mon to Sat"
-            cap = 40
-            
-            if num <= 28:
-                status = "Completed"
-                sdate = ""
-                edate = ""
-            elif num <= 31:
-                status = "Running"
-                sdate = "2026-08-18" if num == 31 else ("2026-01-01" if num == 29 else "2026-04-01")
-                edate = ""
-            else:
-                status = "Upcoming"
-                sdate = ""
-                edate = ""
-
-            cursor.execute("""
-            INSERT INTO batches (batch_code, batch_name, course, stream_branch, start_date, end_date, timing, days, instructor, room_no, max_capacity, status, center_name, created_by)
-            VALUES (?, ?, 'Computer', '', ?, ?, ?, ?, 'Faculty', ?, ?, ?, 'Main Campus', 'SuperAdmin')
-            """, (b_code, b_name, sdate, edate, timing, days, room, cap, status))
 
     # Universal Demo Accounts Seeding for BOTH PostgreSQL & SQLite
     demo_accounts = [
@@ -532,8 +466,6 @@ def init_db():
 
     conn.commit()
     conn.close()
-
-# ================= SESSIONS & AUTH =================
 
 def create_user_session(user_id):
     conn = get_db_connection()
