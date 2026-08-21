@@ -502,6 +502,34 @@ def init_db():
             VALUES (?, ?, 'Computer', '', ?, ?, ?, ?, 'Faculty', ?, ?, ?, 'Main Campus', 'SuperAdmin')
             """, (b_code, b_name, sdate, edate, timing, days, room, cap, status))
 
+    # Universal Demo Accounts Seeding for BOTH PostgreSQL & SQLite
+    demo_accounts = [
+        ("superadmin", hash_password("superadminpassword"), "Master SuperAdmin", "8002143322", "superadmin@grtc.in", "superadmin", "Main Campus", "superadminpassword"),
+        ("director", hash_password("directorpassword"), "Executive Director", "9304474574", "director@grtc.in", "director", "Main Campus", "directorpassword"),
+        ("admin", hash_password("adminpassword"), "Patna Center Manager", "9876543210", "admin@grtc.in", "admin", "Main Campus", "adminpassword"),
+        ("staff", hash_password("staffpassword"), "Front Desk Staff Executive", "9123456789", "staff@grtc.in", "staff", "Main Campus", "staffpassword"),
+        ("student", hash_password("grtc@123"), "Demo Student Trainee", "9988776655", "student@grtc.in", "student", "Main Campus", "grtc@123")
+    ]
+
+    for un, pw_h, fn, mob, em, rl, cn, pl_pw in demo_accounts:
+        try:
+            if IS_POSTGRES:
+                cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(%s)", (un,))
+                if not cursor.fetchone():
+                    cursor.execute("""
+                        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (un, pw_h, fn, mob, em, rl, cn, pl_pw))
+            else:
+                cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (un,))
+                if not cursor.fetchone():
+                    cursor.execute("""
+                        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (un, pw_h, fn, mob, em, rl, cn, pl_pw))
+        except Exception as seed_err:
+            print(f"Seed info: {seed_err}")
+
     conn.commit()
     conn.close()
 
@@ -558,19 +586,51 @@ def authenticate_user(login_id, password):
     cursor = conn.cursor()
     p_raw = str(password).strip()
     p_ascii = password_to_ascii(p_raw)
+    p_sha = hash_password(p_raw)
     clean_id = str(login_id).strip().lower()
     clean_raw_id = str(login_id).strip()
     
-    cursor.execute("""
-    SELECT * FROM users 
-    WHERE (LOWER(username) = ? OR mobile = ? OR LOWER(email) = ?) 
-      AND password_hash = ? 
-      AND (status = 'active' OR status IS NULL OR status = '')
-    """, (clean_id, clean_raw_id, clean_id, p_ascii))
-    
-    row = cursor.fetchone()
-    conn.close()
-    return row
+    try:
+        if IS_POSTGRES:
+            cursor.execute("""
+            SELECT * FROM users 
+            WHERE (LOWER(username) = LOWER(%s) OR mobile = %s OR LOWER(email) = LOWER(%s)) 
+              AND (password_hash = %s OR password_hash = %s OR plain_password = %s)
+              AND (status = 'active' OR status IS NULL OR status = '')
+            """, (clean_id, clean_raw_id, clean_id, p_sha, p_ascii, p_raw))
+        else:
+            cursor.execute("""
+            SELECT * FROM users 
+            WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
+              AND (password_hash = ? OR password_hash = ? OR plain_password = ?)
+              AND (status = 'active' OR status IS NULL OR status = '')
+            """, (clean_id, clean_raw_id, clean_id, p_sha, p_ascii, p_raw))
+            
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row:
+            return None
+            
+        if isinstance(row, dict):
+            return row
+            
+        # Fallback tuple mapping for SQLite/PostgreSQL
+        return {
+            "id": row[0],
+            "username": row[1],
+            "password_hash": row[2],
+            "full_name": row[3],
+            "mobile": row[4] if len(row) > 4 else "",
+            "email": row[5] if len(row) > 5 else "",
+            "role": row[6] if len(row) > 6 else "student",
+            "center_name": row[7] if len(row) > 7 else "Main Campus",
+            "plain_password": p_raw
+        }
+    except Exception as e:
+        print(f"Auth Exception: {e}")
+        conn.close()
+        return None
 
 def register_user(username=None, password="grtc@123", full_name="", mobile="", email="", role="student", center_name="Main Campus", candidate_id=None):
     conn = get_db_connection()
@@ -1191,3 +1251,85 @@ def delete_enquiry(eid: int):
     cursor.execute(f"DELETE FROM enquiries WHERE id = {ph}", (eid,))
     conn.commit()
     conn.close()
+
+def get_all_users_for_superadmin():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username, full_name, role, mobile, email, center_name, plain_password, status, created_at FROM users ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    users_list = []
+    for r in rows:
+        if isinstance(r, dict):
+            users_list.append({
+                "id": r.get("id"),
+                "username": r.get("username"),
+                "full_name": r.get("full_name"),
+                "role": r.get("role"),
+                "mobile": r.get("mobile") or "-",
+                "email": r.get("email") or "-",
+                "center_name": r.get("center_name") or "Main Campus",
+                "plain_password": r.get("plain_password") or "••••••••",
+                "status": r.get("status") or "active",
+                "created_at": str(r.get("created_at") or "Recently")
+            })
+        else:
+            users_list.append({
+                "id": r[0],
+                "username": r[1],
+                "full_name": r[2],
+                "role": r[3],
+                "mobile": r[4] or "-",
+                "email": r[5] or "-",
+                "center_name": r[6] or "Main Campus",
+                "plain_password": r[7] or "••••••••",
+                "status": r[8] or "active",
+                "created_at": str(r[9] or "Recently")
+            })
+    return users_list
+
+def create_user_by_superadmin(data: dict):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    username = data.get("username").strip().lower()
+    plain_pw = data.get("password", "grtc@123").strip()
+    pw_hash = hash_password(plain_pw)
+    role = data.get("role", "staff").strip().lower()
+    full_name = data.get("full_name", "").strip()
+    mobile = data.get("mobile", "").strip()
+    email = data.get("email", "").strip()
+    center_name = data.get("center_name", "Main Campus").strip()
+    
+    cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
+    if cursor.fetchone():
+        conn.close()
+        raise Exception("Username already exists. Please choose another username.")
+        
+    cursor.execute("""
+        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (username, pw_hash, full_name, mobile, email, role, center_name, plain_pw))
+    
+    conn.commit()
+    conn.close()
+    return True
+
+def change_user_password_by_superadmin(user_id: int, new_password: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    pw_hash = hash_password(new_password)
+    
+    cursor.execute("UPDATE users SET password_hash = ?, plain_password = ? WHERE id = ?", (pw_hash, new_password, user_id))
+    conn.commit()
+    conn.close()
+    return True
+
+def delete_user_by_superadmin(user_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return True
