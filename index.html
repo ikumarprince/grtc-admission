@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission & Batch Management System</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-brand">
+      <button type="button" class="sidebar-toggle-btn" id="sidebar_toggle_btn" onclick="toggleSidebarMenu(event)" aria-label="Toggle Menu">☰</button>
+      <div class="header-brand-click-target" onclick="switchDashboardView('dashboard')" style="display: flex; align-items: center; gap: 10px; cursor: pointer;" title="Go to Main Dashboard">
+        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" class="header-grtc-logo-img">
+        <div class="header-title">
+          <h1 class="inst-name-text">Gyanoday Rojgar Training Centre</h1>
+          <p class="inst-tagline-text">Khaspur Ramchandra Pahalwan Path near Bajaj Showroom Patna 801503</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active User Profile Bar with Clickable Dropdown -->
+    <div class="user-profile-menu-wrapper" id="header_user_bar" style="display: none;">
+      <button type="button" class="user-profile-trigger" id="user_profile_trigger" onclick="toggleUserProfileDropdown(event)" aria-expanded="false" aria-haspopup="true" title="User Account Menu">
+        <div class="user-avatar-circle" id="header_user_avatar">
+          <span id="header_user_initials">U</span>
+        </div>
+        <div class="user-trigger-text">
+          <span id="header_user_name" class="user-trigger-name">User Name</span>
+          <small id="header_user_id" style="opacity: 0.85; font-size: 0.72rem; color: #e2e8f0; display: none;"></small>
+        </div>
+        <span id="header_user_role" class="role-pill"></span>
+        <span class="dropdown-caret">▼</span>
+      </button>
+
+      <!-- User Profile Dropdown Menu -->
+      <div class="user-dropdown-menu" id="user_profile_dropdown" style="display: none;">
+        <div class="user-dropdown-header">
+          <div class="dropdown-avatar-circle" id="dropdown_user_avatar">
+            <span id="dropdown_user_initials">U</span>
+          </div>
+          <div class="dropdown-user-details">
+            <strong id="dropdown_user_fullname">User Name</strong>
+            <small id="dropdown_user_username">id: username</small>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item" onclick="openUserProfileModal()">
+          <span class="dropdown-icon">👤</span> Open Profile
+        </button>
+        <button type="button" class="dropdown-item" onclick="openChangePasswordModal()">
+          <span class="dropdown-icon">🔑</span> Change Password
+        </button>
+        <button type="button" class="dropdown-item" onclick="openChangeAvatarModal()">
+          <span class="dropdown-icon">🖼️</span> Change Profile Picture
+        </button>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item danger" onclick="logoutUser()">
+          <span class="dropdown-icon">🚪</span> Logout
+        </button>
+      </div>
+    </div>
+  <!-- 3-LINE HAMBURGER LEFT SIDEBAR DRAWER (HOVER-REVEAL SUB-MENUS) -->
+  <aside class="sidebar-drawer" id="sidebar_drawer">
+    <div class="sidebar-header">
+      <div class="sidebar-brand-title">
+        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 26px; width: auto; border-radius: 4px; vertical-align: middle; margin-right: 6px;">
+        GRTC Master Menu
+      </div>
+      <button type="button" class="sidebar-close-btn" onclick="toggleSidebarMenu(event)">&times;</button>
+    </div>
+
+    <nav class="sidebar-nav-menu">
+      <!-- 1. DASHBOARD & LEADS -->
+      <div class="sidebar-nav-group">
+        <a href="javascript:void(0)" class="sidebar-nav-item active" id="nav_item_dashboard" onclick="switchDashboardView('dashboard', this)">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard & Leads</span>
+          <span class="sub-arrow-icon">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="javascript:void(0)" onclick="switchDashboardView('dashboard', document.getElementById('nav_item_dashboard'))">📊 Main Dashboard Overview</a>
+          <a href="javascript:void(0)" onclick="switchDashboardView('dashboard', document.getElementById('nav_item_dashboard')); updateUrlHash("enquiries"); loadAdminEnquiries();">📩 Website Admission Enquiries</a>
+        </div>
+      </div>
+
+      <!-- 2. BATCHES & COURSES -->
+      <div class="sidebar-nav-group">
+        <a href="javascript:void(0)" class="sidebar-nav-item" id="nav_item_batches" onclick="switchDashboardView('batches', this)">
+          <span class="nav-icon">📅</span>
+          <span class="nav-text">Batches & Courses</span>
+          <span class="sub-arrow-icon">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="javascript:void(0)" onclick="switchDashboardView('batches', document.getElementById('nav_item_batches'))">📅 Batch Management Hub</a>
+          <a href="javascript:void(0)" onclick="openBatchCategory('running')">🟢 Running Batches</a>
+          <a href="javascript:void(0)" onclick="openBatchCategory('upcoming')">🟡 Upcoming Batches</a>
+          <a href="javascript:void(0)" onclick="openBatchCategory('completed')">🔴 Completed Batches</a>
+          <a href="javascript:void(0)" onclick="toggleSidebarMenu(event); openCreateBatchModal();">➕ Create New Batch</a>
+        </div>
+      </div>
+
+      <!-- 3. STUDENTS & DIRECTORY -->
+      <div class="sidebar-nav-group">
+        <a href="javascript:void(0)" class="sidebar-nav-item" id="nav_item_students" onclick="switchDashboardView('students', this)">
+          <span class="nav-icon">👨‍🎓</span>
+          <span class="nav-text">Students & Directory</span>
+          <span class="sub-arrow-icon">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="javascript:void(0)" onclick="switchDashboardView('students', document.getElementById('nav_item_students'))">👥 Student Directory & Review</a>
+          <a href="javascript:void(0)" onclick="toggleSidebarMenu(event); exportCsvAdmin();">📊 Export Student CSV Data</a>
+        </div>
+      </div>
+
+      <!-- 4. STAFF & USER ACCOUNTS -->
+      <div class="sidebar-nav-group">
+        <a href="javascript:void(0)" class="sidebar-nav-item" id="nav_item_users" onclick="openSuperAdminUsersTab('managers')">
+          <span class="nav-icon">👔</span>
+          <span class="nav-text">Staff & Accounts</span>
+          <span class="sub-arrow-icon">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="javascript:void(0)" onclick="openSuperAdminUsersTab('managers')">👔 Center Managers & Staff</a>
+          <a href="javascript:void(0)" onclick="openSuperAdminUsersTab('students')">👨‍🎓 Registered Student Accounts</a>
+          <a href="javascript:void(0)" onclick="openSuperAdminUsersTab('superadmins')">👑 Master SuperAdmins</a>
+          <a href="javascript:void(0)" onclick="toggleSidebarMenu(event); openCreateAdminModal();">➕ Add New Center Manager</a>
+        </div>
+      </div>
+
+      <!-- 5. SETTINGS & PROFILE -->
+      <div class="sidebar-nav-group">
+        <a href="javascript:void(0)" class="sidebar-nav-item" onclick="openUserProfileModal()">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">Settings & Profile</span>
+          <span class="sub-arrow-icon">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="javascript:void(0)" onclick="toggleSidebarMenu(event); openUserProfileModal();">👤 My Account Profile</a>
+          <a href="javascript:void(0)" onclick="toggleSidebarMenu(event); openChangePasswordModal();">🔑 Change Password</a>
+          <a href="javascript:void(0)" onclick="toggleSidebarMenu(event); openChangeAvatarModal();">🖼️ Change Profile Avatar</a>
+        </div>
+      </div>
+
+      <!-- 6. PUBLIC SITE LINK & LOGOUT -->
+      <div class="sidebar-nav-group" style="margin-top: 10px;">
+        <a href="/" target="_blank" class="sidebar-nav-item">
+          <span class="nav-icon">🌐</span>
+          <span class="nav-text">Visit Public Website</span>
+        </a>
+      </div>
+      
+      <div class="sidebar-nav-group">
+        <a href="javascript:void(0)" class="sidebar-nav-item" style="color: #ef4444;" onclick="logoutUser()">
+          <span class="nav-icon">🚪</span>
+          <span class="nav-text">Logout Portal</span>
+        </a>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay-backdrop" id="sidebar_overlay" onclick="toggleSidebarMenu(event)"></div>
+  </header>
+
+  <main class="container">
+
+    <!-- ================= 1. AUTH VIEW (LOGIN / SIGNUP) ================= -->
+    <div id="auth_view" class="auth-wrapper" style="display: block;">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 6px;">🔐</div>
+        <h2 style="font-size: 1.3rem; color: var(--primary-dark);">Portal Login & Registration</h2>
+        <p style="font-size: 0.82rem; color: var(--text-muted);">Students, Center Managers & SuperAdmin</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="btn_auth_login" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab-btn" id="btn_auth_signup" onclick="switchAuthTab('signup')">New Student Registration</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="form_login" class="auth-form" onsubmit="event.preventDefault(); handleLogin(); return false;">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="login_id">User ID / Mobile / Email <span class="req">*</span></label>
+          <input type="text" class="form-control" id="login_id" placeholder="e.g. rahul123 or 9876543210 or superadmin" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="login_password">Password <span class="req">*</span></label>
+          <input type="password" class="form-control" id="login_password" placeholder="Enter Password" required minlength="6" maxlength="12">
+        </div>
+        <button type="button" onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">🔓 Login to Portal</button>
+  
+      </form>
+
+      <!-- Student Sign Up Form -->
+      <form id="form_signup" class="auth-form" style="display: none;" onsubmit="event.preventDefault(); handleSignup(); return false;">
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label for="signup_name">Full Name <span class="req">*</span></label>
+          <input type="text" class="form-control" id="signup_name" placeholder="Candidate Full Name" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label for="signup_username">Create Unique Username / ID <span class="req">*</span></label>
+          <input type="text" class="form-control" id="signup_username" placeholder="e.g. rahul_sharma" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label for="signup_mobile">Mobile Number <span class="req">*</span></label>
+          <input type="tel" class="form-control" id="signup_mobile" placeholder="10-digit Mobile" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label for="signup_email">Email Address</label>
+          <input type="email" class="form-control" id="signup_email" placeholder="candidate@example.com">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.2rem;">
+          <label for="signup_password">Set Password <span class="req">*</span></label>
+          <input type="password" class="form-control" id="signup_password" placeholder="Minimum 6 characters" required>
+        </div>
+        <button type="button" onclick="handleSignup()" class="btn btn-success" style="width: 100%;">📝 Register & Create Account</button>
+      </form>
+    </div>
+
+    <!-- ================= 2. MAIN APP VIEW (PORTALS) ================= -->
+    <div id="main_app_view" style="display: none;">
+
+      <!-- ================= PORTAL A: STUDENT PORTAL ================= -->
+      <div id="portal_student" class="portal-section" style="display: none;">
+        
+        <!-- Welcome & Status Banner -->
+        <div class="card" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;">
+          <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+              <h2 style="font-size: 1.3rem; margin-bottom: 4px; color: white;"><img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 24px; width: auto; border-radius: 4px; vertical-align: middle; margin-right: 6px;"> Welcome to Student Portal</h2>
+              <p style="font-size: 0.85rem; opacity: 0.9;">Manage your admission details, view allocated batches and download official receipts.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div>Status: <span id="stu_status_badge" class="badge badge-pending">Pending</span></div>
+              <button class="btn btn-secondary btn-sm" id="stu_slip_btn" style="display: none;" onclick="openStudentSlipModal()">📄 View Admission Slip</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Allocated Batch Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>📅 My Allocated Batch & Class Timetable</h3>
+          </div>
+          <div class="card-body" id="stu_batch_card">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Student Admission Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3 id="stu_form_title">📝 My Admission & Personal Details</h3>
+          </div>
+          <div class="card-body">
+            <form id="student_admission_form" onsubmit="handleStudentAdmissionSubmit(event)">
+              <input type="hidden" id="stu_photo_url" name="stu_photo_url">
+
+              <!-- Photo Section -->
+              <div class="photo-box-wrapper" style="margin-bottom: 1.2rem;">
+                <div class="photo-preview-box" id="stu_photo_preview">
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">No Photo</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <label style="font-size: 0.82rem; font-weight: 600;">Student Photograph</label>
+                  <input type="file" id="stu_photo_input" accept="image/*" style="display: none;" onchange="handlePhotoUploadStudent(this)">
+                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('stu_photo_input').click()">📁 Upload Photo File</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openWebcamStudent()">📷 Take Webcam Photo</button>
+                </div>
+              </div>
+
+              <!-- Section 1: Course -->
+              <div class="form-section">
+                <div class="section-title">📌 1. Course & Session Selection</div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="stu_course">Course / Program Applied <span class="req">*</span></label>
+                    <select class="form-control" id="stu_course" name="stu_course" onchange="onStudentCourseChange()" required></select>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_stream_branch">Specialization / Branch</label>
+                    <select class="form-control" id="stu_stream_branch" name="stu_stream_branch">
+                      <option value="">-- Select Branch --</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_academic_year">Academic Session</label>
+                    <select class="form-control" id="stu_academic_year" name="stu_academic_year"></select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Personal -->
+              <div class="form-section">
+                <div class="section-title">👤 2. Personal Information</div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="stu_full_name">Full Name <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="stu_full_name" name="stu_full_name" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_gender">Gender <span class="req">*</span></label>
+                    <select class="form-control" id="stu_gender" name="stu_gender" required>
+                      <option value="">-- Select --</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_dob">Date of Birth <span class="req">*</span></label>
+                    <input type="date" class="form-control" id="stu_dob" name="stu_dob" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_blood_group">Blood Group</label>
+                    <select class="form-control" id="stu_blood_group" name="stu_blood_group">
+                      <option value="">-- Select --</option>
+                      <option value="A+">A+</option><option value="A-">A-</option>
+                      <option value="B+">B+</option><option value="B-">B-</option>
+                      <option value="O+">O+</option><option value="O-">O-</option>
+                      <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_admission_category">Category / Quota</label>
+                    <select class="form-control" id="stu_admission_category" name="stu_admission_category">
+                      <option value="General">General</option><option value="OBC">OBC</option>
+                      <option value="SC">SC</option><option value="ST">ST</option><option value="EWS">EWS</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_aadhaar_no">Aadhaar / ID No</label>
+                    <input type="text" class="form-control" id="stu_aadhaar_no" name="stu_aadhaar_no">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Contact & Address -->
+              <div class="form-section">
+                <div class="section-title">📞 3. Contact & Address</div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="stu_mobile_no">Mobile Number <span class="req">*</span></label>
+                    <input type="tel" class="form-control" id="stu_mobile_no" name="stu_mobile_no" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_email">Email</label>
+                    <input type="email" class="form-control" id="stu_email" name="stu_email">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_current_city">City</label>
+                    <input type="text" class="form-control" id="stu_current_city" name="stu_current_city">
+                  </div>
+                  <div class="form-group col-span-2">
+                    <label for="stu_current_address">Full Address</label>
+                    <input type="text" class="form-control" id="stu_current_address" name="stu_current_address">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_current_pincode">PIN Code</label>
+                    <input type="text" class="form-control" id="stu_current_pincode" name="stu_current_pincode">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 4: Parent & Academics -->
+              <div class="form-section">
+                <div class="section-title">👨‍👩‍👦 4. Parent & Academic Details</div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="stu_father_name">Father's Name</label>
+                    <input type="text" class="form-control" id="stu_father_name" name="stu_father_name">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_father_mobile">Father's Mobile</label>
+                    <input type="tel" class="form-control" id="stu_father_mobile" name="stu_father_mobile">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_mother_name">Mother's Name</label>
+                    <input type="text" class="form-control" id="stu_mother_name" name="stu_mother_name">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_prev_qualification">Qualifying Exam</label>
+                    <input type="text" class="form-control" id="stu_prev_qualification" name="stu_prev_qualification" placeholder="e.g. 12th Science / Diploma">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_prev_board_university">Board / University</label>
+                    <input type="text" class="form-control" id="stu_prev_board_university" name="stu_prev_board_university">
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_prev_percentage">Percentage / CGPA (%)</label>
+                    <input type="number" step="0.01" class="form-control" id="stu_prev_percentage" name="stu_prev_percentage">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fees (Readonly for Student) -->
+              <div class="form-section">
+                <div class="section-title">💳 5. Fee Summary</div>
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label for="stu_total_course_fee">Total Course Fee (₹)</label>
+                    <input type="number" class="form-control" id="stu_total_course_fee" name="stu_total_course_fee" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_fee_paid">Fee Paid (₹)</label>
+                    <input type="number" class="form-control" id="stu_fee_paid" name="stu_fee_paid" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label for="stu_fee_balance">Balance Amount (₹)</label>
+                    <input type="number" class="form-control" id="stu_fee_balance" name="stu_fee_balance" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Save & Submit Application Details</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= PORTAL B: ADMIN (CENTER MANAGER) ================= -->
+      <div id="portal_admin" class="portal-section" style="display: none;">
+        
+        <!-- VIEW 1: MAIN DASHBOARD OVERVIEW (Executive Control Hub) -->
+        <div id="view_dashboard" class="dashboard-view-panel" style="display: block;">
+          
+          <!-- Executive SuperAdmin Banner -->
+          <div class="superadmin-exec-banner">
+            <div>
+              <h2 class="superadmin-exec-title">
+                👑 SuperAdmin Master Control Hub
+                <span class="superadmin-badge-pill">Master Access</span>
+              </h2>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px; margin-bottom: 0;">
+                Gyanoday Rojgar Training Centre — Complete Center Performance, Admissions & Batch Control.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="btn btn-outline-light btn-sm" onclick="updateUrlHash("enquiries"); loadAdminEnquiries(); loadAdminCandidates(); loadAdminBatches();" style="font-weight: 700;">
+                🔄 Live Refresh All Data
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Summary Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card" style="border-top: 4px solid #2563eb;">
+              <div class="stat-icon">🏛️</div>
+              <div class="stat-details">
+                <h4>Total Center Admissions</h4>
+                <div class="stat-val" id="adm_stat_total">0</div>
+              </div>
+            </div>
+            <div class="stat-card success" style="border-top: 4px solid #10b981;">
+              <div class="stat-icon">🎓</div>
+              <div class="stat-details">
+                <h4>Active Enrolled Students</h4>
+                <div class="stat-val" id="adm_stat_enrolled">0</div>
+              </div>
+            </div>
+            <div class="stat-card accent" style="border-top: 4px solid #8b5cf6;">
+              <div class="stat-icon">📅</div>
+              <div class="stat-details">
+                <h4>Center Batches</h4>
+                <div class="stat-val" id="adm_stat_batches">0</div>
+              </div>
+            </div>
+            <div class="stat-card warning" style="border-top: 4px solid #f59e0b;">
+              <div class="stat-icon">💰</div>
+              <div class="stat-details">
+                <h4>Total Fee Collected</h4>
+                <div class="stat-val" id="adm_stat_fee">₹0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SuperAdmin Executive Quick Action Toolbar -->
+          <div class="exec-quick-toolbar">
+            <strong style="width: 100%; font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">⚡ SUPERADMIN QUICK ACTIONS:</strong>
+            <button class="exec-tool-btn primary" onclick="openCreateBatchModal()">➕ Create Batch</button>
+            <button class="exec-tool-btn success" onclick="openCreateAdminModal()">👤 Add Center Manager</button>
+            <button class="exec-tool-btn warning" onclick="exportCsvAdmin()">📊 Export Student CSV</button>
+            <button class="exec-tool-btn dark" onclick="switchDashboardView('students', document.getElementById('nav_item_students'))">👥 Student Directory</button>
+            <button class="exec-tool-btn primary" onclick="loadAdminEnquiries()">📩 Refresh Leads</button>
+          </div>
+
+          <!-- WEBSITE ADMISSION ENQUIRIES SECTION (AT TOP OF DASHBOARD) -->
+          <div class="card" style="margin-top: 1rem; border: 2px solid #d97706;">
+            <div class="card-header" style="background: #fffbeb; border-bottom: 2px solid #fef08a; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">📩</span>
+                <div>
+                  <h3 style="color: #92400e; font-size: 1.15rem; font-weight: 900; margin: 0;">Website Admission Enquiries (Latest Leads)</h3>
+                  <p style="font-size: 0.8rem; color: #b45309; margin: 0;">Leads & queries submitted from the public homepage enquiry form.</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline-primary btn-sm" onclick="loadAdminEnquiries()">🔄 Refresh Enquiries</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding: 1rem;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr style="background: #fef3c7;">
+                      <th>Enquiry Date & Time</th>
+                      <th>Student Full Name</th>
+                      <th>Mobile Number</th>
+                      <th>Course Selected</th>
+                      <th>District / City</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="enquiries_tbody">
+                    <tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">Loading admission enquiries...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div id="enquiries_toggle_wrap" style="text-align: center; margin-top: 10px; display: none;">
+                <button type="button" id="enquiries_toggle_btn" class="btn btn-outline-primary btn-sm" onclick="toggleAllEnquiriesDisplay()" style="font-weight: 700;">
+                  📂 Show All Enquiries
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: BATCH MANAGEMENT VIEW -->
+        <div id="view_batches" class="dashboard-view-panel" style="display: none;">
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin: 0;">
+                  📅 Batch Management & Allocation
+                </h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                  Click on any colored header strip or arrow to expand/collapse Running (Green), Upcoming (Yellow), or Completed (Red) batches.
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="openCreateBatchModal()">➕ Create New Batch</button>
+              </div>
+            </div>
+
+            <div class="card-body" style="padding: 1.25rem;">
+              <!-- 1. TOP SECTION: 🟢 RUNNING BATCHES (DEFAULT EXPANDED) -->
+              <div id="section_running_batches" class="batch-accordion-group" style="margin-bottom: 1.2rem;">
+                <div class="batch-accordion-header running-header" onclick="toggleBatchSection('grid_running_batches', 'arrow_running')">
+                  <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; pointer-events: none;">
+                    🟢 1. Running Batches ( <span id="cnt_running_batches">0</span> )
+                  </h4>
+                  <div style="display: flex; align-items: center; gap: 10px; pointer-events: none;">
+                    <span class="batch-badge-pill">Active & In Progress</span>
+                    <span id="arrow_running" class="accordion-arrow-icon">&#9660;</span>
+                  </div>
+                </div>
+                <div id="grid_running_batches" class="batch-accordion-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- 2. MIDDLE SECTION: 🟡 UPCOMING BATCHES (DEFAULT COLLAPSED) -->
+              <div id="section_upcoming_batches" class="batch-accordion-group" style="margin-bottom: 1.2rem;">
+                <div class="batch-accordion-header upcoming-header" onclick="toggleBatchSection('grid_upcoming_batches', 'arrow_upcoming')">
+                  <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; pointer-events: none;">
+                    🟡 2. Upcoming Batches ( <span id="cnt_upcoming_batches">0</span> )
+                  </h4>
+                  <div style="display: flex; align-items: center; gap: 10px; pointer-events: none;">
+                    <span class="batch-badge-pill">Scheduled / New</span>
+                    <span id="arrow_upcoming" class="accordion-arrow-icon collapsed">&#9650;</span>
+                  </div>
+                </div>
+                <div id="grid_upcoming_batches" class="batch-accordion-body is-collapsed" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- 3. BOTTOM SECTION: 🔴 COMPLETED BATCHES (DEFAULT COLLAPSED) -->
+              <div id="section_completed_batches" class="batch-accordion-group" style="margin-bottom: 0.5rem;">
+                <div class="batch-accordion-header completed-header" onclick="toggleBatchSection('grid_completed_batches', 'arrow_completed')">
+                  <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; pointer-events: none;">
+                    🔴 3. Completed Batches ( <span id="cnt_completed_batches">0</span> )
+                  </h4>
+                  <div style="display: flex; align-items: center; gap: 10px; pointer-events: none;">
+                    <span class="batch-badge-pill">Finished / Archived</span>
+                    <span id="arrow_completed" class="accordion-arrow-icon collapsed">&#9650;</span>
+                  </div>
+                </div>
+                <div id="grid_completed_batches" class="batch-accordion-body is-collapsed" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: STUDENT DIRECTORY VIEW -->
+        <div id="view_students" class="dashboard-view-panel" style="display: none;">
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+              <h3>👥 Student Directory & Admission Review</h3>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-success btn-sm" onclick="exportCsvAdmin()">📊 Export to Excel/CSV</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <input type="text" class="form-control" id="adm_search" placeholder="🔍 Search Name, App No, Mobile..." oninput="loadAdminCandidates()" style="flex:1;">
+                <select class="form-control" id="adm_status_filter" onchange="loadAdminCandidates()" style="width: auto;">
+                  <option value="">All Statuses</option>
+                  <option value="Enrolled">Enrolled</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>App No</th>
+                      <th>Student Name</th>
+                      <th>Course</th>
+                      <th>Batch Allotment</th>
+                      <th>Fee Status</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin_candidates_tbody">
+                    <!-- Rendered candidates -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= PORTAL C: SUPERADMIN (OWNER MASTER CONTROL) ================= -->
+      <div id="portal_superadmin" class="portal-section" style="display: none;">
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header" style="background: #0f172a; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="color: #fbbf24; font-size: 1.2rem; font-weight: 900; margin: 0;">👑 Master User Accounts Control Center</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Manage accounts, passwords, and permissions across all 5 roles (SuperAdmin, Director, Manager, Staff, Student).</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-warning btn-sm" onclick="openCreateUserModal()" style="font-weight: 800; color: #0f172a;">➕ Create New User Account</button>
+              <button class="btn btn-outline-light btn-sm" onclick="loadSuperAdminUsers()">🔄 Refresh Users</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- Filter Bar for User Roles -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center;">
+              <button class="btn btn-outline-primary btn-sm active" id="btn_role_all" onclick="filterSuperAdminUsersRole('all', this)">All Roles (<span id="cnt_role_all">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_superadmin" onclick="filterSuperAdminUsersRole('superadmin', this)">👑 SuperAdmins (<span id="cnt_role_superadmin">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_director" onclick="filterSuperAdminUsersRole('director', this)">👔 Directors (<span id="cnt_role_director">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_admin" onclick="filterSuperAdminUsersRole('admin', this)">🏛️ Managers (<span id="cnt_role_admin">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_staff" onclick="filterSuperAdminUsersRole('staff', this)">🧑‍💼 Staff Executives (<span id="cnt_role_staff">0</span>)</button>
+              <button class="btn btn-outline-primary btn-sm" id="btn_role_student" onclick="filterSuperAdminUsersRole('student', this)">👨‍🎓 Students (<span id="cnt_role_student">0</span>)</button>
+              
+              <input type="text" class="form-control" id="superadmin_user_search" placeholder="🔍 Search Name, Username, Mobile..." oninput="renderSuperAdminUsersTable()" style="flex: 1; min-width: 200px;">
+            </div>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr style="background: #f1f5f9;">
+                    <th>ID</th>
+                    <th>User Details</th>
+                    <th>User Role</th>
+                    <th>Mobile / Contact</th>
+                    <th>Account Password (SuperAdmin View)</th>
+                    <th>Created On</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="superadmin_users_tbody">
+                  <tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">Loading user accounts...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- CREATE BATCH MODAL -->
+  <div class="modal-overlay" id="create_batch_modal">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>➕ Create New Batch</h3>
+        <button class="modal-close-btn" onclick="closeCreateBatchModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="create_batch_form" onsubmit="handleCreateBatchSubmit(event)">
+          <div class="form-grid-3">
+            <div class="form-group col-span-2">
+              <label for="batch_name">Batch Name <span class="req">*</span></label>
+              <input type="text" class="form-control" id="batch_name" placeholder="e.g. B.Tech CS Morning Batch A" required>
+            </div>
+            <div class="form-group">
+              <label for="batch_course">Course <span class="req">*</span></label>
+              <select class="form-control" id="batch_course" required></select>
+            </div>
+            <div class="form-group">
+              <label for="batch_branch">Stream / Branch</label>
+              <input type="text" class="form-control" id="batch_branch" placeholder="e.g. Computer Science">
+            </div>
+            <div class="form-group">
+              <label for="batch_timing">Class Timing <span class="req">*</span></label>
+              <input type="text" class="form-control" id="batch_timing" placeholder="e.g. 10:00 AM - 12:00 PM" required>
+            </div>
+            <div class="form-group">
+              <label for="batch_days">Days</label>
+              <input type="text" class="form-control" id="batch_days" value="Mon to Fri">
+            </div>
+            <div class="form-group">
+              <label for="batch_instructor">Instructor / Teacher</label>
+              <input type="text" class="form-control" id="batch_instructor" placeholder="Faculty Name">
+            </div>
+            <div class="form-group">
+              <label for="batch_room">Classroom / Lab No</label>
+              <input type="text" class="form-control" id="batch_room" placeholder="e.g. Room 204">
+            </div>
+            <div class="form-group">
+              <label for="batch_capacity">Max Student Capacity</label>
+              <input type="number" class="form-control" id="batch_capacity" value="40">
+            </div>
+            <div class="form-group">
+              <label for="batch_start_date">Start Date</label>
+              <input type="date" class="form-control" id="batch_start_date">
+            </div>
+            <div class="form-group">
+              <label for="batch_end_date">End Date</label>
+              <input type="date" class="form-control" id="batch_end_date">
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top: 1rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeCreateBatchModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Batch</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENROLL STUDENT / ADMISSION MODAL (FULL REGISTRATION COPY) -->
+  <div class="modal-overlay" id="enroll_student_modal">
+    <div class="modal-box" style="max-width: 900px; width: 95%; max-height: 92vh; overflow-y: auto; padding: 1.5rem;">
+      <div class="modal-header" style="position: sticky; top: -1.5rem; background: #ffffff; z-index: 10; padding: 0.8rem 0; border-bottom: 2px solid var(--border-color); margin-bottom: 1rem;">
+        <div>
+          <h3 style="color: var(--primary); font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            🎓 Batch Student Admission & Enrollment: <span id="enroll_modal_batch_name" style="color: #16a34a;"></span>
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+            New student ka full admission form bharein ya existing candidate ko batch me assign karein.
+          </p>
+        </div>
+        <button class="modal-close-btn" onclick="closeEnrollModal()">&times;</button>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="auth-tabs" style="margin-bottom: 1.2rem;">
+        <button type="button" class="auth-tab-btn active" id="btn_enroll_tab_new" onclick="switchBatchEnrollTab('new')">
+          📝 1. New Student Admission Registration
+        </button>
+        <button type="button" class="auth-tab-btn" id="btn_enroll_tab_existing" onclick="switchBatchEnrollTab('existing')">
+          🔍 2. Quick Enroll Existing Candidate
+        </button>
+      </div>
+
+      <!-- ================= TAB 1: FULL ADMISSION FORM (COPY OF REGISTER.HTML) ================= -->
+      <div id="batch_enroll_new_view" style="display: block;">
+        <form id="batch_full_admission_form" onsubmit="event.preventDefault(); submitBatchAdmission(event);">
+          <input type="hidden" id="bem_photo_url" name="photo_url">
+          <input type="hidden" id="bem_url_aadhaar_front" name="aadhaar_front_url">
+          <input type="hidden" id="bem_url_aadhaar_back" name="aadhaar_back_url">
+          <input type="hidden" id="bem_url_marksheet_10th" name="marksheet_10th_url">
+          <input type="hidden" id="bem_url_marksheet_12th" name="marksheet_12th_url">
+          <input type="hidden" id="bem_url_caste_cert" name="caste_cert_url">
+          <input type="hidden" id="bem_url_other_docs_json" name="other_documents_json" value="[]">
+
+          <!-- 1. Course & Batch Details -->
+          <div class="form-section">
+            <div class="section-title">📌 1. Course & Batch Details</div>
+            <div class="form-grid-4">
+              <div class="form-group">
+                <label for="bem_admission_date">Admission Date <span class="req">*</span></label>
+                <input type="date" class="form-control" id="bem_admission_date" name="admission_date" required>
+              </div>
+              <div class="form-group">
+                <label for="bem_batch_id">Batch No (2-Digit) <span class="req">*</span></label>
+                <input type="text" class="form-control" id="bem_batch_id" name="batch_id" placeholder="e.g. 30" maxlength="2" required>
+              </div>
+              <div class="form-group col-span-2">
+                <label for="bem_course">Program / Course Applied <span class="req">*</span></label>
+                <select class="form-control" id="bem_course" name="course" required>
+                  <option value="Computer">Computer</option>
+                  <option value="Hotel Management">Hotel Management</option>
+                  <option value="GDA">GDA</option>
+                </select>
+              </div>
+              <div class="form-group col-span-2">
+                <label for="bem_reference">Reference <span class="req">*</span></label>
+                <input type="text" list="bem_reference_list" class="form-control" id="bem_reference" name="reference" placeholder="e.g. Friend, Newspaper, Social Media..." required>
+                <datalist id="bem_reference_list">
+                  <option value="Newspaper / Banner / Ad">
+                  <option value="Social Media / Online">
+                  <option value="Friend / Student Referral">
+                  <option value="Direct Walk-in / Center Visit">
+                </datalist>
+              </div>
+              <div class="form-group col-span-2">
+                <label for="bem_admission_category">Category / Quota</label>
+                <select class="form-control" id="bem_admission_category" name="admission_category">
+                  <option value="General">General / Open</option>
+                  <option value="OBC">OBC</option>
+                  <option value="SC">SC</option>
+                  <option value="ST">ST</option>
+                  <option value="EWS">EWS</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Personal Information & Photo -->
+          <div class="form-section">
+            <div class="section-title">👤 2. Candidate Personal Information</div>
+            <div class="candidate-photo-container" id="bem_photo_container">
+              <div class="passport-photo-frame" id="bem_photo_preview" onclick="document.getElementById('bem_photo_file').click()" style="cursor: pointer;">
+                <div class="photo-placeholder-text">
+                  <div style="font-size: 2.2rem; margin-bottom: 4px;">📷</div>
+                  <span>Passport Photo Box</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary);">Candidate Photograph <span class="req">*</span></h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">
+                  Computer se upload karein ya Camera se photo khinchein.
+                </p>
+                <input type="file" id="bem_photo_file" accept="image/*" style="display: none;" onchange="handleBemPhotoUpload(this)">
+                <input type="file" id="bem_camera_file" accept="image/*" capture="user" style="display: none;" onchange="handleBemPhotoUpload(this)">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('bem_photo_file').click()">
+                    📁 Upload from Files / Gallery
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="triggerBemCameraCapture()">
+                    📸 Take Photo with Camera
+                  </button>
+                </div>
+                <div id="bem_photo_status_badge" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">
+                  ⚠️ No photo selected yet
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="bem_full_name">Candidate Full Name <span class="req">*</span></label>
+                <input type="text" class="form-control" id="bem_full_name" name="full_name" placeholder="Full Name" required>
+              </div>
+              <div class="form-group">
+                <label for="bem_gender">Gender <span class="req">*</span></label>
+                <select class="form-control" id="bem_gender" name="gender" required>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="bem_dob">Date of Birth <span class="req">*</span></label>
+                <input type="date" class="form-control" id="bem_dob" name="dob" onchange="calcBemAge()" required>
+              </div>
+              <div class="form-group">
+                <label for="bem_age">Calculated Age</label>
+                <input type="text" class="form-control" id="bem_age" readonly placeholder="Auto Calculated Age" style="font-weight: bold; background: #f8fafc;">
+                <div id="bem_age_warning_box" style="margin-top: 4px; font-size: 0.74rem; font-weight: bold; display: none;"></div>
+              </div>
+              <div class="form-group">
+                <label for="bem_blood_group">Blood Group</label>
+                <select class="form-control" id="bem_blood_group" name="blood_group">
+                  <option value="">-- Select --</option>
+                  <option value="A+">A+</option><option value="A-">A-</option>
+                  <option value="B+">B+</option><option value="B-">B-</option>
+                  <option value="O+">O+</option><option value="O-">O-</option>
+                  <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="bem_aadhaar_no">Aadhaar No <span class="req">*</span></label>
+                <input type="text" class="form-control" id="bem_aadhaar_no" name="aadhaar_no" placeholder="12 Digit Aadhaar Number" required maxlength="12">
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Contact & Address -->
+          <div class="form-section">
+            <div class="section-title">📞 3. Contact & Address</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="bem_mobile_no">Mobile No (Login ID) <span class="req">*</span></label>
+                <input type="tel" class="form-control" id="bem_mobile_no" name="mobile_no" placeholder="10-digit Mobile Number" required maxlength="10">
+              </div>
+              <div class="form-group">
+                <label for="bem_password">Student Login Password <span class="req">*</span></label>
+                <input type="text" class="form-control" id="bem_password" name="password" value="grtc@123" required minlength="6" maxlength="12" minlength="6" maxlength="12">
+              </div>
+              <div class="form-group">
+                <label for="bem_email">Email Address</label>
+                <input type="email" class="form-control" id="bem_email" name="email" placeholder="student@example.com">
+              </div>
+            </div>
+
+            <div style="margin-top: 10px;">
+              <div class="address-sub-card">
+                <h4 style="font-size: 0.9rem; font-weight: 700; color: #1e3a8a; margin-bottom: 8px;">📍 Current / Correspondence Address</h4>
+                <div class="form-grid-4">
+                  <div class="form-group col-span-2">
+                    <label>Street Address</label>
+                    <input type="text" class="form-control" id="bem_current_address" name="current_address" placeholder="Village / Ward / Street" oninput="syncBemAddress()">
+                  </div>
+                  <div class="form-group">
+                    <label>City</label>
+                    <input type="text" class="form-control" id="bem_current_city" name="current_city" placeholder="City" oninput="syncBemAddress()">
+                  </div>
+                  <div class="form-group">
+                    <label>PIN Code</label>
+                    <input type="text" class="form-control" id="bem_current_pincode" name="current_pincode" placeholder="6-Digit PIN" oninput="syncBemAddress()">
+                  </div>
+                </div>
+              </div>
+
+              <div class="same-address-toggle-bar" style="margin: 8px 0;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                  <input type="checkbox" id="bem_same_as_current" onchange="syncBemAddress()" style="width: 18px; height: 18px;">
+                  <span>☑️ Permanent Address is same as Current Address</span>
+                </label>
+              </div>
+
+              <div class="address-sub-card">
+                <h4 style="font-size: 0.9rem; font-weight: 700; color: #1e3a8a; margin-bottom: 8px;">🏠 Permanent Address</h4>
+                <div class="form-grid-4">
+                  <div class="form-group col-span-2">
+                    <label>Permanent Street</label>
+                    <input type="text" class="form-control" id="bem_permanent_address" name="permanent_address" placeholder="Permanent Street">
+                  </div>
+                  <div class="form-group">
+                    <label>City</label>
+                    <input type="text" class="form-control" id="bem_permanent_city" name="permanent_city" placeholder="City">
+                  </div>
+                  <div class="form-group">
+                    <label>PIN Code</label>
+                    <input type="text" class="form-control" id="bem_permanent_pincode" name="permanent_pincode" placeholder="PIN">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Mandatory Documents -->
+          <div class="form-section">
+            <div class="section-title">📂 4. Documents Upload</div>
+            <div class="document-upload-grid">
+              <div class="doc-card compulsory" id="bem_card_aadhaar_front">
+                <label style="font-weight: 700; font-size: 0.82rem; color: #1e3a8a;">🆔 Aadhaar Card (FRONT) <span class="req">*</span></label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadBemDoc(this, 'bem_url_aadhaar_front', 'bem_prev_aadhaar_front', 'bem_card_aadhaar_front')" required>
+                <div class="doc-preview-thumb" id="bem_prev_aadhaar_front"><span style="font-size: 0.7rem; color: var(--text-muted);">Front Preview</span></div>
+              </div>
+
+              <div class="doc-card compulsory" id="bem_card_aadhaar_back">
+                <label style="font-weight: 700; font-size: 0.82rem; color: #1e3a8a;">🆔 Aadhaar Card (BACK) <span class="req">*</span></label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadBemDoc(this, 'bem_url_aadhaar_back', 'bem_prev_aadhaar_back', 'bem_card_aadhaar_back')" required>
+                <div class="doc-preview-thumb" id="bem_prev_aadhaar_back"><span style="font-size: 0.7rem; color: var(--text-muted);">Back Preview</span></div>
+              </div>
+
+              <div class="doc-card compulsory" id="bem_card_marksheet_10th">
+                <label style="font-weight: 700; font-size: 0.82rem; color: #1e3a8a;">📜 10th Class Marksheet <span class="req">*</span></label>
+                <input type="file" class="form-control" accept="image/*,application/pdf" onchange="uploadBemDoc(this, 'bem_url_marksheet_10th', 'bem_prev_marksheet_10th', 'bem_card_marksheet_10th')" required>
+                <div class="doc-preview-thumb" id="bem_prev_marksheet_10th"><span style="font-size: 0.7rem; color: var(--text-muted);">10th Marksheet Preview</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Parent Details -->
+          <div class="form-section">
+            <div class="section-title">👨‍👩‍👦 5. Parent & Guardian Details</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="bem_father_name">Father's Name</label>
+                <input type="text" class="form-control" id="bem_father_name" name="father_name" placeholder="Father's Full Name">
+              </div>
+              <div class="form-group">
+                <label for="bem_father_mobile">Father's Mobile No</label>
+                <input type="tel" class="form-control" id="bem_father_mobile" name="father_mobile">
+              </div>
+              <div class="form-group">
+                <label for="bem_mother_name">Mother's Name</label>
+                <input type="text" class="form-control" id="bem_mother_name" name="mother_name" placeholder="Mother's Full Name">
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Fee & Payment -->
+          <div class="form-section">
+            <div class="section-title">💳 6. Fee & Payment Details</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="bem_total_course_fee">Total Course Fee (₹)</label>
+                <input type="number" class="form-control" id="bem_total_course_fee" name="total_course_fee" value="4000" oninput="calcBemFee()" style="font-weight: bold;">
+              </div>
+              <div class="form-group">
+                <label for="bem_fee_paid">Admission Fee Paid (₹) <span class="req">*</span></label>
+                <input type="number" class="form-control" id="bem_fee_paid" name="fee_paid" value="0" required oninput="calcBemFee()" style="font-weight: bold; color: var(--success);">
+              </div>
+              <div class="form-group">
+                <label for="bem_fee_balance">Balance Amount (₹)</label>
+                <input type="number" class="form-control" id="bem_fee_balance" name="fee_balance" value="4000" readonly style="font-weight: bold; background: #fef2f2; color: #b91c1c;">
+              </div>
+            </div>
+
+            <div class="form-grid-3" style="margin-top: 0.75rem;">
+              <div class="form-group">
+                <label for="bem_payment_mode">Payment Mode</label>
+                <select class="form-control" id="bem_payment_mode" name="payment_mode">
+                  <option value="Cash">Cash</option>
+                  <option value="UPI / QR Code">UPI / QR Code (Online Payment)</option>
+                  <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="bem_payment_ref">Transaction / Receipt No</label>
+                <input type="text" class="form-control" id="bem_payment_ref" name="payment_ref" placeholder="Receipt / Ref ID">
+              </div>
+              <div class="form-group">
+                <label for="bem_payment_date">Payment Date</label>
+                <input type="date" class="form-control" id="bem_payment_date" name="payment_date">
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeEnrollModal()">Cancel</button>
+            <button type="submit" id="bem_submit_btn" class="btn btn-success btn-lg" style="font-weight: 700;">
+              🚀 Register Student & Enroll in Batch
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= TAB 2: QUICK ENROLL EXISTING CANDIDATE ================= -->
+      <div id="batch_enroll_existing_view" style="display: none;">
+        <form onsubmit="handleEnrollSubmit(event)">
+          <div class="form-group" style="margin-bottom: 1.2rem;">
+            <label for="enroll_student_select">Select Registered Candidate <span class="req">*</span></label>
+            <select class="form-control" id="enroll_student_select" required style="font-size: 1rem; padding: 8px;"></select>
+          </div>
+          <div class="form-grid-2" style="margin-bottom: 1.2rem;">
+            <div class="form-group">
+              <label for="enroll_roll_no">Batch Roll Number (Optional)</label>
+              <input type="text" class="form-control" id="enroll_roll_no" placeholder="e.g. B-01">
+            </div>
+            <div class="form-group">
+              <label for="enroll_remarks">Remarks / Notes</label>
+              <input type="text" class="form-control" id="enroll_remarks" placeholder="Optional notes">
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeEnrollModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-lg">➕ Confirm Batch Allocation</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BATCH STUDENTS LIST MODAL -->
+  <div class="modal-overlay" id="batch_students_modal">
+    <div class="modal-box" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 id="batch_students_modal_title">Enrolled Students</h3>
+        <button class="modal-close-btn" onclick="closeBatchStudentsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>App No</th>
+              <th>Student Name</th>
+              <th>Enrolled Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="batch_students_tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeBatchStudentsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE ADMIN USER MODAL -->
+  <div class="modal-overlay" id="create_admin_modal">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>👔 Add Center Manager / Admin</h3>
+        <button class="modal-close-btn" onclick="closeCreateAdminModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleCreateAdminSubmit(event)">
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="new_admin_name">Manager Full Name <span class="req">*</span></label>
+            <input type="text" class="form-control" id="new_admin_name" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="new_admin_username">Login Username / ID <span class="req">*</span></label>
+            <input type="text" class="form-control" id="new_admin_username" placeholder="e.g. manager_branch1" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="new_admin_password">Login Password <span class="req">*</span></label>
+            <input type="password" class="form-control" id="new_admin_password" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="new_admin_center">Assigned Branch / Center Name</label>
+            <input type="text" class="form-control" id="new_admin_center" value="Main Campus">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="new_admin_mobile">Contact Mobile</label>
+            <input type="tel" class="form-control" id="new_admin_mobile">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeCreateAdminModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Manager</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINT SLIP MODAL -->
+  <div class="modal-overlay" id="slip_modal">
+    <div class="modal-box">
+      <div class="modal-header no-print">
+        <h3>📄 Admission Receipt & Slip</h3>
+        <button class="modal-close-btn" onclick="closeSlipModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="slip_content"></div>
+      <div class="modal-footer no-print">
+        <button type="button" class="btn btn-secondary" onclick="closeSlipModal()">Close</button>
+        <button type="button" class="btn btn-primary" onclick="printAdmissionSlip()">🖨️ Print Slip / PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEBCAM MODAL -->
+  <div class="modal-overlay" id="webcam_modal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>📷 Take Photo</h3>
+        <button class="modal-close-btn" onclick="closeWebcamModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <video id="webcam_video" autoplay playsinline style="width: 100%; border-radius: 6px; background: #000;"></video>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeWebcamModal()">Cancel</button>
+        <button class="btn btn-success" onclick="captureWebcamStudent()">📸 Capture</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+
+  <!-- MOBILE BOTTOM APP NAVIGATION DOCK (Shown only on phones) -->
+  <nav class="mobile-bottom-nav" id="mobile_bottom_bar">
+    <button type="button" class="mobile-nav-item active" onclick="switchNavTab('overview')">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </button>
+    <button type="button" class="mobile-nav-item" onclick="switchNavTab('candidates')">
+      <span class="icon">👨‍🎓</span>
+      <span>Students</span>
+    </button>
+    <button type="button" class="mobile-nav-item" onclick="switchNavTab('batches')">
+      <span class="icon">📅</span>
+      <span>Batches</span>
+    </button>
+    <button type="button" class="mobile-nav-item" onclick="logoutUser()">
+      <span class="icon">🚪</span>
+      <span>Logout</span>
+    </button>
+  </nav>
+<!-- EDIT USER MODAL -->
+  <div class="modal-overlay" id="edit_user_modal">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="edit_modal_title">✏️ Edit User Account</h3>
+        <button class="modal-close-btn" onclick="closeEditUserModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form_edit_user" onsubmit="handleEditUserSubmit(event)">
+          <input type="hidden" id="edit_user_id">
+          
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label for="edit_full_name">Full Name <span class="req">*</span></label>
+            <input type="text" class="form-control" id="edit_full_name" required>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 0.85rem;">
+            <div class="form-group">
+              <label for="edit_username">Login Username / ID <span class="req">*</span></label>
+              <input type="text" class="form-control" id="edit_username" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_mobile">Mobile Number</label>
+              <input type="tel" class="form-control" id="edit_mobile">
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 0.85rem;">
+            <div class="form-group">
+              <label for="edit_password">Password (Clear Text)</label>
+              <input type="text" class="form-control" id="edit_password" placeholder="Leave blank to keep same">
+            </div>
+            <div class="form-group">
+              <label for="edit_center_name">Center / Campus</label>
+              <input type="text" class="form-control" id="edit_center_name">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.2rem;">
+            <label for="edit_role">User Role</label>
+            <select class="form-control" id="edit_role">
+              <option value="student">Student / Candidate</option>
+              <option value="admin">Center Manager / Admin</option>
+              <option value="director">⭐ Executive Director</option>
+              <option value="superadmin">Master SuperAdmin</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<!-- EDIT BATCH MODAL -->
+  <div class="modal-overlay" id="edit_batch_modal">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 id="edit_batch_modal_title">✏️ Edit Batch Details</h3>
+        <button class="modal-close-btn" onclick="closeEditBatchModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit_batch_form" onsubmit="handleEditBatchSubmit(event)">
+          <input type="hidden" id="edit_batch_id">
+          
+          <div class="form-grid-3">
+            <div class="form-group col-span-2">
+              <label for="edit_batch_name">Batch Name <span class="req">*</span></label>
+              <input type="text" class="form-control" id="edit_batch_name" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_course">Course <span class="req">*</span></label>
+              <select class="form-control" id="edit_batch_course" required>
+                <option value="Computer">Computer</option>
+                <option value="Hotel Management">Hotel Management</option>
+                <option value="GDA">GDA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_timing">Class Timing</label>
+              <input type="text" class="form-control" id="edit_batch_timing" value="09:00 AM - 05:00 PM">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_days">Schedule / Days</label>
+              <input type="text" class="form-control" id="edit_batch_days" value="Mon to Sat">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_instructor">Instructor / Teacher</label>
+              <input type="text" class="form-control" id="edit_batch_instructor" placeholder="Faculty Name">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_room">Classroom / Lab No</label>
+              <input type="text" class="form-control" id="edit_batch_room" placeholder="e.g. Lab 1">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_capacity">Max Student Capacity</label>
+              <input type="number" class="form-control" id="edit_batch_capacity" value="40">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_start_date">Start Date</label>
+              <input type="date" class="form-control" id="edit_batch_start_date">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_end_date">End Date</label>
+              <input type="date" class="form-control" id="edit_batch_end_date">
+            </div>
+            <div class="form-group">
+              <label for="edit_batch_status">Batch Status</label>
+              <select class="form-control" id="edit_batch_status">
+                <option value="Running">🟢 Running</option>
+                <option value="Upcoming">🟡 Upcoming</option>
+                <option value="Completed">🔴 Completed</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top: 1.2rem; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn btn-secondary" onclick="closeEditBatchModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Save Batch Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<!-- COMPREHENSIVE BATCH DETAILS & MANAGEMENT HUB MODAL -->
+  <div class="modal-overlay" id="batch_detail_hub_modal">
+    <div class="modal-box" style="max-width: 950px; width: 96%; max-height: 92vh; overflow-y: auto; padding: 1.5rem;">
+      <div class="modal-header" style="position: sticky; top: -1.5rem; background: #ffffff; z-index: 10; padding: 0.8rem 0; border-bottom: 2px solid var(--border-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 48px; height: 48px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+            🏛️
+          </div>
+          <div>
+            <h2 id="hub_batch_title" style="color: var(--primary); font-size: 1.35rem; font-weight: 800; margin: 0;">Batch 1</h2>
+            <div id="hub_batch_subtitle" style="font-size: 0.84rem; color: var(--text-muted); margin-top: 2px;">
+              BAT-2026-001 | Computer | Main Campus
+            </div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeBatchDetailHub()">&times;</button>
+      </div>
+
+      <!-- Quick Action Toolbar & Instant Status Switcher -->
+      <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; margin-bottom: 1.2rem; display: flex; gap: 8px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn btn-success btn-sm" id="hub_btn_enroll" onclick="hubTriggerEnroll()">
+            ➕ Enroll New Student
+          </button>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="hub_btn_edit" onclick="hubTriggerEdit()">
+            ✏️ Edit Details
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="exportHubStudentsCSV()">
+            📥 Export CSV
+          </button>
+          <div style="display: flex; align-items: center; gap: 6px; margin-left: 6px; background: #ffffff; padding: 3px 8px; border: 1px solid var(--border-color); border-radius: 6px;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin: 0;">Status Section:</label>
+            <select id="hub_quick_status" onchange="quickUpdateBatchStatus(this.value)" style="padding: 2px 6px; font-size: 0.82rem; font-weight: 700; border-radius: 4px; border: 1px solid var(--border-color);">
+              <option value="Running">🟢 Running (Top)</option>
+              <option value="Upcoming">🟡 Upcoming (Middle)</option>
+              <option value="Completed">🔴 Completed (Bottom)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-danger btn-sm" id="hub_btn_delete" onclick="hubTriggerDelete()">
+            🗑️ Delete Batch
+          </button>
+        </div>
+      </div>
+
+      <!-- Batch Overview Stats Grid -->
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.2rem;">
+        <div class="stat-card" style="padding: 12px 14px; border-left: 4px solid var(--primary);">
+          <div class="stat-label">⏰ Class Timing</div>
+          <div class="stat-value" id="hub_stat_timing" style="font-size: 0.98rem;">09:00 AM - 05:00 PM</div>
+          <small id="hub_stat_days" style="color: var(--text-muted);">Mon to Sat</small>
+        </div>
+        <div class="stat-card" style="padding: 12px 14px; border-left: 4px solid #16a34a;">
+          <div class="stat-label">📅 Batch Duration</div>
+          <div class="stat-value" id="hub_stat_dates" style="font-size: 0.95rem;">2026-04-01 to 2026-07-31</div>
+          <small style="color: var(--success); font-weight: bold;">Active Batch</small>
+        </div>
+        <div class="stat-card" style="padding: 12px 14px; border-left: 4px solid #f59e0b;">
+          <div class="stat-label">👨‍🏫 Instructor & Room</div>
+          <div class="stat-value" id="hub_stat_instructor" style="font-size: 0.98rem;">Kumar Prince</div>
+          <small id="hub_stat_room" style="color: var(--text-muted);">Lab 1</small>
+        </div>
+        <div class="stat-card" style="padding: 12px 14px; border-left: 4px solid #8b5cf6;">
+          <div class="stat-label">👥 Enrolled Students</div>
+          <div class="stat-value" id="hub_stat_enrolled" style="font-size: 1.2rem; color: #7c3aed;">37 / 45</div>
+          <small id="hub_stat_seat_pct" style="color: var(--text-muted);">82% Seats Filled</small>
+        </div>
+      </div>
+
+      <!-- Enrolled Students Section -->
+      <div class="card" style="border: 1px solid var(--border-color);">
+        <div class="card-header" style="background: #ffffff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border-color);">
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e3a8a; margin: 0;">
+            👨‍🎓 Enrolled Students List (<span id="hub_students_count">0</span>)
+          </h3>
+          <input type="text" class="form-control" id="hub_student_search" placeholder="🔍 Search name, roll, mobile..." oninput="filterHubStudents()" style="max-width: 260px; padding: 5px 10px; font-size: 0.85rem;">
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+            <table class="table" style="margin-bottom: 0;">
+              <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 2;">
+                <tr>
+                  <th>Roll No</th>
+                  <th>App No</th>
+                  <th>Student Name</th>
+                  <th>Mobile / Login ID</th>
+                  <th>Fee Status</th>
+                  <th>Enrolled On</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="hub_students_tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.2rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeBatchDetailHub()">Close Details</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 1. OPEN PROFILE MODAL ================= -->
+  <div class="modal-overlay" id="user_profile_modal">
+    <div class="modal-box" style="max-width: 500px; padding: 1.5rem;">
+      <div class="modal-header">
+        <h3 style="color: var(--primary); font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+          👤 User Profile Details
+        </h3>
+        <button class="modal-close-btn" onclick="closeUserProfileModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <div id="modal_profile_avatar" style="width: 80px; height: 80px; border-radius: 50%; background: #2563eb; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; border: 3px solid #bfdbfe; background-size: cover; background-position: center; margin-bottom: 8px;">
+            <span id="modal_profile_initials">U</span>
+          </div>
+          <h4 id="modal_profile_fullname" style="font-size: 1.1rem; color: #0f172a; margin: 0;">User Full Name</h4>
+          <span id="modal_profile_role_pill" class="role-pill" style="margin-top: 4px; display: inline-block;">ROLE</span>
+        </div>
+
+        <div style="background: #f8fafc; border-radius: 10px; padding: 1rem; border: 1px solid #e2e8f0; font-size: 0.88rem;">
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #edf2f7;">
+            <span style="color: #64748b;">🆔 User ID / Username:</span>
+            <strong id="modal_profile_username" style="color: #0f172a;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #edf2f7;">
+            <span style="color: #64748b;">📞 Mobile Number:</span>
+            <strong id="modal_profile_mobile" style="color: #0f172a;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #edf2f7;">
+            <span style="color: #64748b;">📧 Email Address:</span>
+            <strong id="modal_profile_email" style="color: #0f172a;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+            <span style="color: #64748b;">🏢 Center / Campus:</span>
+            <strong id="modal_profile_center" style="color: #0f172a;">Main Campus</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.2rem; display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="closeUserProfileModal(); openChangeAvatarModal();">🖼️ Change Photo</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeUserProfileModal(); openChangePasswordModal();">🔑 Change Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 2. CHANGE PASSWORD MODAL ================= -->
+  <div class="modal-overlay" id="change_password_modal">
+    <div class="modal-box" style="max-width: 450px; padding: 1.5rem;">
+      <div class="modal-header">
+        <h3 style="color: var(--primary); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+          🔑 Change Password
+        </h3>
+        <button class="modal-close-btn" onclick="closeChangePasswordModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 0.8rem;">
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Enter your current password and set a new password (6 to 12 characters).
+        </p>
+        <form id="change_password_form" onsubmit="event.preventDefault(); handleChangePasswordSubmit(event);">
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label for="cp_current_password">Current Password <span class="req">*</span></label>
+            <input type="password" class="form-control" id="cp_current_password" required minlength="6" maxlength="12" placeholder="Current Password">
+          </div>
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label for="cp_new_password">New Password <span class="req">*</span></label>
+            <input type="password" class="form-control" id="cp_new_password" required minlength="6" maxlength="12" placeholder="New Password (6-12 chars)">
+          </div>
+          <div class="form-group" style="margin-bottom: 1.2rem;">
+            <label for="cp_confirm_password">Confirm New Password <span class="req">*</span></label>
+            <input type="password" class="form-control" id="cp_confirm_password" required minlength="6" maxlength="12" placeholder="Re-enter New Password">
+          </div>
+          <div id="cp_status_alert" style="display: none; padding: 8px; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1rem; font-weight: bold;"></div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Update Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 3. CHANGE PROFILE PICTURE MODAL ================= -->
+  <div class="modal-overlay" id="change_avatar_modal">
+    <div class="modal-box" style="max-width: 450px; padding: 1.5rem;">
+      <div class="modal-header">
+        <h3 style="color: var(--primary); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+          🖼️ Change Profile Picture
+        </h3>
+        <button class="modal-close-btn" onclick="closeChangeAvatarModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 0.8rem; text-align: center;">
+        <div id="avatar_preview_circle" style="width: 100px; height: 100px; border-radius: 50%; background: #1e40af; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800; border: 4px solid #bfdbfe; background-size: cover; background-position: center; margin-bottom: 1rem;">
+          <span id="avatar_preview_initials">U</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Upload a JPG, PNG, or WEBP photo (Maximum 5MB).
+        </p>
+
+        <input type="file" id="avatar_file_input" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handleAvatarFileSelected(this)">
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 1rem;">
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('avatar_file_input').click()">
+            📁 Choose Photo from Device
+          </button>
+        </div>
+        <div id="avatar_upload_status" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;"></div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 1rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeChangeAvatarModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btn_submit_avatar" onclick="submitAvatarUpload()" disabled>📤 Upload & Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- MODAL: UNIVERSAL CREATE NEW USER ACCOUNT -->
+  <div class="modal-backdrop" id="modal_create_user">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background: #0f172a; color: #ffffff;">
+        <h3 style="color: #fbbf24; margin: 0; font-size: 1.1rem; font-weight: 800;">➕ Create New System User Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal_create_user')" style="color: #ffffff;">&times;</button>
+      </div>
+      <form onsubmit="submitCreateUser(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Select User Role *</label>
+            <select class="form-control" id="new_user_role" required style="font-weight: 800; color: #1e293b;">
+              <option value="staff">🧑‍💼 Staff Executive</option>
+              <option value="admin">🏛️ Center Manager / Admin</option>
+              <option value="director">👔 Executive Director</option>
+              <option value="superadmin">👑 Master SuperAdmin</option>
+              <option value="student">👨‍🎓 Student Candidate</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Username (Login ID) *</label>
+            <input type="text" class="form-control" id="new_user_username" required placeholder="e.g. patna_staff1, director2">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-control" id="new_user_fullname" required placeholder="e.g. Rajesh Kumar">
+          </div>
+
+          <div class="form-row" style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Mobile Number</label>
+              <input type="tel" class="form-control" id="new_user_mobile" placeholder="10-digit mobile">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="new_user_email" placeholder="user@grtc.in">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Account Password *</label>
+            <input type="text" class="form-control" id="new_user_password" required value="grtc@123" placeholder="Enter password">
+            <small style="color: #64748b;">SuperAdmin will be able to see and reset this password anytime.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal_create_user')">Cancel</button>
+          <button type="submit" class="btn btn-warning" style="font-weight: 800;">🚀 Create Account Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SUPERADMIN RESET USER PASSWORD -->
+  <div class="modal-backdrop" id="modal_superadmin_reset_password">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background: #0f172a; color: #ffffff;">
+        <h3 style="color: #fbbf24; margin: 0; font-size: 1.1rem; font-weight: 800;">🔑 SuperAdmin Reset User Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal_superadmin_reset_password')" style="color: #ffffff;">&times;</button>
+      </div>
+      <form onsubmit="submitSuperAdminResetPassword(event)">
+        <input type="hidden" id="reset_pw_user_id">
+        <div class="modal-body">
+          <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 0.88rem; color: #475569;">Target User: <strong id="reset_pw_target_name" style="color: #0f172a;">User</strong></p>
+            <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">Role: <span id="reset_pw_target_role" class="badge">Role</span></p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">New Password *</label>
+            <input type="text" class="form-control" id="reset_pw_new_password" required placeholder="Enter new password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal_superadmin_reset_password')">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="font-weight: 800;">💾 Save New Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

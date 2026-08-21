@@ -523,45 +523,56 @@ def authenticate_user(login_id, password):
     clean_raw_id = str(login_id).strip()
     
     try:
-        if IS_POSTGRES:
-            cursor.execute("""
-            SELECT * FROM users 
-            WHERE (LOWER(username) = LOWER(%s) OR mobile = %s OR LOWER(email) = LOWER(%s)) 
-              AND (password_hash = %s OR password_hash = %s OR plain_password = %s)
-              AND (status = 'active' OR status IS NULL OR status = '')
-            """, (clean_id, clean_raw_id, clean_id, p_sha, p_ascii, p_raw))
-        else:
-            cursor.execute("""
-            SELECT * FROM users 
-            WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
-              AND (password_hash = ? OR password_hash = ? OR plain_password = ?)
-              AND (status = 'active' OR status IS NULL OR status = '')
-            """, (clean_id, clean_raw_id, clean_id, p_sha, p_ascii, p_raw))
+        cursor.execute("""
+        SELECT * FROM users 
+        WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
+          AND (password_hash = ? OR password_hash = ? OR plain_password = ?)
+        """, (clean_id, clean_raw_id, clean_id, p_sha, p_ascii, p_raw))
             
         row = cursor.fetchone()
         conn.close()
         
-        if not row:
-            return None
+        if row:
+            if isinstance(row, dict):
+                return row
+            return {
+                "id": row[0],
+                "username": row[1],
+                "password_hash": row[2],
+                "full_name": row[3],
+                "mobile": row[4] if len(row) > 4 else "",
+                "email": row[5] if len(row) > 5 else "",
+                "role": row[6] if len(row) > 6 else "student",
+                "center_name": row[7] if len(row) > 7 else "Main Campus",
+                "candidate_id": row[8] if len(row) > 8 else None
+            }
+
+        # Fallback Username Matching
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)", (clean_id, clean_raw_id, clean_id))
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            r_dict = dict(row) if isinstance(row, dict) else {
+                "id": row[0], "username": row[1], "password_hash": row[2], "full_name": row[3],
+                "mobile": row[4] if len(row) > 4 else "", "email": row[5] if len(row) > 5 else "",
+                "role": row[6] if len(row) > 6 else "student", "center_name": row[7] if len(row) > 7 else "Main Campus",
+                "candidate_id": row[8] if len(row) > 8 else None,
+                "plain_password": row[11] if len(row) > 11 else ""
+            }
+            stored_pw = r_dict.get("plain_password") or ""
+            stored_hash = r_dict.get("password_hash") or ""
             
-        if isinstance(row, dict):
-            return row
-            
-        # Fallback tuple mapping for SQLite/PostgreSQL
-        return {
-            "id": row[0],
-            "username": row[1],
-            "password_hash": row[2],
-            "full_name": row[3],
-            "mobile": row[4] if len(row) > 4 else "",
-            "email": row[5] if len(row) > 5 else "",
-            "role": row[6] if len(row) > 6 else "student",
-            "center_name": row[7] if len(row) > 7 else "Main Campus",
-            "plain_password": p_raw
-        }
+            if stored_pw == p_raw or stored_hash in [p_sha, p_ascii] or stored_pw == p_ascii:
+                return r_dict
+
+        return None
     except Exception as e:
         print(f"Auth Exception: {e}")
-        conn.close()
+        try: conn.close()
+        except Exception: pass
         return None
 
 def register_user(username=None, password="grtc@123", full_name="", mobile="", email="", role="student", center_name="Main Campus", candidate_id=None):

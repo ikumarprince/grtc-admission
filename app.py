@@ -189,13 +189,17 @@ async def api_signup(payload: dict = Body(...)):
 
 @app.post("/api/auth/login")
 async def api_login(payload: dict = Body(...)):
-    login_id = payload.get("login_id", "").strip()
-    password = payload.get("password", "").strip() or "grtc@123" or "grtc@123"
+    login_id = payload.get("login_id") or payload.get("username") or payload.get("email") or payload.get("application_no") or payload.get("user_id") or ""
+    login_id = str(login_id).strip()
+    password = payload.get("password", "").strip() or "grtc@123"
     
+    if not login_id:
+        raise HTTPException(status_code=400, detail="Username or Login ID is required.")
+
     user = database.authenticate_user(login_id, password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid User ID or Password.")
-    
+
     token = database.create_user_session(user["id"])
     return {
         "status": "success",
@@ -203,10 +207,10 @@ async def api_login(payload: dict = Body(...)):
         "user": {
             "id": user["id"],
             "username": user["username"],
-            "full_name": user["full_name"],
-            "role": user["role"],
-            "center_name": user["center_name"],
-            "candidate_id": user["candidate_id"]
+            "full_name": user.get("full_name", "User"),
+            "role": user.get("role", "student"),
+            "center_name": user.get("center_name", "Main Campus"),
+            "candidate_id": user.get("candidate_id")
         }
     }
 
