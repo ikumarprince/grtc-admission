@@ -142,7 +142,15 @@ def validate_password(password: str) -> str:
     return p_str
 
 def hash_password(password: str) -> str:
-    return password_to_ascii(password)
+    if not password:
+        return ""
+    return str(password).strip()
+
+def password_to_ascii(password: str) -> str:
+    return str(password).strip()
+
+def password_to_ascii(password: str) -> str:
+    return str(password).strip()
 
 def init_db():
     conn = get_db_connection()
@@ -516,9 +524,7 @@ def authenticate_user(login_id, password):
         return None
     conn = get_db_connection()
     cursor = conn.cursor()
-    p_raw = str(password).strip()
-    p_ascii = password_to_ascii(p_raw)
-    p_sha = hash_password(p_raw)
+    p_clean = str(password).strip()
     clean_id = str(login_id).strip().lower()
     clean_raw_id = str(login_id).strip()
     
@@ -526,8 +532,9 @@ def authenticate_user(login_id, password):
         cursor.execute("""
         SELECT * FROM users 
         WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
-          AND (password_hash = ? OR password_hash = ? OR plain_password = ?)
-        """, (clean_id, clean_raw_id, clean_id, p_sha, p_ascii, p_raw))
+          AND (password_hash = ? OR plain_password = ?)
+          AND (status = 'active' OR status IS NULL OR status = '')
+        """, (clean_id, clean_raw_id, clean_id, p_clean, p_clean))
             
         row = cursor.fetchone()
         conn.close()
@@ -544,29 +551,9 @@ def authenticate_user(login_id, password):
                 "email": row[5] if len(row) > 5 else "",
                 "role": row[6] if len(row) > 6 else "student",
                 "center_name": row[7] if len(row) > 7 else "Main Campus",
-                "candidate_id": row[8] if len(row) > 8 else None
-            }
-
-        # Fallback Username Matching
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)", (clean_id, clean_raw_id, clean_id))
-        row = cursor.fetchone()
-        conn.close()
-
-        if row:
-            r_dict = dict(row) if isinstance(row, dict) else {
-                "id": row[0], "username": row[1], "password_hash": row[2], "full_name": row[3],
-                "mobile": row[4] if len(row) > 4 else "", "email": row[5] if len(row) > 5 else "",
-                "role": row[6] if len(row) > 6 else "student", "center_name": row[7] if len(row) > 7 else "Main Campus",
                 "candidate_id": row[8] if len(row) > 8 else None,
-                "plain_password": row[11] if len(row) > 11 else ""
+                "plain_password": p_clean
             }
-            stored_pw = r_dict.get("plain_password") or ""
-            stored_hash = r_dict.get("password_hash") or ""
-            
-            if stored_pw == p_raw or stored_hash in [p_sha, p_ascii] or stored_pw == p_ascii:
-                return r_dict
 
         return None
     except Exception as e:
