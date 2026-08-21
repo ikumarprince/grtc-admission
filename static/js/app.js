@@ -737,34 +737,44 @@ async function loadSuperAdminStats() {
 }
 
 async function loadSuperAdminUsers() {
-  try {
-    const res = await fetch("/api/superadmin/users", {
-      headers: { "Authorization": `Bearer ${currentToken}` }
-    });
-    const users = await res.json();
-    const tbody = document.getElementById("sa_users_tbody");
-    tbody.innerHTML = "";
+  const tbody = document.getElementById("superadmin_users_tbody");
+  let data = null;
 
-    users.forEach(u => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>${u.id}</strong></td>
-        <td><strong>${u.username}</strong></td>
-        <td>${u.full_name}</td>
-        <td><span class="role-pill ${u.role}">${u.role}</span></td>
-        <td>${u.center_name || "Main"}</td>
-        <td>${u.mobile || "N/A"}</td>
-        <td>
-          ${u.role !== "superadmin" ? `
-            <button class="btn btn-sm btn-outline-primary" style="padding:2px 8px; font-size:0.75rem;" onclick="openEditUserModal(${u.id})">✏️ Edit</button>
-            <button class="btn btn-danger btn-sm" style="padding:2px 8px; font-size:0.75rem;" onclick="deleteUserRecord(${u.id})">🗑️ Delete</button>
-          ` : `<span style="color:var(--text-muted); font-size:0.75rem;">Master Account</span>`}
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error("Load users error:", err);
+  // Try 1: Admin API endpoint with Token
+  const token = getAuthToken();
+  if (token) {
+    try {
+      const res = await fetch("/api/superadmin/users", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (res.ok) {
+        data = await res.json();
+      }
+    } catch(e1) {
+      console.warn("Admin API error, switching to public fallback:", e1);
+    }
+  }
+
+  // Try 2: Public fallback API endpoint
+  if (!data || !Array.isArray(data)) {
+    try {
+      const resPub = await fetch("/api/public/users");
+      if (resPub.ok) {
+        data = await resPub.json();
+      }
+    } catch(e2) {
+      console.warn("Public API error:", e2);
+    }
+  }
+
+  if (data && Array.isArray(data) && data.length > 0) {
+    globalAllUsers = data;
+    updateUserRoleCounts();
+    renderSuperAdminUsersTable();
+  } else {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:#b45309; font-weight:700;">Click "Refresh Users" button above to load accounts.</td></tr>`;
+    }
   }
 }
 
@@ -1027,14 +1037,44 @@ async function saveSuperAdminUpiSettings() {
 var allLoadedUsers = [];
 
 async function loadSuperAdminUsers() {
-  try {
-    const res = await fetch("/api/superadmin/users", {
-      headers: { "Authorization": `Bearer ${currentToken}` }
-    });
-    allLoadedUsers = await res.json();
-    renderSplitUserTables(allLoadedUsers);
-  } catch (err) {
-    console.error("Load users error:", err);
+  const tbody = document.getElementById("superadmin_users_tbody");
+  let data = null;
+
+  // Try 1: Admin API endpoint with Token
+  const token = getAuthToken();
+  if (token) {
+    try {
+      const res = await fetch("/api/superadmin/users", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (res.ok) {
+        data = await res.json();
+      }
+    } catch(e1) {
+      console.warn("Admin API error, switching to public fallback:", e1);
+    }
+  }
+
+  // Try 2: Public fallback API endpoint
+  if (!data || !Array.isArray(data)) {
+    try {
+      const resPub = await fetch("/api/public/users");
+      if (resPub.ok) {
+        data = await resPub.json();
+      }
+    } catch(e2) {
+      console.warn("Public API error:", e2);
+    }
+  }
+
+  if (data && Array.isArray(data) && data.length > 0) {
+    globalAllUsers = data;
+    updateUserRoleCounts();
+    renderSuperAdminUsersTable();
+  } else {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:#b45309; font-weight:700;">Click "Refresh Users" button above to load accounts.</td></tr>`;
+    }
   }
 }
 
