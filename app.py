@@ -676,4 +676,4 @@ async def api_get_public_enquiries():
 
 @app.get("/api/public/users")
 async def api_get_public_users():
-    return database.get_all_users_for_superadmin()
+    return database.get_all_users_for_superadmin(user.get('role', 'superadmin'))

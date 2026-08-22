@@ -1198,41 +1198,41 @@ def delete_enquiry(eid: int):
     conn.commit()
     conn.close()
 
-def get_all_users_for_superadmin():
+def get_all_users_for_superadmin(current_user_role: str = "superadmin"):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, username, full_name, role, mobile, email, center_name, plain_password, status, created_at FROM users ORDER BY id DESC")
     rows = cursor.fetchall()
     conn.close()
     
+    c_role = (current_user_role or "superadmin").lower()
+
+    # Define allowed visible roles based on Hierarchy
+    # Level 1: superadmin -> All roles
+    # Level 2: director   -> director, admin, center_manager, staff, student (NO superadmin)
+    # Level 3: admin      -> admin, center_manager, staff, student (NO superadmin, director)
+    # Level 4: staff      -> staff, student (NO superadmin, director, admin)
+    allowed_roles = {"superadmin", "director", "admin", "center_manager", "manager", "staff", "student"}
+    if c_role == "director":
+        allowed_roles = {"director", "admin", "center_manager", "manager", "staff", "student"}
+    elif c_role in ["admin", "center_manager", "manager"]:
+        allowed_roles = {"admin", "center_manager", "manager", "staff", "student"}
+    elif c_role == "staff":
+        allowed_roles = {"staff", "student"}
+
     users_list = []
     for r in rows:
-        if isinstance(r, dict):
-            users_list.append({
-                "id": r.get("id"),
-                "username": r.get("username"),
-                "full_name": r.get("full_name"),
-                "role": r.get("role"),
-                "mobile": r.get("mobile") or "-",
-                "email": r.get("email") or "-",
-                "center_name": r.get("center_name") or "Main Campus",
-                "plain_password": r.get("plain_password") or "••••••••",
-                "status": r.get("status") or "active",
-                "created_at": str(r.get("created_at") or "Recently")
-            })
-        else:
-            users_list.append({
-                "id": r[0],
-                "username": r[1],
-                "full_name": r[2],
-                "role": r[3],
-                "mobile": r[4] or "-",
-                "email": r[5] or "-",
-                "center_name": r[6] or "Main Campus",
-                "plain_password": r[7] or "••••••••",
-                "status": r[8] or "active",
-                "created_at": str(r[9] or "Recently")
-            })
+        r_dict = dict(r) if isinstance(r, dict) else {
+            "id": r[0], "username": r[1], "full_name": r[2], "role": r[3],
+            "mobile": r[4] or "-", "email": r[5] or "-", "center_name": r[6] or "Main Campus",
+            "plain_password": r[7] or "••••••••", "status": r[8] or "active",
+            "created_at": str(r[9] or "Recently")
+        }
+        
+        u_role = (r_dict.get("role") or "").lower()
+        if u_role in allowed_roles:
+            users_list.append(r_dict)
+
     return users_list
 
 def create_user_by_superadmin(data: dict):
