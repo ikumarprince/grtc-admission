@@ -5,7 +5,7 @@ import base64
 import uuid
 from datetime import datetime
 from fastapi import FastAPI, Request, HTTPException, Body, Header
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import database
@@ -446,7 +446,7 @@ async def api_delete_admin_user(uid: int, authorization: str = Header(None)):
 @app.get("/api/public/batches")
 async def api_get_public_batches():
     try:
-        batches = database.get_all_batches()
+        batches = database.get_batches()
         public_list = []
         for b in batches:
             if isinstance(b, dict):
@@ -676,4 +676,70 @@ async def api_get_public_enquiries():
 
 @app.get("/api/public/users")
 async def api_get_public_users():
-    return database.get_all_users_for_superadmin(user.get('role', 'superadmin'))
+    return database.get_all_users_for_superadmin('superadmin')
+
+# ================= DEDICATED PAGE ROUTES FOR ALL MENU ITEMS =================
+
+@app.get("/batches")
+async def page_batches():
+    return FileResponse("templates/batches.html")
+
+@app.get("/users")
+async def page_users():
+    return FileResponse("templates/users.html")
+
+@app.get("/enquiries")
+async def page_enquiries():
+    return FileResponse("templates/enquiries.html")
+
+@app.get("/candidates")
+async def page_candidates():
+    return FileResponse("templates/candidates.html")
+
+@app.get("/reports")
+async def page_reports():
+    return FileResponse("templates/reports.html")
+
+@app.get("/profile")
+async def page_profile():
+    return FileResponse("templates/profile.html")
+
+# ================= DYNAMIC REPORTS & ANALYTICS API =================
+@app.get("/api/admin/reports")
+async def get_admin_reports(request: Request):
+    user = await get_current_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    db = get_db_connection()
+    try:
+        cur = db.cursor()
+        cur.execute("SELECT COUNT(*) FROM candidates")
+        total_candidates = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM batches")
+        total_batches = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM enquiries")
+        total_enquiries = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM users")
+        total_users = cur.fetchone()[0]
+
+        cur.execute("SELECT COALESCE(SUM(total_fee), 0), COALESCE(SUM(fee_paid), 0) FROM candidates")
+        fee_row = cur.fetchone()
+        total_fee = fee_row[0] if fee_row else 0
+        fee_paid = fee_row[1] if fee_row else 0
+
+        return {
+            "success": True,
+            "total_candidates": total_candidates,
+            "total_batches": total_batches,
+            "total_enquiries": total_enquiries,
+            "total_users": total_users,
+            "total_fee": total_fee,
+            "fee_paid": fee_paid,
+            "pending_fee": total_fee - fee_paid
+        }
+    finally:
+        db.close()

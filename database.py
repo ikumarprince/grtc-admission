@@ -1,3 +1,4 @@
+import hashlib
 import os
 import json
 import uuid
@@ -146,7 +147,8 @@ def validate_password(password: str) -> str:
 def hash_password(password: str) -> str:
     if not password:
         return ""
-    return str(password).strip()
+    p_clean = str(password).strip()
+    return hashlib.sha256(p_clean.encode("utf-8")).hexdigest().lower()
 
 def password_to_ascii(password: str) -> str:
     return str(password).strip()
@@ -474,6 +476,19 @@ def init_db():
         except Exception as seed_err:
             print(f"Seed info: {seed_err}")
 
+    
+    # Performance Indexes for Fast Lookups
+    try:
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_mobile ON users(mobile);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_user_id ON candidates(user_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_status ON candidates(admission_status);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_enquiries_status ON enquiries(status);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_batches_status ON batches(status);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_batch_enrollments_batch ON batch_enrollments(batch_id);")
+    except Exception as idx_err:
+        print(f"Index creation note: {idx_err}")
     conn.commit()
     conn.close()
 
@@ -481,45 +496,95 @@ def create_user_session(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     token = uuid.uuid4().hex
-    cursor.execute("INSERT INTO user_sessions (token, user_id) VALUES (?, ?)", (token, user_id))
-    conn.commit()
-    conn.close()
+    try:
+        if IS_POSTGRES:
+            cursor.execute("INSERT INTO user_sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
+        else:
+            cursor.execute("INSERT INTO user_sessions (token, user_id) VALUES (?, ?)", (token, user_id))
+        conn.commit()
+    except Exception as e:
+        print(f"Session Insert Error: {e}")
+    finally:
+        conn.close()
     return token
 
 def get_user_id_from_session(token):
     if not token:
         return None
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT user_id FROM user_sessions WHERE token = ?", (token,))
-    row = cursor.fetchone()
-    conn.close()
-    if row:
-        return row["user_id"] if isinstance(row, dict) else row[0]
-    return None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if IS_POSTGRES:
+            cursor.execute("SELECT user_id FROM user_sessions WHERE token = %s", (token,))
+        else:
+            cursor.execute("SELECT user_id FROM user_sessions WHERE token = ?", (token,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            if isinstance(row, dict):
+                return row.get("user_id")
+            return row[0]
+        return None
+    except Exception as e:
+        print(f"Session Lookup Error: {e}")
+        return None
 
 def delete_user_session(token):
     if not token:
         return
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM user_sessions WHERE token = ?", (token,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if IS_POSTGRES:
+            cursor.execute("DELETE FROM user_sessions WHERE token = %s", (token,))
+        else:
+            cursor.execute("DELETE FROM user_sessions WHERE token = ?", (token,))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
 
 def get_user_by_id(uid):
     if not uid:
         return None
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-    SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status, profile_picture, created_at 
-    FROM users 
-    WHERE id = ?
-    """, (uid,))
-    row = cursor.fetchone()
-    conn.close()
-    return row
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if IS_POSTGRES:
+            cursor.execute("""
+            SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status, profile_picture, created_at 
+            FROM users WHERE id = %s
+            """, (uid,))
+        else:
+            cursor.execute("""
+            SELECT id, username, full_name, mobile, email, role, center_name, candidate_id, status, profile_picture, created_at 
+            FROM users WHERE id = ?
+            """, (uid,))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row:
+            return None
+            
+        if isinstance(row, dict):
+            return row
+            
+        return {
+            "id": row[0],
+            "username": row[1],
+            "full_name": row[2],
+            "mobile": row[3] if len(row) > 3 else "",
+            "email": row[4] if len(row) > 4 else "",
+            "role": row[5] if len(row) > 5 else "student",
+            "center_name": row[6] if len(row) > 6 else "Main Campus",
+            "candidate_id": row[7] if len(row) > 7 else None,
+            "status": row[8] if len(row) > 8 else "active",
+            "profile_picture": row[9] if len(row) > 9 else None,
+            "created_at": str(row[10]) if len(row) > 10 else "Recently"
+        }
+    except Exception as e:
+        print(f"User Lookup Error: {e}")
+        return None
 
 def authenticate_user(login_id, password):
     if not login_id or not password:
@@ -527,36 +592,40 @@ def authenticate_user(login_id, password):
     conn = get_db_connection()
     cursor = conn.cursor()
     p_clean = str(password).strip()
+    p_hash = hash_password(p_clean)
     clean_id = str(login_id).strip().lower()
     clean_raw_id = str(login_id).strip()
 
-    # Password Aliases Map for Demo Accounts
-    password_aliases = [p_clean]
+    # Candidate hashes (computed SHA-256 hash + aliases)
+    candidate_hashes = [p_hash]
     if clean_id == "superadmin":
-        password_aliases.extend(["superadminpassword", "superadmin", "superadminpa"])
+        candidate_hashes.extend([hash_password("superadminpassword"), hash_password("superadmin"), hash_password("superadminpa")])
     elif clean_id == "director":
-        password_aliases.extend(["directorpassword", "director", "directorpass"])
+        candidate_hashes.extend([hash_password("directorpassword"), hash_password("director"), hash_password("directorpass")])
     elif clean_id == "admin":
-        password_aliases.extend(["adminpassword", "admin", "adminpasswor"])
+        candidate_hashes.extend([hash_password("adminpassword"), hash_password("admin"), hash_password("adminpasswor")])
     elif clean_id == "staff":
-        password_aliases.extend(["staffpassword", "staff", "staffpasswor"])
+        candidate_hashes.extend([hash_password("staffpassword"), hash_password("staff"), hash_password("staffpasswor")])
     elif clean_id == "student":
-        password_aliases.extend(["grtc@123", "student", "student@123"])
+        candidate_hashes.extend([hash_password("grtc@123"), hash_password("student"), hash_password("student@123")])
 
     try:
-        for pw_cand in password_aliases:
+        for cand_hash in set(candidate_hashes):
             cursor.execute("""
             SELECT * FROM users 
             WHERE (LOWER(username) = LOWER(?) OR mobile = ? OR LOWER(email) = LOWER(?)) 
               AND (password_hash = ? OR plain_password = ?)
               AND (status = 'active' OR status IS NULL OR status = '')
-            """, (clean_id, clean_raw_id, clean_id, pw_cand, pw_cand))
+            """, (clean_id, clean_raw_id, clean_id, cand_hash, p_clean))
                 
             row = cursor.fetchone()
             if row:
                 conn.close()
                 if isinstance(row, dict):
                     return row
+                col_names = [d[0] for d in cursor.description] if cursor.description else []
+                if col_names:
+                    return dict(zip(col_names, row))
                 return {
                     "id": row[0],
                     "username": row[1],
@@ -567,7 +636,7 @@ def authenticate_user(login_id, password):
                     "role": row[6] if len(row) > 6 else "student",
                     "center_name": row[7] if len(row) > 7 else "Main Campus",
                     "candidate_id": row[8] if len(row) > 8 else None,
-                    "plain_password": pw_cand
+                    "plain_password": row[12] if len(row) > 12 else p_clean
                 }
 
         conn.close()
@@ -665,6 +734,7 @@ def delete_user(uid):
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users WHERE id = ?", (uid,))
     deleted = cursor.rowcount > 0
+    
     conn.commit()
     conn.close()
     return deleted
@@ -686,6 +756,7 @@ def update_settings(new_config: dict):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE settings SET config_data = ? WHERE id = 1", (json.dumps(new_config),))
+    
     conn.commit()
     conn.close()
     return new_config
@@ -895,6 +966,7 @@ def delete_candidate(cid):
     cursor.execute("DELETE FROM batch_enrollments WHERE candidate_id = ?", (cid,))
     cursor.execute("DELETE FROM candidates WHERE id = ?", (cid,))
     deleted = cursor.rowcount > 0
+    
     conn.commit()
     conn.close()
     return deleted
@@ -989,6 +1061,7 @@ def delete_batch(bid):
     cursor.execute("DELETE FROM batch_enrollments WHERE batch_id = ?", (bid,))
     cursor.execute("DELETE FROM batches WHERE id = ?", (bid,))
     deleted = cursor.rowcount > 0
+    
     conn.commit()
     conn.close()
     return deleted
@@ -1046,6 +1119,7 @@ def enroll_candidate_in_batch(bid, cid, roll_number=None, remarks=""):
         """, (bid, cid, date_now, roll_number, remarks))
         
     cursor.execute("UPDATE candidates SET admission_status = 'Enrolled' WHERE id = ?", (cid,))
+    
     conn.commit()
     conn.close()
     return True
@@ -1055,6 +1129,7 @@ def unenroll_candidate_from_batch(bid, cid):
     cursor = conn.cursor()
     cursor.execute("DELETE FROM batch_enrollments WHERE batch_id = ? AND candidate_id = ?", (bid, cid))
     cursor.execute("UPDATE candidates SET admission_status = 'Pending' WHERE id = ?", (cid,))
+    
     conn.commit()
     conn.close()
     return True
@@ -1131,6 +1206,7 @@ def migrate_passwords_to_ascii():
         else:
             skipped.append(f"User ID {uid} ({uname}): empty password")
             
+    
     conn.commit()
     conn.close()
     return {
@@ -1147,6 +1223,7 @@ def create_enquiry(full_name: str, mobile: str, course: str, district: str) -> d
     query = f"INSERT INTO enquiries (full_name, mobile, course, district) VALUES ({ph}, {ph}, {ph}, {ph})"
     cursor.execute(query, (full_name, mobile, course, district))
     eid = cursor.lastrowid
+    
     conn.commit()
     conn.close()
     return {"id": eid, "full_name": full_name, "mobile": mobile, "course": course, "district": district, "status": "Pending"}
@@ -1187,6 +1264,7 @@ def update_enquiry_status(eid: int, status: str):
     cursor = conn.cursor()
     ph = parse_placeholder(cursor)
     cursor.execute(f"UPDATE enquiries SET status = {ph} WHERE id = {ph}", (status, eid))
+    
     conn.commit()
     conn.close()
 
@@ -1195,45 +1273,49 @@ def delete_enquiry(eid: int):
     cursor = conn.cursor()
     ph = parse_placeholder(cursor)
     cursor.execute(f"DELETE FROM enquiries WHERE id = {ph}", (eid,))
+    
     conn.commit()
     conn.close()
 
 def get_all_users_for_superadmin(current_user_role: str = "superadmin"):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, username, full_name, role, mobile, email, center_name, plain_password, status, created_at FROM users ORDER BY id DESC")
+    
+    role = (current_user_role or "superadmin").lower()
+    
+    if role == "superadmin":
+        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, plain_password, password_hash FROM users ORDER BY id ASC")
+    elif role == "director":
+        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role != 'superadmin' ORDER BY id ASC")
+    elif role in ["admin", "center_manager", "manager"]:
+        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role NOT IN ('superadmin', 'director') ORDER BY id ASC")
+    elif role == "staff":
+        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role IN ('staff', 'student') ORDER BY id ASC")
+    else:
+        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role = 'student' ORDER BY id ASC")
+        
     rows = cursor.fetchall()
     conn.close()
     
-    c_role = (current_user_role or "superadmin").lower()
-
-    # Define allowed visible roles based on Hierarchy
-    # Level 1: superadmin -> All roles
-    # Level 2: director   -> director, admin, center_manager, staff, student (NO superadmin)
-    # Level 3: admin      -> admin, center_manager, staff, student (NO superadmin, director)
-    # Level 4: staff      -> staff, student (NO superadmin, director, admin)
-    allowed_roles = {"superadmin", "director", "admin", "center_manager", "manager", "staff", "student"}
-    if c_role == "director":
-        allowed_roles = {"director", "admin", "center_manager", "manager", "staff", "student"}
-    elif c_role in ["admin", "center_manager", "manager"]:
-        allowed_roles = {"admin", "center_manager", "manager", "staff", "student"}
-    elif c_role == "staff":
-        allowed_roles = {"staff", "student"}
-
-    users_list = []
+    user_list = []
     for r in rows:
-        r_dict = dict(r) if isinstance(r, dict) else {
-            "id": r[0], "username": r[1], "full_name": r[2], "role": r[3],
-            "mobile": r[4] or "-", "email": r[5] or "-", "center_name": r[6] or "Main Campus",
-            "plain_password": r[7] or "••••••••", "status": r[8] or "active",
-            "created_at": str(r[9] or "Recently")
-        }
-        
-        u_role = (r_dict.get("role") or "").lower()
-        if u_role in allowed_roles:
-            users_list.append(r_dict)
-
-    return users_list
+        if isinstance(r, dict):
+            user_list.append(r)
+        else:
+            user_list.append({
+                "id": r[0],
+                "username": r[1],
+                "full_name": r[2],
+                "mobile": r[3],
+                "email": r[4],
+                "role": r[5],
+                "center_name": r[6],
+                "status": r[7],
+                "created_at": r[8],
+                "plain_password": r[9] if role == "superadmin" else "********",
+                "password_hash": r[10]
+            })
+    return user_list
 
 def create_user_by_superadmin(data: dict):
     conn = get_db_connection()
@@ -1248,14 +1330,14 @@ def create_user_by_superadmin(data: dict):
     email = data.get("email", "").strip()
     center_name = data.get("center_name", "Main Campus").strip()
     
-    cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
+    cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (username,))
     if cursor.fetchone():
         conn.close()
         raise Exception("Username already exists. Please choose another username.")
         
     cursor.execute("""
-        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
     """, (username, pw_hash, full_name, mobile, email, role, center_name, plain_pw))
     
     conn.commit()
@@ -1268,6 +1350,7 @@ def change_user_password_by_superadmin(user_id: int, new_password: str):
     pw_hash = hash_password(new_password)
     
     cursor.execute("UPDATE users SET password_hash = ?, plain_password = ? WHERE id = ?", (pw_hash, new_password, user_id))
+    
     conn.commit()
     conn.close()
     return True
@@ -1276,6 +1359,7 @@ def delete_user_by_superadmin(user_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    
     conn.commit()
     conn.close()
     return True

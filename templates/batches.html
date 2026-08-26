@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batches & Courses - GRTC Live Portal</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=3.0">
+</head>
+<body id="page_batches">
+
+  <!-- UNIVERSAL MASTER TOP HEADER BAR -->
+  <header class="app-main-header">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <button type="button" class="btn btn-link" id="btn_hamburger_menu" onclick="toggleSidebarMenu(event)" style="color: #ffffff; font-size: 1.4rem; padding: 0; margin: 0; text-decoration: none;" title="Toggle Main Menu">
+        ☰
+      </button>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 38px; width: auto; border-radius: 50%; border: 2px solid #fbbf24;">
+        <div>
+          <h1 style="font-size: 1.15rem; font-weight: 900; margin: 0; color: #ffffff; letter-spacing: 0.3px;">Gyanoday Rojgar Training Centre</h1>
+          <p style="font-size: 0.72rem; margin: 0; opacity: 0.85; color: #cbd5e1;">Khaspur Ramchandra Pahalwan Path near Bajaj Showroom Patna 801503</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-profile-menu-wrapper" id="header_user_bar" style="display: flex !important;">
+      <button type="button" class="user-profile-trigger" id="user_profile_trigger" onclick="toggleUserProfileDropdown(event)">
+        <div class="user-avatar-circle" id="header_user_avatar">
+          <span id="header_user_initials">U</span>
+        </div>
+        <span id="header_user_name" class="user-trigger-name">User Account</span>
+        <span id="header_user_role" class="role-pill superadmin">SUPERADMIN</span>
+        <span style="font-size: 0.7rem; opacity: 0.8;">▼</span>
+      </button>
+
+      <div class="user-dropdown-menu" id="user_profile_dropdown">
+        <div class="user-dropdown-header">
+          <div class="user-avatar-circle" id="dropdown_user_avatar" style="width: 38px; height: 38px;">
+            <span id="dropdown_user_initials">U</span>
+          </div>
+          <div class="dropdown-user-details">
+            <strong id="dropdown_user_fullname">User Profile</strong>
+            <small id="dropdown_user_username">id: username</small>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a href="/profile" class="dropdown-item">👤 View Profile</a>
+        <a href="/profile#password" class="dropdown-item">🔑 Change Password</a>
+        <a href="/profile#avatar" class="dropdown-item">🖼️ Change Profile Picture</a>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item danger" onclick="logoutUser()">🚪 Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- LEFT SIDEBAR DRAWER -->
+  <aside class="sidebar-drawer" id="sidebar_drawer">
+    <div class="sidebar-header">
+      <div class="sidebar-brand-title">
+        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 24px; width: auto; border-radius: 50%; margin-right: 8px;">
+        GRTC Main Menu
+      </div>
+      <button type="button" onclick="toggleSidebarMenu(event)" style="background: none; border: none; color: #ffffff; font-size: 1.3rem; cursor: pointer;">&times;</button>
+    </div>
+
+    <nav class="sidebar-nav-menu">
+      <div class="sidebar-nav-group">
+        <a href="/dashboard" class="sidebar-nav-item">
+          <span>🏠 Dashboard Overview</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="/dashboard">🔄 Main Dashboard Overview</a>
+          <a href="/enquiries">📩 Website Admission Enquiries</a>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-group">
+        <a href="/batches" class="sidebar-nav-item">
+          <span>🗓️ Batches & Courses</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="/batches#running">🟢 Running Batches</a>
+          <a href="/batches#upcoming">🟡 Upcoming Batches</a>
+          <a href="/batches#completed">🔵 Completed Batches</a>
+          <a href="/batches#create" onclick="openModal('create_batch_modal')">➕ Create New Batch</a>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-group">
+        <a href="/users" class="sidebar-nav-item">
+          <span>👥 Staff & Accounts</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="/users#superadmin" id="sub_link_superadmins">👑 Master SuperAdmins</a>
+          <a href="/users#director" id="sub_link_directors">👔 Executive Directors</a>
+          <a href="/users#admin" id="sub_link_managers">🏛️ Center Managers</a>
+          <a href="/users#staff" id="sub_link_staff">🧑‍💼 Staff Executives</a>
+          <a href="/users#student" id="sub_link_students">👨‍🎓 Registered Students</a>
+          <a href="/users#create" onclick="openModal('modal_create_user')">➕ Create New User Account</a>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-group">
+        <a href="/enquiries" class="sidebar-nav-item">
+          <span>📥 Admission Enquiries</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="/enquiries">📩 All Website Enquiries</a>
+          <a href="/enquiries#pending">⏳ Pending Leads</a>
+          <a href="/enquiries#contacted">📞 Contacted Applicants</a>
+          <a href="/enquiries#admitted">✅ Admitted Candidates</a>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-group">
+        <a href="/candidates" class="sidebar-nav-item">
+          <span>🎓 Candidate Directory</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="/candidates">👥 Trainees Directory</a>
+          <a href="/api/admin/candidates/export-csv">📊 Export Student CSV Data</a>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-group">
+        <a href="/reports" class="sidebar-nav-item">
+          <span>📊 Reports & Analytics</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+      </div>
+
+      <div class="sidebar-nav-group">
+        <a href="/profile" class="sidebar-nav-item">
+          <span>⚙️ Settings & Profile</span>
+          <span class="nav-arrow-right">▶</span>
+        </a>
+        <div class="sidebar-sub-menu">
+          <a href="/profile">👤 My Profile Details</a>
+          <a href="/profile#password">🔑 Change Password</a>
+          <a href="/profile#avatar">🖼️ Change Profile Picture</a>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-group" style="margin-top: 15px;">
+        <button type="button" class="sidebar-nav-item" style="background: none; border: none; width: 100%; text-align: left; color: #ef4444; cursor: pointer;" onclick="logoutUser()">
+          <span>🚪 Logout Portal</span>
+        </button>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay-backdrop" id="sidebar_overlay" onclick="toggleSidebarMenu(event)"></div>
+
+  <main class="main-content-container" style="padding: 1.5rem; max-width: 1320px; margin: auto;">
+    
+<div class="card p-4" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.5rem;">
+    <div>
+      <h2 style="margin:0; font-size:1.4rem; font-weight:900; color:#0f172a;">🗓️ Batches & Courses Management Hub</h2>
+      <p style="margin:4px 0 0; color:#64748b; font-size:0.88rem;">Real-time database records of all running, upcoming, and completed course batches.</p>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline-primary" onclick="loadBatchesPage()" style="font-weight:800; border-radius:8px;">🔄 Live Refresh</button>
+      <button class="btn btn-primary" onclick="openModal('create_batch_modal')" style="font-weight:800; border-radius:8px;">➕ Create New Batch</button>
+    </div>
+  </div>
+
+  <!-- Filter Pills -->
+  <div style="display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap;">
+    <button type="button" class="btn btn-sm btn-dark" id="filter_batch_all" onclick="filterBatchesCategory('all', this)" style="font-weight:800; border-radius:20px; padding:6px 16px;">All Batches</button>
+    <button type="button" class="btn btn-sm btn-outline-success" id="filter_batch_running" onclick="filterBatchesCategory('running', this)" style="font-weight:800; border-radius:20px; padding:6px 16px;">🟢 Running</button>
+    <button type="button" class="btn btn-sm btn-outline-warning" id="filter_batch_upcoming" onclick="filterBatchesCategory('upcoming', this)" style="font-weight:800; border-radius:20px; padding:6px 16px;">🟡 Upcoming</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="filter_batch_completed" onclick="filterBatchesCategory('completed', this)" style="font-weight:800; border-radius:20px; padding:6px 16px;">🔵 Completed</button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle" style="font-size:0.9rem;">
+      <thead style="background:#f8fafc; color:#334155; font-weight:800;">
+        <tr>
+          <th>Batch ID</th>
+          <th>Course Name</th>
+          <th>Start Date</th>
+          <th>Class Timing</th>
+          <th>Instructor / Room</th>
+          <th>Enrolled Trainees</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="batches_table_body">
+        <tr>
+          <td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">
+            Fetching live batch records from database...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+  </main>
+
+  <script src="/static/js/app.js?v=3.0"></script>
+  <script>
+    function toggleSidebarMenu(e) {
+      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      var drawer = document.getElementById("sidebar_drawer");
+      var overlay = document.getElementById("sidebar_overlay");
+      if (drawer) drawer.classList.toggle("open");
+      if (overlay) overlay.classList.toggle("open");
+    }
+    function toggleUserProfileDropdown(e) {
+      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      var dropdown = document.getElementById("user_profile_dropdown");
+      if (dropdown) {
+        dropdown.classList.toggle("show");
+        dropdown.classList.toggle("active");
+      }
+    }
+  </script>
+</body>
+</html>

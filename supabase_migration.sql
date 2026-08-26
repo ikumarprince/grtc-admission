@@ -1,10 +1,21 @@
 -- ==============================================================================
--- GRTC SUPABASE (POSTGRESQL) SCHEMA & ALL 5 USER ROLES DEMO ACCOUNTS
--- Copy and paste this script directly into Supabase SQL Editor & click RUN!
+-- GRTC SUPABASE (POSTGRESQL) FULL DATABASE RESET & RE-CREATION SCRIPT
+-- Copy and paste this ENTIRE script directly into Supabase SQL Editor & click RUN!
 -- ==============================================================================
 
--- 1. Create Users Table in Supabase PostgreSQL
-CREATE TABLE IF NOT EXISTS users (
+-- STEP 1: ERASE / DROP ALL EXISTING TABLES & CONSTRAINTS IN SUPABASE
+DROP TABLE IF EXISTS batch_enrollments CASCADE;
+DROP TABLE IF EXISTS batches CASCADE;
+DROP TABLE IF EXISTS candidates CASCADE;
+DROP TABLE IF EXISTS user_sessions CASCADE;
+DROP TABLE IF EXISTS enquiries CASCADE;
+DROP TABLE IF EXISTS settings CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- STEP 2: RE-CREATE ALL TABLES WITH CLEAN POSTGRESQL SCHEMAS
+
+-- 1. Users Table (Plaintext Passwords)
+CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
@@ -20,22 +31,104 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Ensure plain_password column exists
-ALTER TABLE users ADD COLUMN IF NOT EXISTS plain_password TEXT;
+-- 2. Candidates Table
+CREATE TABLE candidates (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    center_name VARCHAR(255) DEFAULT 'Main Campus',
+    application_no VARCHAR(100) UNIQUE NOT NULL,
+    academic_year VARCHAR(50) DEFAULT '2026-2027',
+    course VARCHAR(100) NOT NULL,
+    stream_branch VARCHAR(100),
+    admission_status VARCHAR(50) DEFAULT 'Pending',
+    full_name VARCHAR(255) NOT NULL,
+    gender VARCHAR(50),
+    dob VARCHAR(50),
+    category VARCHAR(50),
+    blood_group VARCHAR(20),
+    aadhaar_no VARCHAR(50),
+    nationality VARCHAR(50) DEFAULT 'Indian',
+    religion VARCHAR(50),
+    mother_tongue VARCHAR(50),
+    mobile_no VARCHAR(50) NOT NULL,
+    email VARCHAR(255),
+    current_address TEXT,
+    current_city VARCHAR(100),
+    current_state VARCHAR(100),
+    current_pincode VARCHAR(20),
+    permanent_address TEXT,
+    permanent_city VARCHAR(100),
+    permanent_state VARCHAR(100),
+    permanent_pincode VARCHAR(20),
+    father_name VARCHAR(255),
+    father_occupation VARCHAR(100),
+    father_mobile VARCHAR(50),
+    mother_name VARCHAR(255),
+    mother_occupation VARCHAR(100),
+    annual_income REAL DEFAULT 0,
+    prev_qualification VARCHAR(100),
+    prev_school_college TEXT,
+    prev_board_university TEXT,
+    prev_passing_year VARCHAR(50),
+    prev_roll_no VARCHAR(50),
+    prev_max_marks REAL DEFAULT 0,
+    prev_marks_obtained REAL DEFAULT 0,
+    prev_percentage REAL DEFAULT 0,
+    total_course_fee REAL DEFAULT 0,
+    fee_paid REAL DEFAULT 0,
+    fee_balance REAL DEFAULT 0,
+    payment_mode VARCHAR(100) DEFAULT 'Cash',
+    payment_ref VARCHAR(255),
+    payment_date VARCHAR(50),
+    remarks TEXT,
+    photo_url TEXT,
+    signature_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- 2. Insert Demo Accounts for ALL 5 User Roles into Supabase
-INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password)
-VALUES
-  ('superadmin', '74a6b2edeead0b25e791223e7f457e5d26305a415a772f4f2c5e5095368a5a40', 'Master SuperAdmin', '8002143322', 'superadmin@grtc.in', 'superadmin', 'Main Campus', 'superadminpassword'),
-  ('director', 'd710ee9d34208a0d0a0b68636b060d4b971a1c3d1f3f4c6e9a6b1c4e7f2a1b0c', 'Executive Director', '9304474574', 'director@grtc.in', 'director', 'Main Campus', 'directorpassword'),
-  ('admin', 'f1df30e8c89b33a08eb675c97d6d538e12d1b827e8a939f72740263f350c37ad', 'Patna Center Manager', '9876543210', 'admin@grtc.in', 'admin', 'Main Campus', 'adminpassword'),
-  ('staff', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'Front Desk Staff Executive', '9123456789', 'staff@grtc.in', 'staff', 'Main Campus', 'staffpassword'),
-  ('student', 'd8c3a936a718b5387b920ef1e8932ef2f05b0c96c429c6934c9c1ef34a1a3b5c', 'Demo Student Trainee', '9988776655', 'student@grtc.in', 'student', 'Main Campus', 'grtc@123')
-ON CONFLICT (username) DO UPDATE 
-SET password_hash = EXCLUDED.password_hash, plain_password = EXCLUDED.plain_password;
+-- 3. Batches Table
+CREATE TABLE batches (
+    id SERIAL PRIMARY KEY,
+    batch_code VARCHAR(100) UNIQUE NOT NULL,
+    batch_name VARCHAR(255) NOT NULL,
+    course VARCHAR(100) NOT NULL,
+    stream_branch VARCHAR(100),
+    start_date VARCHAR(50),
+    end_date VARCHAR(50),
+    timing VARCHAR(100),
+    days VARCHAR(100),
+    instructor VARCHAR(255),
+    room_no VARCHAR(100),
+    max_capacity INTEGER DEFAULT 40,
+    status VARCHAR(50) DEFAULT 'Running',
+    center_name VARCHAR(255) DEFAULT 'Main Campus',
+    created_by VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- 3. Create Enquiries Table in Supabase
-CREATE TABLE IF NOT EXISTS enquiries (
+-- 4. Batch Enrollments Table
+CREATE TABLE batch_enrollments (
+    id SERIAL PRIMARY KEY,
+    batch_id INTEGER NOT NULL,
+    candidate_id INTEGER NOT NULL,
+    enrollment_date VARCHAR(50) NOT NULL,
+    roll_number VARCHAR(100),
+    status VARCHAR(50) DEFAULT 'Active',
+    remarks TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(batch_id, candidate_id)
+);
+
+-- 5. User Sessions Table
+CREATE TABLE user_sessions (
+    token VARCHAR(255) PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. Website Admission Enquiries Table
+CREATE TABLE enquiries (
     id SERIAL PRIMARY KEY,
     full_name VARCHAR(255) NOT NULL,
     mobile VARCHAR(50) NOT NULL,
@@ -45,12 +138,28 @@ CREATE TABLE IF NOT EXISTS enquiries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Insert Enquiries Demo Leads
+-- 7. Settings Table
+CREATE TABLE settings (
+    id SERIAL PRIMARY KEY,
+    config_data TEXT NOT NULL
+);
+
+-- STEP 3: SEED CLEAN DEMO USER ACCOUNTS WITH PLAINTEXT PASSWORDS (NO HASHING)
+
+INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, plain_password)
+VALUES
+  ('superadmin', 'superadminpassword', 'Master SuperAdmin', '8002143322', 'superadmin@grtc.in', 'superadmin', 'Main Campus', 'superadminpassword'),
+  ('director', 'directorpassword', 'Executive Director', '9304474574', 'director@grtc.in', 'director', 'Main Campus', 'directorpassword'),
+  ('admin', 'adminpassword', 'Patna Center Manager', '9876543210', 'admin@grtc.in', 'admin', 'Main Campus', 'adminpassword'),
+  ('staff', 'staffpassword', 'Front Desk Staff Executive', '9123456789', 'staff@grtc.in', 'staff', 'Main Campus', 'staffpassword'),
+  ('student', 'grtc@123', 'Demo Student Trainee', '9988776655', 'student@grtc.in', 'student', 'Main Campus', 'grtc@123');
+
+-- STEP 4: SEED DEMO ADMISSION ENQUIRY LEADS
+
 INSERT INTO enquiries (full_name, mobile, course, district, status, created_at)
 VALUES
   ('Rahul Kumar Sharma', '9876543210', 'Computer IT & Office Automation', 'Patna', 'Pending', NOW()),
   ('Priya Singh', '9304474574', 'Hotel Management & F&B Services', 'Nalanda', 'Contacted', NOW()),
   ('Amit Kumar Verma', '8002143322', 'General Duty Assistant (GDA Nursing)', 'Gaya', 'Pending', NOW()),
   ('Suman Kumari', '9123456789', 'Computer IT & Office Automation', 'Muzaffarpur', 'Admitted', NOW()),
-  ('Vikash Roy', '9988776655', 'Hotel Management & F&B Services', 'Darbhanga', 'Pending', NOW())
-ON CONFLICT DO NOTHING;
+  ('Vikash Roy', '9988776655', 'Hotel Management & F&B Services', 'Darbhanga', 'Pending', NOW());

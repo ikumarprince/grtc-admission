@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Student Admission & Registration - Excellence Institute</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=2.5">
+  <link rel="stylesheet" href="/static/css/style.css?v=3.0">
 </head>
 <body>
 
@@ -106,7 +106,7 @@
           <div class="form-section" id="sec_personal">
             <div class="section-title">👤 2. Candidate Personal Information</div>
             <div class="candidate-photo-container" id="reg_photo_container">
-              <div class="passport-photo-frame" id="reg_photo_preview" onclick="document.getElementById('reg_photo_file').click()" style="cursor: pointer;">
+              <div class="passport-photo-frame" id="reg_photo_preview" onclick="if(event)event.preventDefault(); document.getElementById('reg_photo_file').click()" style="cursor: pointer;">
                 <div class="photo-placeholder-text">
                   <div style="font-size: 2.4rem; margin-bottom: 4px;">📷</div>
                   <span>Tap to Upload / Capture Photo</span>
@@ -123,10 +123,10 @@
                 <input type="file" id="reg_camera_file" accept="image/*" capture="user" style="display: none;" onchange="handleRegPhotoUpload(this)">
                 
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('reg_photo_file').click()">
+                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="if(event)event.preventDefault(); document.getElementById('reg_photo_file').click()">
                     📁 Choose from Gallery
                   </button>
-                  <button type="button" class="btn btn-primary btn-sm" onclick="triggerCameraCapture()">
+                  <button type="button" class="btn btn-primary btn-sm" onclick="if(event)event.preventDefault(); triggerCameraCapture()">
                     📸 Open Live Camera
                   </button>
                 </div>
@@ -208,8 +208,8 @@
             </div>
 
             <!-- SAME AS CURRENT ADDRESS TOGGLE CARD -->
-            <div class="same-address-toggle-bar" onclick="document.getElementById('reg_same_as_current').click()">
-              <label onclick="event.stopPropagation()">
+            <div class="same-address-toggle-bar" onclick="if(event)event.preventDefault(); document.getElementById('reg_same_as_current').click()">
+              <label onclick="if(event)event.preventDefault(); event.stopPropagation()">
                 <input type="checkbox" id="reg_same_as_current" onchange="toggleRegSameAddress()">
                 <span>☑️ Permanent Address is same as Current Address (Same as Current)</span>
               </label>
@@ -335,7 +335,7 @@
                   <strong style="font-size: 0.9rem; color: var(--primary);">📁 Additional / Other Documents</strong>
                   <p style="font-size: 0.78rem; color: var(--text-muted);">Transfer Certificate, Income, Domicile, Graduation, etc.</p>
                 </div>
-                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOtherDocumentRow()">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="if(event)event.preventDefault(); addOtherDocumentRow()">
                   ➕ Add Document
                 </button>
               </div>
@@ -443,7 +443,7 @@
           <!-- SUBMIT ACTIONS -->
           <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
             <a href="/login" class="btn btn-secondary" style="text-decoration: none;">🔐 Back to Login</a>
-            <button type="button" id="submit_reg_btn" onclick="submitFullRegistration(event)" class="btn btn-primary" style="padding: 0.85rem 1.8rem; font-size: 1rem; font-weight: 700;">🚀 Submit Admission & Generate Slip</button>
+            <button type="button" id="submit_reg_btn" onclick="if(event)event.preventDefault(); submitFullRegistration(event)" class="btn btn-primary" style="padding: 0.85rem 1.8rem; font-size: 1rem; font-weight: 700;">🚀 Submit Admission & Generate Slip</button>
           </div>
         </form>
       </div>
@@ -455,12 +455,12 @@
     <div class="modal-box">
       <div class="modal-header no-print">
         <h3>📄 Official Admission Receipt & Slip</h3>
-        <button class="modal-close-btn" onclick="closeSlipModal()">&times;</button>
+        <button class="modal-close-btn" onclick="if(event)event.preventDefault(); closeSlipModal()">&times;</button>
       </div>
       <div class="modal-body" id="slip_content"></div>
       <div class="modal-footer no-print">
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='/login'">Go to Login</button>
-        <button type="button" class="btn btn-primary" onclick="printAdmissionSlip()">🖨️ Print Slip / Save PDF</button>
+        <button type="button" class="btn btn-secondary" onclick="if(event)event.preventDefault(); window.location.href='/login'">Go to Login</button>
+        <button type="button" class="btn btn-primary" onclick="if(event)event.preventDefault(); printAdmissionSlip()">🖨️ Print Slip / Save PDF</button>
       </div>
     </div>
   </div>
@@ -470,19 +470,19 @@
     <div class="modal-box" style="max-width: 480px;">
       <div class="modal-header">
         <h3>📷 Take Candidate Photo</h3>
-        <button class="modal-close-btn" onclick="closeRegWebcam()">&times;</button>
+        <button class="modal-close-btn" onclick="if(event)event.preventDefault(); closeRegWebcam()">&times;</button>
       </div>
       <div class="modal-body" style="text-align:center;">
         <video id="webcam_video" autoplay playsinline style="width: 100%; border-radius: 8px; background: #000;"></video>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeRegWebcam()">Cancel</button>
-        <button class="btn btn-success" onclick="captureRegWebcam()">📸 Capture Photo</button>
+        <button class="btn btn-secondary" onclick="if(event)event.preventDefault(); closeRegWebcam()">Cancel</button>
+        <button class="btn btn-success" onclick="if(event)event.preventDefault(); captureRegWebcam()">📸 Capture Photo</button>
       </div>
     </div>
   </div>
 
-  <script src="/static/js/app.js?v=2.5">// ================= REAL-TIME DUPLICATE MOBILE CHECK =================
+  <script src="/static/js/app.js?v=3.0">// ================= REAL-TIME DUPLICATE MOBILE CHECK =================
 var isMobileDuplicate = false;
 
 async function checkMobileDuplication(val) {
@@ -730,7 +730,7 @@ async function checkMobileDuplication(val) {
     }
 
     // Single Document Uploader with Visual Card Status
-    function uploadSingleDoc(input, hiddenId, prevId, cardId) {
+    async function uploadSingleDoc(input, hiddenId, prevId, cardId) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
         const reader = new FileReader();
@@ -770,7 +770,7 @@ async function checkMobileDuplication(val) {
       div.innerHTML = `
         <input type="text" class="form-control doc-title-input" placeholder="Document Name (e.g. TC / Migration)" required>
         <input type="file" class="form-control doc-file-input" accept="image/*,application/pdf" onchange="uploadDynamicOtherDoc(this, '${rowId}')" required>
-        <button type="button" class="btn btn-danger btn-sm" onclick="removeOtherDocRow('${rowId}')">❌ Remove</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="if(event)event.preventDefault(); removeOtherDocRow('${rowId}')">❌ Remove</button>
       `;
       container.appendChild(div);
     }
@@ -781,7 +781,7 @@ async function checkMobileDuplication(val) {
       updateOtherDocsJson();
     }
 
-    function uploadDynamicOtherDoc(input, rowId) {
+    async function uploadDynamicOtherDoc(input, rowId) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
         const reader = new FileReader();
@@ -816,7 +816,7 @@ async function checkMobileDuplication(val) {
       document.getElementById("url_other_docs_json").value = JSON.stringify(list);
     }
 
-    function handleRegPhotoUpload(input) {
+    async function handleRegPhotoUpload(input) {
       if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = async (e) => {

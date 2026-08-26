@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css?v=2.5">
+  <link rel="stylesheet" href="/static/css/style.css?v=3.0">
   <link rel="icon" href="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg">
 </head>
 <body class="home-page clean-theme">
@@ -45,7 +45,7 @@
         </div>
       </a>
 
-      <button class="mobile-nav-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Navigation">
+      <button class="mobile-nav-toggle" onclick="if(event)event.preventDefault(); toggleMobileMenu()" aria-label="Toggle Navigation">
         ☰
       </button>
 
@@ -156,8 +156,8 @@
               </div>
             </div>
           </div>
-          <button class="slider-arrow prev" onclick="moveSlide('hero_slider_track', -1)">❮</button>
-          <button class="slider-arrow next" onclick="moveSlide('hero_slider_track', 1)">❯</button>
+          <button class="slider-arrow prev" onclick="if(event)event.preventDefault(); moveSlide('hero_slider_track', -1)">❮</button>
+          <button class="slider-arrow next" onclick="if(event)event.preventDefault(); moveSlide('hero_slider_track', 1)">❯</button>
         </div>
       </div>
 
@@ -273,9 +273,9 @@
 
       <!-- Course Category Tabs -->
       <div class="course-tabs-wrapper">
-        <button class="course-tab-btn active" onclick="switchCourseTab('tab_it', this)">💻 Computer IT & Office</button>
-        <button class="course-tab-btn" onclick="switchCourseTab('tab_fb', this)">🍽️ Hotel Management & F&B</button>
-        <button class="course-tab-btn" onclick="switchCourseTab('tab_gda', this)">🩺 GDA Healthcare Nursing</button>
+        <button class="course-tab-btn active" onclick="if(event)event.preventDefault(); switchCourseTab('tab_it', this)">💻 Computer IT & Office</button>
+        <button class="course-tab-btn" onclick="if(event)event.preventDefault(); switchCourseTab('tab_fb', this)">🍽️ Hotel Management & F&B</button>
+        <button class="course-tab-btn" onclick="if(event)event.preventDefault(); switchCourseTab('tab_gda', this)">🩺 GDA Healthcare Nursing</button>
       </div>
 
       <!-- Tab Content 1: IT -->
@@ -403,8 +403,8 @@
             </div>
           </div>
         </div>
-        <button class="slider-arrow prev" onclick="moveSlide('facilities_slider_track', -1)">❮</button>
-        <button class="slider-arrow next" onclick="moveSlide('facilities_slider_track', 1)">❯</button>
+        <button class="slider-arrow prev" onclick="if(event)event.preventDefault(); moveSlide('facilities_slider_track', -1)">❮</button>
+        <button class="slider-arrow next" onclick="if(event)event.preventDefault(); moveSlide('facilities_slider_track', 1)">❯</button>
       </div>
     </div>
   </section>
@@ -421,7 +421,7 @@
       <div class="single-slider-box" id="activities_slider_box">
         <div class="single-slider-track" id="activities_slider_track">
           <!-- Slide 1 -->
-          <div class="single-slide-item slide-aspect-16-9" onclick="openLightbox('/static/img/categories/06_Activities_and_Events/assembly.jpeg', 'Student Morning Assembly & Prayer')">
+          <div class="single-slide-item slide-aspect-16-9" onclick="if(event)event.preventDefault(); openLightbox('/static/img/categories/06_Activities_and_Events/assembly.jpeg', 'Student Morning Assembly & Prayer')">
             <img src="/static/img/categories/06_Activities_and_Events/assembly.jpeg" alt="Student Morning Assembly" class="single-slide-img">
             <div class="single-slide-overlay bottom-card-overlay">
               <h3 class="overlay-card-title">Morning Assembly & Prayer</h3>
@@ -429,7 +429,7 @@
             </div>
           </div>
           <!-- Slide 2 -->
-          <div class="single-slide-item slide-aspect-16-9" onclick="openLightbox('/static/img/categories/06_Activities_and_Events/morning exersize 2.jpeg', 'Morning Physical Fitness & Wellness')">
+          <div class="single-slide-item slide-aspect-16-9" onclick="if(event)event.preventDefault(); openLightbox('/static/img/categories/06_Activities_and_Events/morning exersize 2.jpeg', 'Morning Physical Fitness & Wellness')">
             <img src="/static/img/categories/06_Activities_and_Events/morning exersize 2.jpeg" alt="Morning Exercise Session" class="single-slide-img">
             <div class="single-slide-overlay bottom-card-overlay">
               <h3 class="overlay-card-title">Physical Wellness Session</h3>
@@ -437,7 +437,7 @@
             </div>
           </div>
           <!-- Slide 3 -->
-          <div class="single-slide-item slide-aspect-16-9" onclick="openLightbox('/static/img/categories/06_Activities_and_Events/Playing Basketball.jpeg', 'Sports Activity - Basketball')">
+          <div class="single-slide-item slide-aspect-16-9" onclick="if(event)event.preventDefault(); openLightbox('/static/img/categories/06_Activities_and_Events/Playing Basketball.jpeg', 'Sports Activity - Basketball')">
             <img src="/static/img/categories/06_Activities_and_Events/Playing Basketball.jpeg" alt="Playing Basketball" class="single-slide-img">
             <div class="single-slide-overlay bottom-card-overlay">
               <h3 class="overlay-card-title">Sports & Games</h3>
@@ -445,7 +445,7 @@
             </div>
           </div>
           <!-- Slide 4 -->
-          <div class="single-slide-item slide-aspect-16-9" onclick="openLightbox('/static/img/categories/06_Activities_and_Events/Saturday activity.jpeg', 'Saturday Extracurricular Activity')">
+          <div class="single-slide-item slide-aspect-16-9" onclick="if(event)event.preventDefault(); openLightbox('/static/img/categories/06_Activities_and_Events/Saturday activity.jpeg', 'Saturday Extracurricular Activity')">
             <img src="/static/img/categories/06_Activities_and_Events/Saturday activity.jpeg" alt="Saturday Activity" class="single-slide-img">
             <div class="single-slide-overlay bottom-card-overlay">
               <h3 class="overlay-card-title">Saturday Extracurriculars</h3>
@@ -453,7 +453,7 @@
             </div>
           </div>
           <!-- Slide 5 -->
-          <div class="single-slide-item slide-aspect-16-9" onclick="openLightbox('/static/img/categories/06_Activities_and_Events/Womens day function inauguration.jpeg', 'Womens Day Function Inauguration')">
+          <div class="single-slide-item slide-aspect-16-9" onclick="if(event)event.preventDefault(); openLightbox('/static/img/categories/06_Activities_and_Events/Womens day function inauguration.jpeg', 'Womens Day Function Inauguration')">
             <img src="/static/img/categories/06_Activities_and_Events/Womens day function inauguration.jpeg" alt="Women Day Function" class="single-slide-img">
             <div class="single-slide-overlay bottom-card-overlay">
               <h3 class="overlay-card-title">Women's Day Event</h3>
@@ -461,8 +461,8 @@
             </div>
           </div>
         </div>
-        <button class="slider-arrow prev" onclick="moveSlide('activities_slider_track', -1)">❮</button>
-        <button class="slider-arrow next" onclick="moveSlide('activities_slider_track', 1)">❯</button>
+        <button class="slider-arrow prev" onclick="if(event)event.preventDefault(); moveSlide('activities_slider_track', -1)">❮</button>
+        <button class="slider-arrow next" onclick="if(event)event.preventDefault(); moveSlide('activities_slider_track', 1)">❯</button>
       </div>
     </div>
   </section>
@@ -502,8 +502,8 @@
             </div>
           </div>
         </div>
-        <button class="slider-arrow prev" onclick="moveSlide('placements_slider_track', -1)">❮</button>
-        <button class="slider-arrow next" onclick="moveSlide('placements_slider_track', 1)">❯</button>
+        <button class="slider-arrow prev" onclick="if(event)event.preventDefault(); moveSlide('placements_slider_track', -1)">❮</button>
+        <button class="slider-arrow next" onclick="if(event)event.preventDefault(); moveSlide('placements_slider_track', 1)">❯</button>
       </div>
     </div>
   </section>
@@ -630,9 +630,9 @@
   </footer>
 
   <!-- LIGHTBOX MODAL FOR GALLERY -->
-  <div class="lightbox-overlay" id="lightbox_overlay" onclick="closeLightbox()">
-    <div class="lightbox-content" onclick="event.stopPropagation()">
-      <span class="lightbox-close-btn" onclick="closeLightbox()">&times;</span>
+  <div class="lightbox-overlay" id="lightbox_overlay" onclick="if(event)event.preventDefault(); closeLightbox()">
+    <div class="lightbox-content" onclick="if(event)event.preventDefault(); event.stopPropagation()">
+      <span class="lightbox-close-btn" onclick="if(event)event.preventDefault(); closeLightbox()">&times;</span>
       <img id="lightbox_img" src="" alt="Enlarged View">
       <div id="lightbox_caption" class="lightbox-caption-text"></div>
     </div>
