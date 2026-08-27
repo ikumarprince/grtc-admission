@@ -5,7 +5,7 @@ import base64
 import uuid
 from datetime import datetime
 from fastapi import FastAPI, Request, HTTPException, Body, Header
-from fastapi.responses import FileResponse, FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse, RedirectResponse, RedirectResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import database
@@ -76,16 +76,27 @@ async def api_change_user_password(payload: dict = Body(...), authorization: str
     return {"status": "success", "message": "Password changed successfully."}
 
 @app.post("/api/user/avatar")
-async def api_upload_user_avatar(payload: dict = Body(...), authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
+async def api_upload_user_avatar(request: Request, payload: dict = Body(...), authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
     user = get_current_user_from_token(token)
     if not user:
-        raise HTTPException(status_code=401, detail="Session expired or invalid.")
+        # Fallback: if single active superadmin or local testing session
+        raise HTTPException(status_code=401, detail="Authentication required. Please log in again.")
         
     try:
         raw_url = payload.get("profile_picture") or payload.get("photo_url") or ""
-        if not raw_url:
-            raise HTTPException(status_code=400, detail="Invalid photo data.")
+        
+        # Reset avatar request
+        if raw_url == "REMOVE" or raw_url == "":
+            updated = database.update_user(user["id"], {"profile_picture": None})
+            return {"status": "success", "profile_picture": None, "user": updated}
             
         if raw_url.startswith("data:image/"):
             header, base64_str = raw_url.split(",", 1)
@@ -98,6 +109,7 @@ async def api_upload_user_avatar(payload: dict = Body(...), authorization: str =
             if len(img_data) > 5 * 1024 * 1024:
                 raise HTTPException(status_code=400, detail="File size exceeds maximum limit of 5MB.")
                 
+            os.makedirs(UPLOADS_DIR, exist_ok=True)
             safe_fname = f"avatar_user_{user['id']}_{uuid.uuid4().hex[:8]}{ext}"
             save_path = os.path.join(UPLOADS_DIR, safe_fname)
             with open(save_path, "wb") as f:
@@ -108,37 +120,18 @@ async def api_upload_user_avatar(payload: dict = Body(...), authorization: str =
 
         updated = database.update_user(user["id"], {"profile_picture": avatar_url})
         return {"status": "success", "profile_picture": avatar_url, "user": updated}
-    except HTTPException as he:
-        raise he
-    except Exception as err:
-        return JSONResponse(status_code=500, content={"detail": f"Upload processing error: {str(err)}"})
-    except HTTPException as he:
-        raise he
-    except Exception as err:
-        return JSONResponse(status_code=500, content={"detail": f"Upload processing error: {str(err)}"})
+    except Exception as e:
+        print(f"Avatar upload exception: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# ================= PAGES & NAVIGATION =================
-
-@app.head("/")
 @app.get("/", response_class=HTMLResponse)
+@app.get("/home", response_class=HTMLResponse)
 async def serve_home():
-    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
-        return f.read()
-
-@app.get("/home", response_class=HTMLResponse)
-async def serve_home_alias():
-    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
-        return f.read()
-
-@app.get("/home", response_class=HTMLResponse)
-async def serve_home_alias():
-    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
-        return f.read()
-
-@app.get("/home", response_class=HTMLResponse)
-async def serve_home_alias():
-    with open(os.path.join(TEMPLATES_DIR, "home.html"), "r", encoding="utf-8") as f:
-        return f.read()
+    home_file = os.path.join(TEMPLATES_DIR, "home.html")
+    if os.path.exists(home_file):
+        with open(home_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return FileResponse(os.path.join(TEMPLATES_DIR, "index.html"))
 
 @app.head("/healthz")
 @app.get("/healthz")
@@ -231,11 +224,24 @@ async def api_get_me(authorization: str = Header(None)):
             
     return {"user": user, "candidate": candidate, "batch": batch}
 
+@app.get("/logout")
+@app.get("/api/auth/logout")
+async def api_logout_get():
+    res = RedirectResponse(url="/login", status_code=302)
+    res.delete_cookie("token")
+    res.delete_cookie("auth_token")
+    res.delete_cookie("session")
+    return res
+
 @app.post("/api/auth/logout")
 async def api_logout(authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
-    database.delete_user_session(token)
-    return {"status": "success"}
+    if token:
+        database.delete_user_session(token)
+    res = JSONResponse(content={"status": "success", "message": "Logged out successfully."})
+    res.delete_cookie("token")
+    res.delete_cookie("auth_token")
+    return res
 
 
 @app.get("/api/candidates/check-mobile")
@@ -385,17 +391,23 @@ async def api_remove_candidate(bid: int, payload: dict = Body(...), authorizatio
 # ================= SUPERADMIN USER MANAGEMENT =================
 
 @app.get("/api/superadmin/users")
-async def api_get_superadmin_users(role: str = "", authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
+@app.get("/api/public/users")
+async def api_get_superadmin_users(request: Request, role: str = "", authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
     user = get_current_user_from_token(token)
-    if not user or user["role"] not in ["superadmin", "director", "admin", "center_manager", "manager"]:
-        raise HTTPException(status_code=403, detail="SuperAdmin or Director permission required.")
+    user_role = user["role"].lower() if user and "role" in user else "guest"
     
-    users = database.get_all_users(role=role if role else None)
-    if user["role"] == "director":
-        for u in users:
-            if isinstance(u, dict):
-                u["password_hash"] = "••••••••"
+    # Strictly ONLY superadmin sees plain passwords. Everyone else gets masked '********'
+    users = database.get_all_users_for_superadmin(user_role)
+    if role:
+        users = [u for u in users if u.get("role", "").lower() == role.lower()]
     return users
 
 @app.post("/api/superadmin/users")
@@ -673,10 +685,6 @@ if __name__ == "__main__":
 @app.get("/api/public/enquiries")
 async def api_get_public_enquiries():
     return database.get_all_enquiries()
-
-@app.get("/api/public/users")
-async def api_get_public_users():
-    return database.get_all_users_for_superadmin('superadmin')
 
 # ================= DEDICATED PAGE ROUTES FOR ALL MENU ITEMS =================
 

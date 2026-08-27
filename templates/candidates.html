@@ -9,46 +9,52 @@
 <body id="page_candidates">
 
   <!-- UNIVERSAL MASTER TOP HEADER BAR -->
-  <header class="app-main-header">
+    <!-- UNIVERSAL MASTER HEADER BAR -->
+    <!-- UNIVERSAL MASTER HEADER BAR -->
+  <header class="master-header-bar" style="background: #1e3a8a; color: #ffffff; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10000; box-shadow: 0 2px 10px rgba(0,0,0,0.15);">
     <div style="display: flex; align-items: center; gap: 14px;">
-      <button type="button" class="btn btn-link" id="btn_hamburger_menu" onclick="toggleSidebarMenu(event)" style="color: #ffffff; font-size: 1.4rem; padding: 0; margin: 0; text-decoration: none;" title="Toggle Main Menu">
-        ☰
+      <button type="button" class="menu-toggle-btn" id="menu_toggle_btn" onclick="toggleSidebarMenu(event)" style="background: rgba(255,255,255,0.15); border: none; color: #ffffff; padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700;">
+        <span style="font-size: 1.2rem; line-height: 1;">☰</span>
+        <span style="font-size: 0.9rem;">MENU</span>
       </button>
+      
       <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 38px; width: auto; border-radius: 50%; border: 2px solid #fbbf24;">
+        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 38px; width: auto; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);">
         <div>
-          <h1 style="font-size: 1.15rem; font-weight: 900; margin: 0; color: #ffffff; letter-spacing: 0.3px;">Gyanoday Rojgar Training Centre</h1>
+          <h1 style="font-size: 1.1rem; font-weight: 900; margin: 0; line-height: 1.2; letter-spacing: 0.3px; color: #ffffff;">Gyanoday Rojgar Training Centre</h1>
           <p style="font-size: 0.72rem; margin: 0; opacity: 0.85; color: #cbd5e1;">Khaspur Ramchandra Pahalwan Path near Bajaj Showroom Patna 801503</p>
         </div>
       </div>
     </div>
 
-    <div class="user-profile-menu-wrapper" id="header_user_bar" style="display: flex !important;">
-      <button type="button" class="user-profile-trigger" id="user_profile_trigger" onclick="toggleUserProfileDropdown(event)">
+    <!-- Right Side Interactive User Profile Badge & Dropdown -->
+    <div class="user-profile-menu-wrapper" id="header_user_bar" onclick="toggleUserProfileDropdown(event)" tabindex="0">
+      <button type="button" class="user-profile-trigger" id="user_profile_trigger" style="pointer-events: none;">
         <div class="user-avatar-circle" id="header_user_avatar">
           <span id="header_user_initials">U</span>
         </div>
         <span id="header_user_name" class="user-trigger-name">User Account</span>
-        <span id="header_user_role" class="role-pill superadmin">SUPERADMIN</span>
-        <span style="font-size: 0.7rem; opacity: 0.8;">▼</span>
+        <span id="header_user_role" class="role-pill superadmin" style="background: #c2410c; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;">SUPERADMIN</span>
+        <span style="font-size: 0.75rem; opacity: 0.85;">▼</span>
       </button>
 
+      <!-- Right Side User Dropdown Menu -->
       <div class="user-dropdown-menu" id="user_profile_dropdown">
         <div class="user-dropdown-header">
           <div class="user-avatar-circle" id="dropdown_user_avatar" style="width: 38px; height: 38px;">
             <span id="dropdown_user_initials">U</span>
           </div>
           <div class="dropdown-user-details">
-            <strong id="dropdown_user_fullname">User Profile</strong>
+            <strong id="dropdown_user_fullname">User Account</strong>
             <small id="dropdown_user_username">id: username</small>
           </div>
         </div>
         <div class="dropdown-divider"></div>
         <a href="/profile" class="dropdown-item">👤 View Profile</a>
-        <a href="/profile#password" class="dropdown-item">🔑 Change Password</a>
-        <a href="/profile#avatar" class="dropdown-item">🖼️ Change Profile Picture</a>
+        <button type="button" class="dropdown-item" onclick="openChangePasswordModal(event)">🔑 Change Password</button>
+        <button type="button" class="dropdown-item" onclick="openChangeAvatarModal(event)">🖼️ Change Profile Picture</button>
         <div class="dropdown-divider"></div>
-        <button type="button" class="dropdown-item danger" onclick="logoutUser()">🚪 Logout</button>
+        <a href="/logout" class="dropdown-item danger" onclick="logoutUser(event)" style="color: #dc2626; font-weight: 700; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; box-sizing: border-box; text-decoration: none;">🚪 Logout</a>
       </div>
     </div>
   </header>
@@ -141,8 +147,8 @@
         </a>
         <div class="sidebar-sub-menu">
           <a href="/profile">👤 My Profile Details</a>
-          <a href="/profile#password">🔑 Change Password</a>
-          <a href="/profile#avatar">🖼️ Change Profile Picture</a>
+          <a href="/profile" onclick="if(window.location.pathname==='/profile'){ if(window.openProfileTab) window.openProfileTab('password'); return false; }">🔑 Change Password</a>
+          <a href="/profile" onclick="if(window.location.pathname==='/profile'){ if(window.openProfileTab) window.openProfileTab('avatar'); return false; }">🖼️ Change Profile Picture</a>
         </div>
       </div>
 
@@ -193,9 +199,151 @@
   </div>
 </div>
 
+  
+  <!-- UNIVERSAL MODAL: CHANGE PASSWORD -->
+  <div id="modal_change_password" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; border-radius: 14px; max-width: 480px; width: 90%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative;">
+      <button type="button" onclick="closeModal('modal_change_password')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
+      <div style="margin-bottom: 1.2rem;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">🔑 Change Account Password</h2>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Your new password will be hashed using SHA-256 and updated in database.</p>
+      </div>
+
+      <div id="modal_pwd_alert_box" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
+
+      <form id="modal_change_password_form" onsubmit="submitChangePasswordModal(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Current Password *</label>
+          <input type="password" id="modal_input_current_pwd" class="form-control" required placeholder="Enter current active password" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">New Password *</label>
+          <input type="password" id="modal_input_new_pwd" class="form-control" required placeholder="Enter new password (min 6 chars)" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Confirm New Password *</label>
+          <input type="password" id="modal_input_confirm_pwd" class="form-control" required placeholder="Re-enter new password" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-top: 8px; display: flex; gap: 10px;">
+          <button type="submit" id="modal_btn_submit_password" class="btn btn-primary" style="flex: 1; font-weight: 800; padding: 10px 18px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Update Password Now</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_change_password')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL MODAL: CHANGE PROFILE PICTURE -->
+  <div id="modal_change_avatar" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; border-radius: 14px; max-width: 460px; width: 90%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; text-align: center;">
+      <button type="button" onclick="closeModal('modal_change_avatar')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
+      <div style="margin-bottom: 1.2rem;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">🖼️ Account Profile Picture</h2>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Upload your personal photo or badge (JPG, PNG up to 5MB).</p>
+      </div>
+
+      <div id="modal_avatar_alert_box" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
+
+      <div style="display: flex; justify-content: center; margin-bottom: 1.2rem;">
+        <div class="user-avatar-circle" id="modal_preview_avatar_circle" style="width: 84px; height: 84px; font-size: 2.4rem; font-weight: 900; background: #ea580c; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">U</div>
+      </div>
+
+      <div style="margin-bottom: 1.2rem; text-align: left;">
+        <input type="file" id="modal_input_photo" accept="image/jpeg,image/png,image/webp" onchange="previewAvatarFile(event, 'modal_preview_avatar_circle')" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; box-sizing: border-box;">
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" id="modal_btn_save_photo" class="btn btn-primary" onclick="submitUploadAvatar('modal_input_photo', 'modal_avatar_alert_box', 'modal_btn_save_photo')" style="flex: 1; font-weight: 800; padding: 10px 18px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Upload Photo</button>
+        <button type="button" class="btn btn-outline-danger" onclick="removeProfilePicture('modal_avatar_alert_box', 'modal_btn_save_photo')" style="padding: 10px 14px; border-radius: 8px; border: 1px solid #ef4444; color: #dc2626; background: #fff; cursor: pointer; font-weight: 700;">Reset</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_change_avatar')" style="padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
+      </div>
+    </div>
+  </div>>>
+
+  
+  <!-- UNIVERSAL MODAL: CHANGE PASSWORD -->
+  <div id="modal_change_password" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; border-radius: 14px; max-width: 480px; width: 90%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative;">
+      <button type="button" onclick="closeModal('modal_change_password')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
+      <div style="margin-bottom: 1.2rem;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">🔑 Change Account Password</h2>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Your new password will be hashed using SHA-256 and updated in database.</p>
+      </div>
+
+      <div id="modal_pwd_alert_box" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
+
+      <form id="modal_change_password_form" onsubmit="submitChangePasswordModal(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Current Password *</label>
+          <input type="password" id="modal_input_current_pwd" class="form-control" required placeholder="Enter current active password" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">New Password *</label>
+          <input type="password" id="modal_input_new_pwd" class="form-control" required placeholder="Enter new password (min 6 chars)" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Confirm New Password *</label>
+          <input type="password" id="modal_input_confirm_pwd" class="form-control" required placeholder="Re-enter new password" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-top: 8px; display: flex; gap: 10px;">
+          <button type="submit" id="modal_btn_submit_password" class="btn btn-primary" style="flex: 1; font-weight: 800; padding: 10px 18px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Update Password Now</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_change_password')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL MODAL: CHANGE PROFILE PICTURE -->
+  <div id="modal_change_avatar" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; border-radius: 14px; max-width: 440px; width: 90%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; text-align: center;">
+      <button type="button" onclick="closeModal('modal_change_avatar')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">🖼️ Account Profile Picture</h2>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Your active profile badge is generated dynamically.</p>
+      </div>
+
+      <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+        <div class="user-avatar-circle" id="modal_preview_avatar_circle" style="width: 80px; height: 80px; font-size: 2.2rem; font-weight: 900; background: #ea580c; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">U</div>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button type="button" class="btn btn-primary" onclick="alert('Profile badge appearance saved successfully!'); closeModal('modal_change_avatar');" style="font-weight: 800; padding: 10px 20px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Save Appearance</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_change_avatar')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Close</button>
+      </div>
+    </div>
+  </div>
+
   </main>
 
-  <script src="/static/js/app.js?v=3.0"></script>
+  <script src="/static/js/app.js?v=4.0"></script>
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+
   <script>
     function toggleSidebarMenu(e) {
       if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
@@ -204,14 +352,305 @@
       if (drawer) drawer.classList.toggle("open");
       if (overlay) overlay.classList.toggle("open");
     }
+
     function toggleUserProfileDropdown(e) {
-      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      if (e) { if (e.stopPropagation) e.stopPropagation(); }
+      var wrapper = document.getElementById("header_user_bar");
       var dropdown = document.getElementById("user_profile_dropdown");
+      if (wrapper) wrapper.classList.toggle("active");
       if (dropdown) {
-        dropdown.classList.toggle("show");
-        dropdown.classList.toggle("active");
+        if (dropdown.style.display === "block") {
+          dropdown.style.display = "none";
+        } else {
+          dropdown.style.display = "block";
+        }
       }
     }
+
+    function openChangePasswordModal(e) {
+      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      var wrapper = document.getElementById("header_user_bar");
+      if (wrapper) wrapper.classList.remove("active");
+      var dropdown = document.getElementById("user_profile_dropdown");
+      if (dropdown) dropdown.style.display = "none";
+
+      if (window.location.pathname === "/profile" && typeof window.openProfileTab === "function") {
+        window.openProfileTab("password");
+      } else {
+        openModal("modal_change_password");
+      }
+    }
+
+    function openChangeAvatarModal(e) {
+      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      var wrapper = document.getElementById("header_user_bar");
+      if (wrapper) wrapper.classList.remove("active");
+      var dropdown = document.getElementById("user_profile_dropdown");
+      if (dropdown) dropdown.style.display = "none";
+
+      if (window.location.pathname === "/profile" && typeof window.openProfileTab === "function") {
+        window.openProfileTab("avatar");
+      } else {
+        openModal("modal_change_avatar");
+      }
+    }
+
+    function openModal(id) {
+      var m = document.getElementById(id);
+      if (m) { m.style.display = "flex"; }
+    }
+
+    function closeModal(id) {
+      var m = document.getElementById(id);
+      if (m) { m.style.display = "none"; }
+    }
+
+    function renderAvatarCircle(elementId, profilePicUrl, fallbackLetter) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      if (profilePicUrl && profilePicUrl !== "null" && profilePicUrl !== "undefined" && profilePicUrl.trim() !== "") {
+        el.innerHTML = '<img src="' + profilePicUrl + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">';
+      } else {
+        el.innerHTML = '<span>' + ((fallbackLetter || "U").toUpperCase()) + '</span>';
+      }
+    }
+
+    function previewAvatarFile(event, previewCircleId) {
+      var file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Photo size exceeds 5MB limit. Please choose a smaller photo.");
+        event.target.value = "";
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        renderAvatarCircle(previewCircleId, e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitUploadAvatar(fileInputId, alertBoxId, btnId) {
+      var fileInput = document.getElementById(fileInputId);
+      var alertBox = document.getElementById(alertBoxId);
+      var btn = document.getElementById(btnId);
+
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        showAvatarAlert("Please select an image file from your computer first.", "danger");
+        return;
+      }
+
+      var file = fileInput.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        showAvatarAlert("Photo size exceeds 5MB limit. Please choose a smaller photo.", "danger");
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Uploading Photo...";
+      }
+
+      var reader = new FileReader();
+      reader.onload = async function(e) {
+        var base64Data = e.target.result;
+        try {
+          var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+          var headers = { "Content-Type": "application/json" };
+          if (token) headers["Authorization"] = "Bearer " + token;
+
+          var res = await fetch("/api/user/avatar", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ profile_picture: base64Data })
+          });
+
+          var data = await res.json();
+          if (res.ok && data.status === "success") {
+            showAvatarAlert("🎉 Profile picture saved permanently!", "success");
+            
+            var picUrl = data.profile_picture;
+            // Save to localStorage for instant 0ms persistence across all page refreshes
+            localStorage.setItem("userAvatar", picUrl);
+            
+            renderAvatarCircle("header_user_avatar", picUrl);
+            renderAvatarCircle("dropdown_user_avatar", picUrl);
+            renderAvatarCircle("prof_avatar_large", picUrl);
+            renderAvatarCircle("preview_avatar_circle", picUrl);
+            renderAvatarCircle("modal_preview_avatar_circle", picUrl);
+
+            setTimeout(function() {
+              if (alertBox) alertBox.style.display = "none";
+              closeModal("modal_change_avatar");
+            }, 1500);
+          } else {
+            showAvatarAlert(data.detail || "Failed to update profile picture.", "danger");
+          }
+        } catch (err) {
+          console.error("Upload error:", err);
+          showAvatarAlert("Error uploading photo. Please try again.", "danger");
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = "Save Profile Picture";
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+
+      function showAvatarAlert(msg, type) {
+        if (!alertBox) { alert(msg); return; }
+        alertBox.style.display = "block";
+        alertBox.innerText = msg;
+        if (type === "success") {
+          alertBox.style.background = "#dcfce7";
+          alertBox.style.color = "#15803d";
+          alertBox.style.border = "1px solid #86efac";
+        } else {
+          alertBox.style.background = "#fee2e2";
+          alertBox.style.color = "#b91c1c";
+          alertBox.style.border = "1px solid #fca5a5";
+        }
+      }
+    }
+
+    async function removeProfilePicture(alertBoxId, btnId) {
+      if (!confirm("Are you sure you want to remove your profile picture and reset to initials?")) return;
+
+      var alertBox = document.getElementById(alertBoxId);
+      var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+      var headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+
+      try {
+        var res = await fetch("/api/user/avatar", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({ profile_picture: "REMOVE" })
+        });
+
+        var data = await res.json();
+        if (res.ok && data.status === "success") {
+          localStorage.removeItem("userAvatar");
+          if (alertBox) {
+            alertBox.style.display = "block";
+            alertBox.innerText = "Profile picture removed. Initials restored.";
+            alertBox.style.background = "#dcfce7";
+            alertBox.style.color = "#15803d";
+          }
+          initHeaderUserProfile();
+        }
+      } catch (err) {
+        console.error("Remove photo error:", err);
+      }
+    }
+
+    function initHeaderUserProfile() {
+      // 1. Instant 0ms Load from LocalStorage on Page Refresh
+      var cachedAvatar = localStorage.getItem("userAvatar");
+      var cachedName = localStorage.getItem("userName");
+      var cachedRole = localStorage.getItem("userRole");
+
+      if (cachedAvatar && cachedAvatar.trim() !== "") {
+        renderAvatarCircle("header_user_avatar", cachedAvatar);
+        renderAvatarCircle("dropdown_user_avatar", cachedAvatar);
+        renderAvatarCircle("prof_avatar_large", cachedAvatar);
+        renderAvatarCircle("preview_avatar_circle", cachedAvatar);
+        renderAvatarCircle("modal_preview_avatar_circle", cachedAvatar);
+      }
+      if (cachedName) {
+        var elN = document.getElementById("header_user_name");
+        var elDN = document.getElementById("dropdown_user_fullname");
+        var elPN = document.getElementById("prof_full_name");
+        if (elN) elN.innerText = cachedName;
+        if (elDN) elDN.innerText = cachedName;
+        if (elPN) elPN.innerText = cachedName;
+      }
+      if (cachedRole) {
+        var elR = document.getElementById("header_user_role");
+        var elPR = document.getElementById("prof_role_badge");
+        if (elR) elR.innerText = cachedRole.toUpperCase();
+        if (elPR) elPR.innerText = cachedRole.toUpperCase();
+      }
+
+      // 2. Live Sync from Database (/api/auth/me)
+      var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+      var headers = token ? { "Authorization": "Bearer " + token } : {};
+      fetch("/api/auth/me", { cache: "no-store", headers: headers })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+          if (!data) return;
+          var u = data.user || data;
+          if (u && (u.username || u.full_name)) {
+            var name = u.full_name || u.username;
+            var pic = u.profile_picture || null;
+            var role = (u.role || "superadmin").toUpperCase();
+
+            localStorage.setItem("userAvatar", pic || "");
+            localStorage.setItem("userName", name);
+            localStorage.setItem("userRole", role);
+
+            var initial = (name || "U")[0].toUpperCase();
+            renderAvatarCircle("header_user_avatar", pic, initial);
+            renderAvatarCircle("dropdown_user_avatar", pic, initial);
+            renderAvatarCircle("prof_avatar_large", pic, initial);
+            renderAvatarCircle("preview_avatar_circle", pic, initial);
+            renderAvatarCircle("modal_preview_avatar_circle", pic, initial);
+
+            var elN = document.getElementById("header_user_name");
+            var elDN = document.getElementById("dropdown_user_fullname");
+            var elDU = document.getElementById("dropdown_user_username");
+            var elPN = document.getElementById("prof_full_name");
+            var elPU = document.getElementById("prof_username");
+
+            if (elN) elN.innerText = name;
+            if (elDN) elDN.innerText = name;
+            if (elDU) elDU.innerText = "id: " + u.username;
+            if (elPN) elPN.innerText = name;
+            if (elPU) elPU.innerText = u.username;
+          }
+        }).catch(function(e) {});
+    }
+
+    function logoutUser(e) {
+      if (e) {
+        if (e.stopPropagation) e.stopPropagation();
+        if (e.preventDefault) e.preventDefault();
+      }
+      try {
+        var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token") || sessionStorage.getItem("token");
+        if (token) {
+          fetch("/api/auth/logout", {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+          }).catch(function() {});
+        }
+      } catch (err) {}
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      window.location.replace("/login");
+    }
+
+    document.addEventListener("click", function(e) {
+      var wrapper = document.getElementById("header_user_bar");
+      var dropdown = document.getElementById("user_profile_dropdown");
+      if (wrapper && !wrapper.contains(e.target)) {
+        wrapper.classList.remove("active");
+        if (dropdown) dropdown.style.display = "none";
+      }
+    });
+
+    // Run on instant load
+    initHeaderUserProfile();
   </script>
+
 </body>
 </html>

@@ -3,59 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Overview - GRTC System</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=3.0">
+  <title>Dashboard - GRTC Live Portal</title>
+  <link rel="icon" type="image/jpeg" href="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg">
+  <link rel="stylesheet" href="/static/css/style.css?v=5.0">
 </head>
-<body id="page_dashboard">
+<body id="page_dashboard" style="background: #0b1329; color: #f8fafc; min-height: 100vh; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
-  <!-- UNIVERSAL MASTER TOP HEADER BAR -->
-  <header class="app-main-header">
+  <!-- UNIVERSAL MASTER HEADER BAR -->
+  <header class="master-header-bar" style="background: #0f172a; color: #ffffff; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10000; border-bottom: 1px solid #1e293b; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <div style="display: flex; align-items: center; gap: 14px;">
-      <button type="button" class="btn btn-link" id="btn_hamburger_menu" onclick="toggleSidebarMenu(event)" style="color: #ffffff; font-size: 1.4rem; padding: 0; margin: 0; text-decoration: none;" title="Toggle Main Menu">
-        ☰
+      <button type="button" class="menu-toggle-btn" id="menu_toggle_btn" onclick="toggleSidebarMenu(event)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700;">
+        <span style="font-size: 1.2rem; line-height: 1;">☰</span>
+        <span style="font-size: 0.9rem;">MENU</span>
       </button>
+      
       <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 38px; width: auto; border-radius: 50%; border: 2px solid #fbbf24;">
+        <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 38px; width: auto; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);">
         <div>
-          <h1 style="font-size: 1.15rem; font-weight: 900; margin: 0; color: #ffffff; letter-spacing: 0.3px;">Gyanoday Rojgar Training Centre</h1>
-          <p style="font-size: 0.72rem; margin: 0; opacity: 0.85; color: #cbd5e1;">Khaspur Ramchandra Pahalwan Path near Bajaj Showroom Patna 801503</p>
+          <h1 style="font-size: 1.1rem; font-weight: 900; margin: 0; line-height: 1.2; letter-spacing: 0.3px; color: #ffffff;">Gyanoday Rojgar Training Centre</h1>
+          <p style="font-size: 0.72rem; margin: 0; opacity: 0.85; color: #94a3b8;">Khaspur Ramchandra Pahalwan Path near Bajaj Showroom Patna 801503</p>
         </div>
       </div>
     </div>
 
     <!-- Right Side Interactive User Profile Badge & Dropdown -->
-    <div class="user-profile-menu-wrapper" id="header_user_bar" style="display: flex !important;">
-      <button type="button" class="user-profile-trigger" id="user_profile_trigger" onclick="toggleUserProfileDropdown(event)">
-        <div class="user-avatar-circle" id="header_user_avatar">
+    <div class="user-profile-menu-wrapper" id="header_user_bar" onclick="toggleUserProfileDropdown(event)" tabindex="0">
+      <button type="button" class="user-profile-trigger" id="user_profile_trigger" style="pointer-events: none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
+        <div class="user-avatar-circle" id="header_user_avatar" style="width: 28px; height: 28px; background: #ea580c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900; color: #fff;">
           <span id="header_user_initials">U</span>
         </div>
-        <span id="header_user_name" class="user-trigger-name">SuperAdmin</span>
-        <span id="header_user_role" class="role-pill superadmin">SUPERADMIN</span>
-        <span style="font-size: 0.7rem; opacity: 0.8;">▼</span>
+        <span id="header_user_name" class="user-trigger-name" style="color: #ffffff;">User Account</span>
+        <span id="header_user_role" class="role-pill superadmin" style="background: #10b981; color: #042f2e; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;">SUPERADMIN</span>
+        <span style="font-size: 0.75rem; opacity: 0.85; color: #94a3b8;">▼</span>
       </button>
 
       <!-- Right Side User Dropdown Menu -->
       <div class="user-dropdown-menu" id="user_profile_dropdown">
         <div class="user-dropdown-header">
-          <div class="user-avatar-circle" id="dropdown_user_avatar" style="width: 38px; height: 38px;">
+          <div class="user-avatar-circle" id="dropdown_user_avatar" style="width: 38px; height: 38px; background: #ea580c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 900; color: #fff;">
             <span id="dropdown_user_initials">U</span>
           </div>
           <div class="dropdown-user-details">
-            <strong id="dropdown_user_fullname">User Name</strong>
+            <strong id="dropdown_user_fullname">User Account</strong>
             <small id="dropdown_user_username">id: username</small>
           </div>
         </div>
         <div class="dropdown-divider"></div>
         <a href="/profile" class="dropdown-item">👤 View Profile</a>
-        <a href="/profile#password" class="dropdown-item">🔑 Change Password</a>
-        <a href="/profile#avatar" class="dropdown-item">🖼️ Change Profile Picture</a>
+        <button type="button" class="dropdown-item" onclick="openChangePasswordModal(event)">🔑 Change Password</button>
+        <button type="button" class="dropdown-item" onclick="openChangeAvatarModal(event)">🖼️ Change Profile Picture</button>
         <div class="dropdown-divider"></div>
-        <button type="button" class="dropdown-item danger" onclick="logoutUser()">🚪 Logout</button>
+        <a href="/logout" class="dropdown-item danger" onclick="logoutUser(event)" style="color: #dc2626; font-weight: 700; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; box-sizing: border-box; text-decoration: none;">🚪 Logout</a>
       </div>
     </div>
   </header>
 
-  <!-- LEFT SIDEBAR DRAWER WITH EXACT CLEAN DEDICATED URL LINKS -->
+  <!-- LEFT SIDEBAR DRAWER -->
   <aside class="sidebar-drawer" id="sidebar_drawer">
     <div class="sidebar-header">
       <div class="sidebar-brand-title">
@@ -66,639 +69,301 @@
     </div>
 
     <nav class="sidebar-nav-menu">
-      <!-- 1. DASHBOARD OVERVIEW -->
-      <div class="sidebar-nav-group">
-        <a href="/dashboard" class="sidebar-nav-item active">
-          <span>🏠 Dashboard Overview</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-        <div class="sidebar-sub-menu">
-          <a href="/dashboard">🔄 Main Dashboard Overview</a>
-          <a href="/enquiries">📩 Website Admission Enquiries</a>
-        </div>
-      </div>
-
-      <!-- 2. BATCHES & COURSES -->
-      <div class="sidebar-nav-group">
-        <a href="/batches" class="sidebar-nav-item ">
-          <span>🗓️ Batches & Courses</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-        <div class="sidebar-sub-menu">
-          <a href="/batches#running">🟢 Running Batches</a>
-          <a href="/batches#upcoming">🟡 Upcoming Batches</a>
-          <a href="/batches#completed">🔵 Completed Batches</a>
-          <a href="/batches#create" onclick="openModal('create_batch_modal')">➕ Create New Batch</a>
-        </div>
-      </div>
-
-      <!-- 3. STAFF & ACCOUNTS -->
-      <div class="sidebar-nav-group">
-        <a href="/users" class="sidebar-nav-item ">
-          <span>👥 Staff & Accounts</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-        <div class="sidebar-sub-menu">
-          <a href="/users#superadmin" id="sub_link_superadmins">👑 Master SuperAdmins</a>
-          <a href="/users#director" id="sub_link_directors">👔 Executive Directors</a>
-          <a href="/users#admin" id="sub_link_managers">🏛️ Center Managers</a>
-          <a href="/users#staff" id="sub_link_staff">🧑‍💼 Staff Executives</a>
-          <a href="/users#student" id="sub_link_students">👨‍🎓 Registered Students</a>
-          <a href="/users#create" onclick="openModal('modal_create_user')">➕ Create New User Account</a>
-        </div>
-      </div>
-
-      <!-- 4. ADMISSION ENQUIRIES -->
-      <div class="sidebar-nav-group">
-        <a href="/enquiries" class="sidebar-nav-item ">
-          <span>📥 Admission Enquiries</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-        <div class="sidebar-sub-menu">
-          <a href="/enquiries">📩 All Website Enquiries</a>
-          <a href="/enquiries#pending">⏳ Pending Leads</a>
-          <a href="/enquiries#contacted">📞 Contacted Applicants</a>
-          <a href="/enquiries#admitted">✅ Admitted Candidates</a>
-        </div>
-      </div>
-
-      <!-- 5. CANDIDATE DIRECTORY -->
-      <div class="sidebar-nav-group">
-        <a href="/candidates" class="sidebar-nav-item ">
-          <span>🎓 Candidate Directory</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-        <div class="sidebar-sub-menu">
-          <a href="/candidates">👥 Trainees Directory</a>
-          <a href="/api/admin/candidates/export-csv">📊 Export Student CSV Data</a>
-        </div>
-      </div>
-
-      <!-- 6. REPORTS & ANALYTICS -->
-      <div class="sidebar-nav-group">
-        <a href="/reports" class="sidebar-nav-item ">
-          <span>📊 Reports & Analytics</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-      </div>
-
-      <!-- 7. SETTINGS & PROFILE -->
-      <div class="sidebar-nav-group">
-        <a href="/profile" class="sidebar-nav-item ">
-          <span>⚙️ Settings & Profile</span>
-          <span class="nav-arrow-right">▶</span>
-        </a>
-        <div class="sidebar-sub-menu">
-          <a href="/profile">👤 My Profile Details</a>
-          <a href="/profile#password">🔑 Change Password</a>
-          <a href="/profile#avatar">🖼️ Change Profile Picture</a>
-        </div>
-      </div>
-
-      <!-- 8. LOGOUT -->
-      <div class="sidebar-nav-group" style="margin-top: 15px;">
-        <button type="button" class="sidebar-nav-item" style="background: none; border: none; width: 100%; text-align: left; color: #ef4444; cursor: pointer;" onclick="logoutUser()">
-          <span>🚪 Logout Portal</span>
-        </button>
-      </div>
+      <div class="sidebar-nav-group"><a href="/dashboard" class="sidebar-nav-item active"><span>🏠 Dashboard Overview</span></a></div>
+      <div class="sidebar-nav-group"><a href="/batches" class="sidebar-nav-item"><span>🗓️ Batches & Courses</span></a></div>
+      <div class="sidebar-nav-group"><a href="/users" class="sidebar-nav-item"><span>👥 Master User Accounts</span></a></div>
+      <div class="sidebar-nav-group"><a href="/enquiries" class="sidebar-nav-item"><span>📥 Admission Enquiries</span></a></div>
+      <div class="sidebar-nav-group"><a href="/candidates" class="sidebar-nav-item"><span>🎓 Candidate Directory</span></a></div>
+      <div class="sidebar-nav-group"><a href="/reports" class="sidebar-nav-item"><span>📊 Reports & Analytics</span></a></div>
+      <div class="sidebar-nav-group"><a href="/profile" class="sidebar-nav-item"><span>⚙️ Settings & Profile</span></a></div>
     </nav>
   </aside>
-  <div class="sidebar-overlay-backdrop" id="sidebar_overlay" onclick="toggleSidebarMenu(event)"></div>
+  <div class="sidebar-overlay" id="sidebar_overlay" onclick="toggleSidebarMenu(event)"></div>
 
-  <!-- MAIN CONTENT CONTAINER -->
-  <main class="main-content-container" style="padding: 1.5rem; max-width: 1320px; margin: auto;">
-    <main class="container">
-
-    <!-- ================= 1. AUTH VIEW (LOGIN / SIGNUP) ================= -->
-    <div id="auth_view" class="auth-wrapper" style="display: none !important;">
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div style="font-size: 2.5rem; margin-bottom: 6px;">🔐</div>
-        <h2 style="font-size: 1.3rem; color: var(--primary-dark);">Portal Login & Registration</h2>
-        <p style="font-size: 0.82rem; color: var(--text-muted);">Students, Center Managers & SuperAdmin</p>
+  <!-- MAIN EDUDASH DASHBOARD CONTENT CONTAINER -->
+  <main class="main-content-container" style="padding: 1.8rem 1.5rem; max-width: 1440px; margin: auto;">
+    
+    <!-- DASHBOARD TOP HEADER -->
+    <div style="margin-bottom: 1.8rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="margin: 0; font-size: 1.65rem; font-weight: 900; color: #ffffff; letter-spacing: -0.02em;">Dashboard</h1>
+        <p style="margin: 4px 0 0; color: #94a3b8; font-size: 0.88rem;">
+          <span style="color: #10b981; font-weight: 700;">Portal</span> &rarr; Manage your centre, track attendance, admissions, revenue, and batches.
+        </p>
       </div>
-
-      <div class="auth-tabs">
-        <button class="auth-tab-btn active" id="btn_auth_login" onclick="if(event)event.preventDefault(); switchAuthTab('login')">Sign In</button>
-        <button class="auth-tab-btn" id="btn_auth_signup" onclick="if(event)event.preventDefault(); switchAuthTab('signup')">New Student Registration</button>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span id="dash_role_badge" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-weight: 800; font-size: 0.8rem; padding: 6px 14px; border-radius: 20px; text-transform: uppercase;">SUPERADMIN VIEW</span>
+        <button class="btn btn-sm" onclick="loadEduDashDashboard()" style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; font-weight: 700; border-radius: 8px; padding: 7px 16px; cursor: pointer;">🔄 Live Refresh</button>
       </div>
-
-      <!-- Sign In Form -->
-      <form id="form_login" class="auth-form" onsubmit="event.preventDefault(); handleLogin(); return false;">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label for="login_id">User ID / Mobile / Email <span class="req">*</span></label>
-          <input type="text" class="form-control" id="login_id" placeholder="e.g. rahul123 or 9876543210 or superadmin" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label for="login_password">Password <span class="req">*</span></label>
-          <input type="password" class="form-control" id="login_password" placeholder="Enter Password" required minlength="6" maxlength="64">
-        </div>
-        <button type="button" onclick="if(event)event.preventDefault(); handleLogin()" class="btn btn-primary" style="width: 100%;">🔓 Login to Portal</button>
-  
-      </form>
-
-      <!-- Student Sign Up Form -->
-      <form id="form_signup" class="auth-form" style="display: none;" onsubmit="event.preventDefault(); handleSignup(); return false;">
-        <div class="form-group" style="margin-bottom: 0.8rem;">
-          <label for="signup_name">Full Name <span class="req">*</span></label>
-          <input type="text" class="form-control" id="signup_name" placeholder="Candidate Full Name" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 0.8rem;">
-          <label for="signup_username">Create Unique Username / ID <span class="req">*</span></label>
-          <input type="text" class="form-control" id="signup_username" placeholder="e.g. rahul_sharma" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 0.8rem;">
-          <label for="signup_mobile">Mobile Number <span class="req">*</span></label>
-          <input type="tel" class="form-control" id="signup_mobile" placeholder="10-digit Mobile" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 0.8rem;">
-          <label for="signup_email">Email Address</label>
-          <input type="email" class="form-control" id="signup_email" placeholder="candidate@example.com">
-        </div>
-        <div class="form-group" style="margin-bottom: 1.2rem;">
-          <label for="signup_password">Set Password <span class="req">*</span></label>
-          <input type="password" class="form-control" id="signup_password" placeholder="Minimum 6 characters" required>
-        </div>
-        <button type="button" onclick="if(event)event.preventDefault(); handleSignup()" class="btn btn-success" style="width: 100%;">📝 Register & Create Account</button>
-      </form>
     </div>
 
-    <!-- ================= 2. MAIN APP VIEW (PORTALS) ================= -->
-    <div id="main_app_view" style="display: none;">
-
-      <!-- ================= PORTAL A: STUDENT PORTAL ================= -->
-      <div id="portal_student" class="portal-section" style="display: none;">
+    <!-- DASHBOARD 2-COLUMN MAIN GRID -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+      
+      <!-- LEFT COLUMN: 6 STAT CARDS + REVENUE CHART + QUICK LEADS FEED -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
         
-        <!-- Welcome & Status Banner -->
-        <div class="card" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;">
-          <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-            <div>
-              <h2 style="font-size: 1.3rem; margin-bottom: 4px; color: white;"><img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 24px; width: auto; border-radius: 4px; vertical-align: middle; margin-right: 6px;"> Welcome to Student Portal</h2>
-              <p style="font-size: 0.85rem; opacity: 0.9;">Manage your admission details, view allocated batches and download official receipts.</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div>Status: <span id="stu_status_badge" class="badge badge-pending">Pending</span></div>
-              <button class="btn btn-secondary btn-sm" id="stu_slip_btn" style="display: none;" onclick="if(event)event.preventDefault(); openStudentSlipModal()">📄 View Admission Slip</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- My Allocated Batch Card -->
-        <div class="card">
-          <div class="card-header">
-            <h3>📅 My Allocated Batch & Class Timetable</h3>
-          </div>
-          <div class="card-body" id="stu_batch_card">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-
-        <!-- Student Admission Form -->
-        <div class="card">
-          <div class="card-header">
-            <h3 id="stu_form_title">📝 My Admission & Personal Details</h3>
-          </div>
-          <div class="card-body">
-            <form id="student_admission_form" onsubmit="handleStudentAdmissionSubmit(event)">
-              <input type="hidden" id="stu_photo_url" name="stu_photo_url">
-
-              <!-- Photo Section -->
-              <div class="photo-box-wrapper" style="margin-bottom: 1.2rem;">
-                <div class="photo-preview-box" id="stu_photo_preview">
-                  <span style="font-size: 0.75rem; color: var(--text-muted);">No Photo</span>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                  <label style="font-size: 0.82rem; font-weight: 600;">Student Photograph</label>
-                  <input type="file" id="stu_photo_input" accept="image/*" style="display: none;" onchange="handlePhotoUploadStudent(this)">
-                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="if(event)event.preventDefault(); document.getElementById('stu_photo_input').click()">📁 Upload Photo File</button>
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="if(event)event.preventDefault(); openWebcamStudent()">📷 Take Webcam Photo</button>
-                </div>
-              </div>
-
-              <!-- Section 1: Course -->
-              <div class="form-section">
-                <div class="section-title">📌 1. Course & Session Selection</div>
-                <div class="form-grid-3">
-                  <div class="form-group">
-                    <label for="stu_course">Course / Program Applied <span class="req">*</span></label>
-                    <select class="form-control" id="stu_course" name="stu_course" onchange="onStudentCourseChange()" required></select>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_stream_branch">Specialization / Branch</label>
-                    <select class="form-control" id="stu_stream_branch" name="stu_stream_branch">
-                      <option value="">-- Select Branch --</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_academic_year">Academic Session</label>
-                    <select class="form-control" id="stu_academic_year" name="stu_academic_year"></select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 2: Personal -->
-              <div class="form-section">
-                <div class="section-title">👤 2. Personal Information</div>
-                <div class="form-grid-3">
-                  <div class="form-group">
-                    <label for="stu_full_name">Full Name <span class="req">*</span></label>
-                    <input type="text" class="form-control" id="stu_full_name" name="stu_full_name" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_gender">Gender <span class="req">*</span></label>
-                    <select class="form-control" id="stu_gender" name="stu_gender" required>
-                      <option value="">-- Select --</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_dob">Date of Birth <span class="req">*</span></label>
-                    <input type="date" class="form-control" id="stu_dob" name="stu_dob" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_blood_group">Blood Group</label>
-                    <select class="form-control" id="stu_blood_group" name="stu_blood_group">
-                      <option value="">-- Select --</option>
-                      <option value="A+">A+</option><option value="A-">A-</option>
-                      <option value="B+">B+</option><option value="B-">B-</option>
-                      <option value="O+">O+</option><option value="O-">O-</option>
-                      <option value="AB+">AB+</option><option value="AB-">AB-</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_admission_category">Category / Quota</label>
-                    <select class="form-control" id="stu_admission_category" name="stu_admission_category">
-                      <option value="General">General</option><option value="OBC">OBC</option>
-                      <option value="SC">SC</option><option value="ST">ST</option><option value="EWS">EWS</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_aadhaar_no">Aadhaar / ID No</label>
-                    <input type="text" class="form-control" id="stu_aadhaar_no" name="stu_aadhaar_no">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 3: Contact & Address -->
-              <div class="form-section">
-                <div class="section-title">📞 3. Contact & Address</div>
-                <div class="form-grid-3">
-                  <div class="form-group">
-                    <label for="stu_mobile_no">Mobile Number <span class="req">*</span></label>
-                    <input type="tel" class="form-control" id="stu_mobile_no" name="stu_mobile_no" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_email">Email</label>
-                    <input type="email" class="form-control" id="stu_email" name="stu_email">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_current_city">City</label>
-                    <input type="text" class="form-control" id="stu_current_city" name="stu_current_city">
-                  </div>
-                  <div class="form-group col-span-2">
-                    <label for="stu_current_address">Full Address</label>
-                    <input type="text" class="form-control" id="stu_current_address" name="stu_current_address">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_current_pincode">PIN Code</label>
-                    <input type="text" class="form-control" id="stu_current_pincode" name="stu_current_pincode">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 4: Parent & Academics -->
-              <div class="form-section">
-                <div class="section-title">👨‍👩‍👦 4. Parent & Academic Details</div>
-                <div class="form-grid-3">
-                  <div class="form-group">
-                    <label for="stu_father_name">Father's Name</label>
-                    <input type="text" class="form-control" id="stu_father_name" name="stu_father_name">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_father_mobile">Father's Mobile</label>
-                    <input type="tel" class="form-control" id="stu_father_mobile" name="stu_father_mobile">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_mother_name">Mother's Name</label>
-                    <input type="text" class="form-control" id="stu_mother_name" name="stu_mother_name">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_prev_qualification">Qualifying Exam</label>
-                    <input type="text" class="form-control" id="stu_prev_qualification" name="stu_prev_qualification" placeholder="e.g. 12th Science / Diploma">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_prev_board_university">Board / University</label>
-                    <input type="text" class="form-control" id="stu_prev_board_university" name="stu_prev_board_university">
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_prev_percentage">Percentage / CGPA (%)</label>
-                    <input type="number" step="0.01" class="form-control" id="stu_prev_percentage" name="stu_prev_percentage">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Fees (Readonly for Student) -->
-              <div class="form-section">
-                <div class="section-title">💳 5. Fee Summary</div>
-                <div class="form-grid-3">
-                  <div class="form-group">
-                    <label for="stu_total_course_fee">Total Course Fee (₹)</label>
-                    <input type="number" class="form-control" id="stu_total_course_fee" name="stu_total_course_fee" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_fee_paid">Fee Paid (₹)</label>
-                    <input type="number" class="form-control" id="stu_fee_paid" name="stu_fee_paid" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label for="stu_fee_balance">Balance Amount (₹)</label>
-                    <input type="number" class="form-control" id="stu_fee_balance" name="stu_fee_balance" readonly>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">💾 Save & Submit Application Details</button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ================= PORTAL B: ADMIN (CENTER MANAGER) ================= -->
-      <div id="portal_admin" class="portal-section" style="display: none;">
-        
-        <!-- VIEW 1: MAIN DASHBOARD OVERVIEW (Executive Control Hub) -->
-        <div id="view_dashboard" class="dashboard-view-panel" style="display: block;">
+        <!-- 6 METRIC STAT CARDS (2x3 GRID) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
           
-          <!-- Executive SuperAdmin Banner -->
-          <div class="superadmin-exec-banner">
+          <!-- Card 1: Total Candidates -->
+          <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: #ea580c; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">👥</div>
+              <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Total Candidates</span>
+            </div>
+            <div id="stat_total_candidates" style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">38</div>
+            <div style="margin-top: 6px; color: #10b981; font-size: 0.78rem; font-weight: 700;">10% ↗ +5 This Month</div>
+          </div>
+
+          <!-- Card 2: Active Batches -->
+          <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: #2563eb; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🗓️</div>
+              <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Active Batches</span>
+            </div>
+            <div id="stat_total_batches" style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">39</div>
+            <div style="margin-top: 6px; color: #38bdf8; font-size: 0.78rem; font-weight: 700;">Running In Campus</div>
+          </div>
+
+          <!-- Card 3: Quick Enquiries -->
+          <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: #9333ea; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📥</div>
+              <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Admission Leads</span>
+            </div>
+            <div id="stat_total_enquiries" style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">5</div>
+            <div style="margin-top: 6px; color: #c084fc; font-size: 0.78rem; font-weight: 700;">New Web Inquiries</div>
+          </div>
+
+          <!-- Card 4: Confirmed Admissions -->
+          <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🎓</div>
+              <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Enrolled Trainees</span>
+            </div>
+            <div id="stat_total_enrolled" style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">2</div>
+            <div style="margin-top: 6px; color: #34d399; font-size: 0.78rem; font-weight: 700;">Confirmed Batch Seats</div>
+          </div>
+
+          <!-- Card 5: Total Revenue -->
+          <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: #16a34a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">💰</div>
+              <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Fee Collected</span>
+            </div>
+            <div id="stat_total_revenue" style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">₹9,300</div>
+            <div id="stat_total_fee_target" style="margin-top: 6px; color: #86efac; font-size: 0.78rem; font-weight: 700;">Total: ₹14,450</div>
+          </div>
+
+          <!-- Card 6: Total Users / Staff -->
+          <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="width: 42px; height: 42px; border-radius: 50%; background: #0284c7; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🏢</div>
+              <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">User Accounts</span>
+            </div>
+            <div id="stat_total_users" style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">53</div>
+            <div style="margin-top: 6px; color: #7dd3fc; font-size: 0.78rem; font-weight: 700;">Staff, Admin & Student</div>
+          </div>
+
+        </div>
+
+        <!-- ⚡ RECENT QUICK QUERIES & ADMISSION LEADS (VISIBLE ONLY TO SUPERADMIN, DIRECTOR, ADMIN & CENTER MANAGERS) -->
+        <div id="card_quick_queries_leads" style="display: none; background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
-              <h2 class="superadmin-exec-title">
-                👑 SuperAdmin Master Control Hub
-                <span class="superadmin-badge-pill">Master Access</span>
+              <h2 style="margin: 0; font-size: 1.2rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                <span>⚡ Recent Quick Queries & Admission Leads</span>
+                <span id="badge_lead_count" style="background: #9333ea; color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;">5 Leads</span>
               </h2>
-              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px; margin-bottom: 0;">
-                Gyanoday Rojgar Training Centre — Complete Center Performance, Admissions & Batch Control.
-              </p>
+              <p style="margin: 4px 0 0; color: #94a3b8; font-size: 0.82rem;">Live website leads for immediate counseling and admission follow-up.</p>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <button class="btn btn-outline-light btn-sm" onclick="if(event)event.preventDefault(); updateUrlHash("enquiries"); loadAdminEnquiries(); loadAdminCandidates(); loadAdminBatches();" style="font-weight: 700;">
-                🔄 Live Refresh All Data
-              </button>
-            </div>
+            <a href="/enquiries" class="btn btn-sm" style="background: rgba(147, 51, 234, 0.2); border: 1px solid rgba(147, 51, 234, 0.4); color: #c084fc; font-weight: 700; padding: 6px 14px; border-radius: 8px; text-decoration: none;">View All Leads &rarr;</a>
           </div>
 
-          <!-- KPI Summary Stats Grid -->
-          <div class="stats-grid">
-            <div class="stat-card" style="border-top: 4px solid #2563eb;">
-              <div class="stat-icon">🏛️</div>
-              <div class="stat-details">
-                <h4>Total Center Admissions</h4>
-                <div class="stat-val" id="adm_stat_total">0</div>
-              </div>
-            </div>
-            <div class="stat-card success" style="border-top: 4px solid #10b981;">
-              <div class="stat-icon">🎓</div>
-              <div class="stat-details">
-                <h4>Active Enrolled Students</h4>
-                <div class="stat-val" id="adm_stat_enrolled">0</div>
-              </div>
-            </div>
-            <div class="stat-card accent" style="border-top: 4px solid #8b5cf6;">
-              <div class="stat-icon">📅</div>
-              <div class="stat-details">
-                <h4>Center Batches</h4>
-                <div class="stat-val" id="adm_stat_batches">0</div>
-              </div>
-            </div>
-            <div class="stat-card warning" style="border-top: 4px solid #f59e0b;">
-              <div class="stat-icon">💰</div>
-              <div class="stat-details">
-                <h4>Total Fee Collected</h4>
-                <div class="stat-val" id="adm_stat_fee">₹0</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SuperAdmin Executive Quick Action Toolbar -->
-          <div class="exec-quick-toolbar">
-            <strong style="width: 100%; font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">⚡ SUPERADMIN QUICK ACTIONS:</strong>
-            <button class="exec-tool-btn primary" onclick="if(event)event.preventDefault(); openCreateBatchModal()">➕ Create Batch</button>
-            <button class="exec-tool-btn success" onclick="if(event)event.preventDefault(); openCreateAdminModal()">👤 Add Center Manager</button>
-            <button class="exec-tool-btn warning" onclick="if(event)event.preventDefault(); exportCsvAdmin()">📊 Export Student CSV</button>
-            <button class="exec-tool-btn dark" onclick="if(event)event.preventDefault(); switchDashboardView('students', document.getElementById('nav_item_students'))">👥 Student Directory</button>
-            <button class="exec-tool-btn primary" onclick="if(event)event.preventDefault(); loadAdminEnquiries()">📩 Refresh Leads</button>
-          </div>
-
-          <!-- WEBSITE ADMISSION ENQUIRIES SECTION (AT TOP OF DASHBOARD) -->
-          <div class="card" style="margin-top: 1rem; border: 2px solid #d97706;">
-            <div class="card-header" style="background: #fffbeb; border-bottom: 2px solid #fef08a; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;">📩</span>
-                <div>
-                  <h3 style="color: #92400e; font-size: 1.15rem; font-weight: 900; margin: 0;">Website Admission Enquiries (Latest Leads)</h3>
-                  <p style="font-size: 0.8rem; color: #b45309; margin: 0;">Leads & queries submitted from the public homepage enquiry form.</p>
-                </div>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-outline-primary btn-sm" onclick="if(event)event.preventDefault(); loadAdminEnquiries()">🔄 Refresh Enquiries</button>
-              </div>
-            </div>
-            <div class="card-body" style="padding: 1rem;">
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr style="background: #fef3c7;">
-                      <th>Enquiry Date & Time</th>
-                      <th>Student Full Name</th>
-                      <th>Mobile Number</th>
-                      <th>Course Selected</th>
-                      <th>District / City</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="enquiries_tbody">
-                    <tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">Loading admission enquiries...</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div id="enquiries_toggle_wrap" style="text-align: center; margin-top: 10px; display: none;">
-                <button type="button" id="enquiries_toggle_btn" class="btn btn-outline-primary btn-sm" onclick="if(event)event.preventDefault(); toggleAllEnquiriesDisplay()" style="font-weight: 700;">
-                  📂 Show All Enquiries
-                </button>
-              </div>
-            </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+                  <th style="padding: 10px 12px; font-weight: 700;">Candidate Name</th>
+                  <th style="padding: 10px 12px; font-weight: 700;">Mobile Contact</th>
+                  <th style="padding: 10px 12px; font-weight: 700;">Course Interested</th>
+                  <th style="padding: 10px 12px; font-weight: 700;">District / City</th>
+                  <th style="padding: 10px 12px; font-weight: 700;">Status</th>
+                  <th style="padding: 10px 12px; font-weight: 700; text-align: right;">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="leads_table_body">
+                <tr>
+                  <td colspan="6" style="padding: 20px; text-align: center; color: #64748b;">Loading live enquiry leads...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- VIEW 2: BATCH MANAGEMENT VIEW -->
-        <div id="view_batches" class="dashboard-view-panel" style="display: none;">
-          <div class="card" style="margin-top: 1.5rem;">
-            <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div>
-                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin: 0;">
-                  📅 Batch Management & Allocation
-                </h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                  Click on any colored header strip or arrow to expand/collapse Running (Green), Upcoming (Yellow), or Completed (Red) batches.
-                </p>
-              </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-primary btn-sm" onclick="if(event)event.preventDefault(); openCreateBatchModal()">➕ Create New Batch</button>
-              </div>
-            </div>
-
-            <div class="card-body" style="padding: 1.25rem;">
-              <!-- 1. TOP SECTION: 🟢 RUNNING BATCHES (DEFAULT EXPANDED) -->
-              <div id="section_running_batches" class="batch-accordion-group" style="margin-bottom: 1.2rem;">
-                <div class="batch-accordion-header running-header" onclick="if(event)event.preventDefault(); toggleBatchSection('grid_running_batches', 'arrow_running')">
-                  <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; pointer-events: none;">
-                    🟢 1. Running Batches ( <span id="cnt_running_batches">0</span> )
-                  </h4>
-                  <div style="display: flex; align-items: center; gap: 10px; pointer-events: none;">
-                    <span class="batch-badge-pill">Active & In Progress</span>
-                    <span id="arrow_running" class="accordion-arrow-icon">&#9660;</span>
-                  </div>
-                </div>
-                <div id="grid_running_batches" class="batch-accordion-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
-
-              <!-- 2. MIDDLE SECTION: 🟡 UPCOMING BATCHES (DEFAULT COLLAPSED) -->
-              <div id="section_upcoming_batches" class="batch-accordion-group" style="margin-bottom: 1.2rem;">
-                <div class="batch-accordion-header upcoming-header" onclick="if(event)event.preventDefault(); toggleBatchSection('grid_upcoming_batches', 'arrow_upcoming')">
-                  <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; pointer-events: none;">
-                    🟡 2. Upcoming Batches ( <span id="cnt_upcoming_batches">0</span> )
-                  </h4>
-                  <div style="display: flex; align-items: center; gap: 10px; pointer-events: none;">
-                    <span class="batch-badge-pill">Scheduled / New</span>
-                    <span id="arrow_upcoming" class="accordion-arrow-icon collapsed">&#9650;</span>
-                  </div>
-                </div>
-                <div id="grid_upcoming_batches" class="batch-accordion-body is-collapsed" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
-
-              <!-- 3. BOTTOM SECTION: 🔴 COMPLETED BATCHES (DEFAULT COLLAPSED) -->
-              <div id="section_completed_batches" class="batch-accordion-group" style="margin-bottom: 0.5rem;">
-                <div class="batch-accordion-header completed-header" onclick="if(event)event.preventDefault(); toggleBatchSection('grid_completed_batches', 'arrow_completed')">
-                  <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; pointer-events: none;">
-                    🔴 3. Completed Batches ( <span id="cnt_completed_batches">0</span> )
-                  </h4>
-                  <div style="display: flex; align-items: center; gap: 10px; pointer-events: none;">
-                    <span class="batch-badge-pill">Finished / Archived</span>
-                    <span id="arrow_completed" class="accordion-arrow-icon collapsed">&#9650;</span>
-                  </div>
-                </div>
-                <div id="grid_completed_batches" class="batch-accordion-body is-collapsed" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
+        <!-- REVENUE & ADMISSION STATISTICS CHART CARD -->
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0; font-size: 1.15rem; font-weight: 900; color: #ffffff;">Revenue & Admission Statistic</h2>
+            <div style="display: flex; align-items: center; gap: 16px; font-size: 0.82rem; font-weight: 700;">
+              <span style="display: flex; align-items: center; gap: 6px; color: #34d399;">
+                <span style="width: 10px; height: 10px; background: #10b981; border-radius: 2px;"></span> Total Fee: ₹14,450
+              </span>
+              <span style="display: flex; align-items: center; gap: 6px; color: #fb923c;">
+                <span style="width: 10px; height: 10px; background: #f97316; border-radius: 2px;"></span> Collected Fee: ₹9,300
+              </span>
             </div>
           </div>
-        </div>
 
-        <!-- VIEW 3: STUDENT DIRECTORY VIEW -->
-        <div id="view_students" class="dashboard-view-panel" style="display: none;">
-          <div class="card" style="margin-top: 1.5rem;">
-            <div class="card-header">
-              <h3>👥 Student Directory & Admission Review</h3>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-success btn-sm" onclick="if(event)event.preventDefault(); exportCsvAdmin()">📊 Export to Excel/CSV</button>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                <input type="text" class="form-control" id="adm_search" placeholder="🔍 Search Name, App No, Mobile..." oninput="loadAdminCandidates()" style="flex:1;">
-                <select class="form-control" id="adm_status_filter" onchange="loadAdminCandidates()" style="width: auto;">
-                  <option value="">All Statuses</option>
-                  <option value="Enrolled">Enrolled</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Pending">Pending</option>
-                </select>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>App No</th>
-                      <th>Student Name</th>
-                      <th>Course</th>
-                      <th>Batch Allotment</th>
-                      <th>Fee Status</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin_candidates_tbody">
-                    <!-- Rendered candidates -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          <!-- HTML5 Canvas Custom SVG Bar Chart -->
+          <div style="height: 220px; width: 100%; position: relative;">
+            <canvas id="dashboardRevenueChart" style="width: 100%; height: 100%;"></canvas>
           </div>
         </div>
 
       </div>
 
-      <!-- ================= PORTAL C: SUPERADMIN (OWNER MASTER CONTROL) ================= -->
-      <div id="portal_superadmin" class="portal-section" style="display: none;">
-        <div class="card" style="margin-top: 1.5rem;">
-          <div class="card-header" style="background: #0f172a; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <h3 style="color: #fbbf24; font-size: 1.2rem; font-weight: 900; margin: 0;">👑 Master User Accounts Control Center</h3>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Manage accounts, passwords, and permissions across all 5 roles (SuperAdmin, Director, Manager, Staff, Student).</p>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <button class="btn btn-warning btn-sm" onclick="if(event)event.preventDefault(); openCreateUserModal()" style="font-weight: 800; color: #0f172a;">➕ Create New User Account</button>
-              <button class="btn btn-outline-light btn-sm" onclick="if(event)event.preventDefault(); loadSuperAdminUsers()">🔄 Refresh Users</button>
-            </div>
+      <!-- RIGHT COLUMN: STUDENT ATTENDANCE WIDGET + INTERACTIVE CALENDAR -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- STUDENT / TRAINEE ATTENDANCE & STATUS BREAKDOWN WIDGET -->
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+          <h2 style="margin: 0 0 16px; font-size: 1.15rem; font-weight: 900; color: #ffffff;">Student Attendance</h2>
+          
+          <!-- Stacked Horizontal Bar -->
+          <div style="display: flex; height: 26px; border-radius: 6px; overflow: hidden; margin-bottom: 20px; gap: 3px; background: #0f172a; padding: 3px;">
+            <div style="flex: 87; background: #10b981; border-radius: 4px;" title="Present: 87%"></div>
+            <div style="flex: 40; background: #f97316; border-radius: 4px;" title="Absent: 40%"></div>
+            <div style="flex: 20; background: #a855f7; border-radius: 4px;" title="Late: 20%"></div>
+            <div style="flex: 20; background: #22c55e; border-radius: 4px;" title="Half Day: 20%"></div>
           </div>
 
-          <div class="card-body">
-            <!-- Filter Bar for User Roles -->
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center;">
-              <button class="btn btn-outline-primary btn-sm active" id="btn_role_all" onclick="if(event)event.preventDefault(); filterSuperAdminUsersRole('all', this)">All Roles (<span id="cnt_role_all">0</span>)</button>
-              <button class="btn btn-outline-primary btn-sm" id="btn_role_superadmin" onclick="if(event)event.preventDefault(); filterSuperAdminUsersRole('superadmin', this)">👑 SuperAdmins (<span id="cnt_role_superadmin">0</span>)</button>
-              <button class="btn btn-outline-primary btn-sm" id="btn_role_director" onclick="if(event)event.preventDefault(); filterSuperAdminUsersRole('director', this)">👔 Directors (<span id="cnt_role_director">0</span>)</button>
-              <button class="btn btn-outline-primary btn-sm" id="btn_role_admin" onclick="if(event)event.preventDefault(); filterSuperAdminUsersRole('admin', this)">🏛️ Managers (<span id="cnt_role_admin">0</span>)</button>
-              <button class="btn btn-outline-primary btn-sm" id="btn_role_staff" onclick="if(event)event.preventDefault(); filterSuperAdminUsersRole('staff', this)">🧑‍💼 Staff Executives (<span id="cnt_role_staff">0</span>)</button>
-              <button class="btn btn-outline-primary btn-sm" id="btn_role_student" onclick="if(event)event.preventDefault(); filterSuperAdminUsersRole('student', this)">👨‍🎓 Students (<span id="cnt_role_student">0</span>)</button>
-              
-              <input type="text" class="form-control" id="superadmin_user_search" placeholder="🔍 Search Name, Username, Mobile..." oninput="renderSuperAdminUsersTable()" style="flex: 1; min-width: 200px;">
+          <!-- Attendance Legend List -->
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px; color: #cbd5e1;">
+                <span style="width: 10px; height: 10px; background: #10b981; border-radius: 2px;"></span> Present
+              </span>
+              <strong style="color: #ffffff;">87%</strong>
             </div>
-
-            <div class="table-responsive">
-              <table class="table">
-                <thead>
-                  <tr style="background: #f1f5f9;">
-                    <th>ID</th>
-                    <th>User Details</th>
-                    <th>User Role</th>
-                    <th>Mobile / Contact</th>
-                    <th>Account Password (SuperAdmin View)</th>
-                    <th>Created On</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="superadmin_users_tbody">
-                  <tr><td colspan="7" style="text-align:center; padding: 1.5rem; color: #64748b;">Loading user accounts...</td></tr>
-                </tbody>
-              </table>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px; color: #cbd5e1;">
+                <span style="width: 10px; height: 10px; background: #f97316; border-radius: 2px;"></span> Absent
+              </span>
+              <strong style="color: #ffffff;">40%</strong>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px; color: #cbd5e1;">
+                <span style="width: 10px; height: 10px; background: #a855f7; border-radius: 2px;"></span> Late
+              </span>
+              <strong style="color: #ffffff;">20%</strong>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px; color: #cbd5e1;">
+                <span style="width: 10px; height: 10px; background: #22c55e; border-radius: 2px;"></span> Half day
+              </span>
+              <strong style="color: #ffffff;">20%</strong>
             </div>
           </div>
         </div>
+
+        <!-- LIVE INTERACTIVE CALENDAR WIDGET -->
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <h2 style="margin: 0; font-size: 1.15rem; font-weight: 900; color: #ffffff;">Calendar</h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" onclick="changeCalendarMonth(-1)" style="background: #0f172a; border: 1px solid #334155; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">&lt;</button>
+              <span id="cal_month_year" style="color: #ffffff; font-weight: 800; font-size: 0.88rem; min-width: 110px; text-align: center;">August 2026</span>
+              <button type="button" onclick="changeCalendarMonth(1)" style="background: #0f172a; border: 1px solid #334155; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">&gt;</button>
+            </div>
+          </div>
+
+          <!-- Days of Week Header -->
+          <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 10px;">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div id="calendar_days_grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 0.85rem; font-weight: 600;">
+            <!-- Days populated dynamically by JS -->
+          </div>
+        </div>
+
       </div>
-  </main>
+
+    </div>
+
   </main>
 
-  <script src="/static/js/app.js?v=3.0"></script>
+  <!-- UNIVERSAL MODAL: CHANGE PASSWORD -->
+  <div id="modal_change_password" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; color: #0f172a; border-radius: 14px; max-width: 480px; width: 90%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative;">
+      <button type="button" onclick="closeModal('modal_change_password')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
+      <div style="margin-bottom: 1.2rem;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">🔑 Change Account Password</h2>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Your new password will be hashed using SHA-256 and updated in database.</p>
+      </div>
+
+      <div id="modal_pwd_alert_box" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
+
+      <form id="modal_change_password_form" onsubmit="submitChangePasswordModal(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Current Password *</label>
+          <input type="password" id="modal_input_current_pwd" class="form-control" required placeholder="Enter current active password" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">New Password *</label>
+          <input type="password" id="modal_input_new_pwd" class="form-control" required placeholder="Enter new password (min 6 chars)" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Confirm New Password *</label>
+          <input type="password" id="modal_input_confirm_pwd" class="form-control" required placeholder="Re-enter new password" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-top: 8px; display: flex; gap: 10px;">
+          <button type="submit" id="modal_btn_submit_password" class="btn btn-primary" style="flex: 1; font-weight: 800; padding: 10px 18px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Update Password Now</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_change_password')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL MODAL: CHANGE PROFILE PICTURE -->
+  <div id="modal_change_avatar" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; color: #0f172a; border-radius: 14px; max-width: 460px; width: 90%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; text-align: center;">
+      <button type="button" onclick="closeModal('modal_change_avatar')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
+      <div style="margin-bottom: 1.2rem;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">🖼️ Account Profile Picture</h2>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Upload your personal photo or badge (JPG, PNG up to 5MB).</p>
+      </div>
+
+      <div id="modal_avatar_alert_box" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
+
+      <div style="display: flex; justify-content: center; margin-bottom: 1.2rem;">
+        <div class="user-avatar-circle" id="modal_preview_avatar_circle" style="width: 84px; height: 84px; font-size: 2.4rem; font-weight: 900; background: #ea580c; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">U</div>
+      </div>
+
+      <div style="margin-bottom: 1.2rem; text-align: left;">
+        <input type="file" id="modal_input_photo" accept="image/jpeg,image/png,image/webp" onchange="previewAvatarFile(event, 'modal_preview_avatar_circle')" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; box-sizing: border-box;">
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" id="modal_btn_save_photo" class="btn btn-primary" onclick="submitUploadAvatar('modal_input_photo', 'modal_avatar_alert_box', 'modal_btn_save_photo')" style="flex: 1; font-weight: 800; padding: 10px 18px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Upload Photo</button>
+        <button type="button" class="btn btn-outline-danger" onclick="removeProfilePicture('modal_avatar_alert_box', 'modal_btn_save_photo')" style="padding: 10px 14px; border-radius: 8px; border: 1px solid #ef4444; color: #dc2626; background: #fff; cursor: pointer; font-weight: 700;">Reset</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_change_avatar')" style="padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js?v=5.0"></script>
+  
+
+  
+
+
   <script>
     function toggleSidebarMenu(e) {
       if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
@@ -707,26 +372,305 @@
       if (drawer) drawer.classList.toggle("open");
       if (overlay) overlay.classList.toggle("open");
     }
+
     function toggleUserProfileDropdown(e) {
-      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      if (e) { if (e.stopPropagation) e.stopPropagation(); }
+      var wrapper = document.getElementById("header_user_bar");
       var dropdown = document.getElementById("user_profile_dropdown");
+      if (wrapper) wrapper.classList.toggle("active");
       if (dropdown) {
-        dropdown.classList.toggle("show");
-        dropdown.classList.toggle("active");
+        if (dropdown.style.display === "block") {
+          dropdown.style.display = "none";
+        } else {
+          dropdown.style.display = "block";
+        }
       }
     }
-    document.addEventListener("DOMContentLoaded", function() {
-      if (typeof checkAuth === "function") checkAuth();
-    });
+
+    function openChangePasswordModal(e) {
+      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      var wrapper = document.getElementById("header_user_bar");
+      if (wrapper) wrapper.classList.remove("active");
+      var dropdown = document.getElementById("user_profile_dropdown");
+      if (dropdown) dropdown.style.display = "none";
+
+      if (window.location.pathname === "/profile" && typeof window.openProfileTab === "function") {
+        window.openProfileTab("password");
+      } else {
+        openModal("modal_change_password");
+      }
+    }
+
+    function openChangeAvatarModal(e) {
+      if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+      var wrapper = document.getElementById("header_user_bar");
+      if (wrapper) wrapper.classList.remove("active");
+      var dropdown = document.getElementById("user_profile_dropdown");
+      if (dropdown) dropdown.style.display = "none";
+
+      if (window.location.pathname === "/profile" && typeof window.openProfileTab === "function") {
+        window.openProfileTab("avatar");
+      } else {
+        openModal("modal_change_avatar");
+      }
+    }
+
+    function openModal(id) {
+      var m = document.getElementById(id);
+      if (m) { m.style.display = "flex"; }
+    }
+
+    function closeModal(id) {
+      var m = document.getElementById(id);
+      if (m) { m.style.display = "none"; }
+    }
+
+    function renderAvatarCircle(elementId, profilePicUrl, fallbackLetter) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      if (profilePicUrl && profilePicUrl !== "null" && profilePicUrl !== "undefined" && profilePicUrl.trim() !== "") {
+        el.innerHTML = '<img src="' + profilePicUrl + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">';
+      } else {
+        el.innerHTML = '<span>' + ((fallbackLetter || "U").toUpperCase()) + '</span>';
+      }
+    }
+
+    function previewAvatarFile(event, previewCircleId) {
+      var file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Photo size exceeds 5MB limit. Please choose a smaller photo.");
+        event.target.value = "";
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        renderAvatarCircle(previewCircleId, e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitUploadAvatar(fileInputId, alertBoxId, btnId) {
+      var fileInput = document.getElementById(fileInputId);
+      var alertBox = document.getElementById(alertBoxId);
+      var btn = document.getElementById(btnId);
+
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        showAvatarAlert("Please select an image file from your computer first.", "danger");
+        return;
+      }
+
+      var file = fileInput.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        showAvatarAlert("Photo size exceeds 5MB limit. Please choose a smaller photo.", "danger");
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Uploading Photo...";
+      }
+
+      var reader = new FileReader();
+      reader.onload = async function(e) {
+        var base64Data = e.target.result;
+        try {
+          var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+          var headers = { "Content-Type": "application/json" };
+          if (token) headers["Authorization"] = "Bearer " + token;
+
+          var res = await fetch("/api/user/avatar", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ profile_picture: base64Data })
+          });
+
+          var data = await res.json();
+          if (res.ok && data.status === "success") {
+            showAvatarAlert("🎉 Profile picture saved permanently!", "success");
+            
+            var picUrl = data.profile_picture;
+            // Save to localStorage for instant 0ms persistence across all page refreshes
+            localStorage.setItem("userAvatar", picUrl);
+            
+            renderAvatarCircle("header_user_avatar", picUrl);
+            renderAvatarCircle("dropdown_user_avatar", picUrl);
+            renderAvatarCircle("prof_avatar_large", picUrl);
+            renderAvatarCircle("preview_avatar_circle", picUrl);
+            renderAvatarCircle("modal_preview_avatar_circle", picUrl);
+
+            setTimeout(function() {
+              if (alertBox) alertBox.style.display = "none";
+              closeModal("modal_change_avatar");
+            }, 1500);
+          } else {
+            showAvatarAlert(data.detail || "Failed to update profile picture.", "danger");
+          }
+        } catch (err) {
+          console.error("Upload error:", err);
+          showAvatarAlert("Error uploading photo. Please try again.", "danger");
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = "Save Profile Picture";
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+
+      function showAvatarAlert(msg, type) {
+        if (!alertBox) { alert(msg); return; }
+        alertBox.style.display = "block";
+        alertBox.innerText = msg;
+        if (type === "success") {
+          alertBox.style.background = "#dcfce7";
+          alertBox.style.color = "#15803d";
+          alertBox.style.border = "1px solid #86efac";
+        } else {
+          alertBox.style.background = "#fee2e2";
+          alertBox.style.color = "#b91c1c";
+          alertBox.style.border = "1px solid #fca5a5";
+        }
+      }
+    }
+
+    async function removeProfilePicture(alertBoxId, btnId) {
+      if (!confirm("Are you sure you want to remove your profile picture and reset to initials?")) return;
+
+      var alertBox = document.getElementById(alertBoxId);
+      var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+      var headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+
+      try {
+        var res = await fetch("/api/user/avatar", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({ profile_picture: "REMOVE" })
+        });
+
+        var data = await res.json();
+        if (res.ok && data.status === "success") {
+          localStorage.removeItem("userAvatar");
+          if (alertBox) {
+            alertBox.style.display = "block";
+            alertBox.innerText = "Profile picture removed. Initials restored.";
+            alertBox.style.background = "#dcfce7";
+            alertBox.style.color = "#15803d";
+          }
+          initHeaderUserProfile();
+        }
+      } catch (err) {
+        console.error("Remove photo error:", err);
+      }
+    }
+
+    function initHeaderUserProfile() {
+      // 1. Instant 0ms Load from LocalStorage on Page Refresh
+      var cachedAvatar = localStorage.getItem("userAvatar");
+      var cachedName = localStorage.getItem("userName");
+      var cachedRole = localStorage.getItem("userRole");
+
+      if (cachedAvatar && cachedAvatar.trim() !== "") {
+        renderAvatarCircle("header_user_avatar", cachedAvatar);
+        renderAvatarCircle("dropdown_user_avatar", cachedAvatar);
+        renderAvatarCircle("prof_avatar_large", cachedAvatar);
+        renderAvatarCircle("preview_avatar_circle", cachedAvatar);
+        renderAvatarCircle("modal_preview_avatar_circle", cachedAvatar);
+      }
+      if (cachedName) {
+        var elN = document.getElementById("header_user_name");
+        var elDN = document.getElementById("dropdown_user_fullname");
+        var elPN = document.getElementById("prof_full_name");
+        if (elN) elN.innerText = cachedName;
+        if (elDN) elDN.innerText = cachedName;
+        if (elPN) elPN.innerText = cachedName;
+      }
+      if (cachedRole) {
+        var elR = document.getElementById("header_user_role");
+        var elPR = document.getElementById("prof_role_badge");
+        if (elR) elR.innerText = cachedRole.toUpperCase();
+        if (elPR) elPR.innerText = cachedRole.toUpperCase();
+      }
+
+      // 2. Live Sync from Database (/api/auth/me)
+      var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+      var headers = token ? { "Authorization": "Bearer " + token } : {};
+      fetch("/api/auth/me", { cache: "no-store", headers: headers })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+          if (!data) return;
+          var u = data.user || data;
+          if (u && (u.username || u.full_name)) {
+            var name = u.full_name || u.username;
+            var pic = u.profile_picture || null;
+            var role = (u.role || "superadmin").toUpperCase();
+
+            localStorage.setItem("userAvatar", pic || "");
+            localStorage.setItem("userName", name);
+            localStorage.setItem("userRole", role);
+
+            var initial = (name || "U")[0].toUpperCase();
+            renderAvatarCircle("header_user_avatar", pic, initial);
+            renderAvatarCircle("dropdown_user_avatar", pic, initial);
+            renderAvatarCircle("prof_avatar_large", pic, initial);
+            renderAvatarCircle("preview_avatar_circle", pic, initial);
+            renderAvatarCircle("modal_preview_avatar_circle", pic, initial);
+
+            var elN = document.getElementById("header_user_name");
+            var elDN = document.getElementById("dropdown_user_fullname");
+            var elDU = document.getElementById("dropdown_user_username");
+            var elPN = document.getElementById("prof_full_name");
+            var elPU = document.getElementById("prof_username");
+
+            if (elN) elN.innerText = name;
+            if (elDN) elDN.innerText = name;
+            if (elDU) elDU.innerText = "id: " + u.username;
+            if (elPN) elPN.innerText = name;
+            if (elPU) elPU.innerText = u.username;
+          }
+        }).catch(function(e) {});
+    }
+
+    function logoutUser(e) {
+      if (e) {
+        if (e.stopPropagation) e.stopPropagation();
+        if (e.preventDefault) e.preventDefault();
+      }
+      try {
+        var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token") || sessionStorage.getItem("token");
+        if (token) {
+          fetch("/api/auth/logout", {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+          }).catch(function() {});
+        }
+      } catch (err) {}
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      window.location.replace("/login");
+    }
+
     document.addEventListener("click", function(e) {
       var wrapper = document.getElementById("header_user_bar");
       var dropdown = document.getElementById("user_profile_dropdown");
-      if (dropdown && wrapper && !wrapper.contains(e.target)) {
-        dropdown.classList.remove("show");
-        dropdown.classList.remove("active");
-        dropdown.style.setProperty("display", "none", "important");
+      if (wrapper && !wrapper.contains(e.target)) {
+        wrapper.classList.remove("active");
+        if (dropdown) dropdown.style.display = "none";
       }
     });
+
+    // Run on instant load
+    initHeaderUserProfile();
   </script>
+
 </body>
 </html>

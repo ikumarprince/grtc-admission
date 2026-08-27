@@ -549,11 +549,12 @@ def get_user_by_id(uid):
             cursor.execute("SELECT * FROM users WHERE id = ?", (uid,))
         row = cursor.fetchone()
         if row:
-            if isinstance(row, dict):
-                return row
             col_names = [d[0] for d in cursor.description] if cursor.description else []
             if col_names:
-                return dict(zip(col_names, row))
+                d = dict(zip(col_names, row))
+                if "profile_picture" not in d:
+                    d["profile_picture"] = None
+                return d
             return {
                 "id": row[0],
                 "username": row[1],
@@ -565,6 +566,8 @@ def get_user_by_id(uid):
                 "center_name": row[7] if len(row) > 7 else "Main Campus",
                 "candidate_id": row[8] if len(row) > 8 else None,
                 "status": row[9] if len(row) > 9 else "active",
+                "created_at": row[10] if len(row) > 10 else "",
+                "profile_picture": row[11] if len(row) > 11 else None,
                 "plain_password": row[12] if len(row) > 12 else ""
             }
         return None
@@ -696,31 +699,45 @@ def update_user(uid, data):
     fields = []
     values = []
     
-    allowed = ["full_name", "mobile", "email", "role", "center_name", "status", "profile_picture"]
+    allowed = ["full_name", "mobile", "email", "role", "center_name", "status", "profile_picture", "plain_password", "password_hash"]
     for k in allowed:
         if k in data:
-            fields.append(f"{k} = ?")
+            if IS_POSTGRES:
+                fields.append(f"{k} = %s")
+            else:
+                fields.append(f"{k} = ?")
             values.append(data[k])
             
     if "password" in data and data["password"]:
-        fields.append("password_hash = ?")
         p_raw = str(data["password"]).strip()
-        validate_password(p_raw)
-        values.append(password_to_ascii(p_raw))
+        p_hash = hash_password(p_raw)
+        if IS_POSTGRES:
+            fields.append("password_hash = %s")
+            fields.append("plain_password = %s")
+        else:
+            fields.append("password_hash = ?")
+            fields.append("plain_password = ?")
+        values.append(p_hash)
+        values.append(p_raw)
         
     if not fields:
         conn.close()
         return None
         
     values.append(uid)
-    query = f"UPDATE users SET {', '.join(fields)} WHERE id = ?"
-    cursor.execute(query, values)
-    conn.commit()
-    
-    cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at FROM users WHERE id = ?", (uid,))
-    user = cursor.fetchone()
-    conn.close()
-    return user
+    if IS_POSTGRES:
+        query = f"UPDATE users SET {', '.join(fields)} WHERE id = %s"
+    else:
+        query = f"UPDATE users SET {', '.join(fields)} WHERE id = ?"
+        
+    try:
+        cursor.execute(query, values)
+        conn.commit()
+    except Exception as e:
+        print(f"Error in update_user: {e}")
+    finally:
+        conn.close()
+    return get_user_by_id(uid)
 
 def delete_user(uid):
     conn = get_db_connection()
@@ -1327,41 +1344,42 @@ def get_all_users_for_superadmin(current_user_role: str = "superadmin"):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    role = (current_user_role or "superadmin").lower()
+    role = (current_user_role or "guest").lower()
     
-    if role == "superadmin":
-        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, plain_password, password_hash FROM users ORDER BY id ASC")
-    elif role == "director":
-        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role != 'superadmin' ORDER BY id ASC")
-    elif role in ["admin", "center_manager", "manager"]:
-        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role NOT IN ('superadmin', 'director') ORDER BY id ASC")
-    elif role == "staff":
-        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role IN ('staff', 'student') ORDER BY id ASC")
-    else:
-        cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, password_hash FROM users WHERE role = 'student' ORDER BY id ASC")
-        
-    rows = cursor.fetchall()
-    conn.close()
-    
-    user_list = []
-    for r in rows:
-        if isinstance(r, dict):
-            user_list.append(r)
+    try:
+        # STRICT RULE: ONLY superadmin gets real plain_password. All other roles get masked '********'
+        if role == "superadmin":
+            cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, plain_password, password_hash, profile_picture FROM users ORDER BY id ASC")
         else:
-            user_list.append({
-                "id": r[0],
-                "username": r[1],
-                "full_name": r[2],
-                "mobile": r[3],
-                "email": r[4],
-                "role": r[5],
-                "center_name": r[6],
-                "status": r[7],
-                "created_at": r[8],
-                "plain_password": r[9] if role == "superadmin" else "********",
-                "password_hash": r[10]
-            })
-    return user_list
+            cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, '********' as password_hash, profile_picture FROM users ORDER BY id ASC")
+            
+        rows = cursor.fetchall()
+        result = []
+        for r in rows:
+            if isinstance(r, dict):
+                result.append(r)
+            else:
+                col_names = [d[0] for d in cursor.description] if cursor.description else []
+                if col_names:
+                    result.append(dict(zip(col_names, r)))
+                else:
+                    result.append({
+                        "id": r[0],
+                        "username": r[1],
+                        "full_name": r[2],
+                        "mobile": r[3],
+                        "email": r[4],
+                        "role": r[5],
+                        "center_name": r[6],
+                        "status": r[7],
+                        "created_at": r[8],
+                        "plain_password": r[9] if role == "superadmin" else "********",
+                        "password_hash": r[10] if role == "superadmin" else "********",
+                        "profile_picture": r[11] if len(r) > 11 else None
+                    })
+        return result
+    finally:
+        conn.close()
 
 def create_user_by_superadmin(data: dict):
     conn = get_db_connection()
