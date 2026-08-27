@@ -474,11 +474,27 @@
         const data = await res.json();
 
         if (res.ok && data.token) {
+          const role = (data.user.role || "student").toLowerCase();
           localStorage.setItem("agy_auth_token", data.token);
           localStorage.setItem("authToken", data.token);
-          localStorage.setItem("userRole", data.user.role);
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("userRole", role);
+          localStorage.setItem("userName", data.user.full_name || data.user.username);
+          localStorage.setItem("userAvatar", data.user.profile_picture || "");
           localStorage.setItem("userData", JSON.stringify(data.user));
-          window.location.href = "/dashboard";
+          
+          document.cookie = "token=" + data.token + "; path=/; max-age=864000";
+          document.cookie = "auth_token=" + data.token + "; path=/; max-age=864000";
+          document.cookie = "user_role=" + role + "; path=/; max-age=864000";
+
+          let dest = data.redirect_url || "/dashboard";
+          if (role === "director") dest = "/dashboard/director";
+          else if (role === "superadmin") dest = "/dashboard/superadmin";
+          else if (role === "admin" || role === "center_manager") dest = "/dashboard/admin";
+          else if (role === "staff") dest = "/dashboard/staff";
+          else if (role === "student") dest = "/dashboard/student";
+
+          window.location.replace(dest);
         } else {
           errBox.style.display = "block";
           errBox.innerText = data.detail || "Invalid Login ID or Password.";

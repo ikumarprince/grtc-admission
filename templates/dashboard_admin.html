@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SuperAdmin Dashboard & Master CMS - GRTC Live Portal</title>
+  <title>Center Manager Dashboard - GRTC Live Portal</title>
   <link rel="icon" type="image/jpeg" href="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg">
   <link rel="stylesheet" href="/static/css/style.css?v=7.0">
 </head>
-<body id="page_dash_superadmin" style="background: #0b1329; color: #f8fafc; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif;">
+<body id="page_dash_admin" style="background: #0b1329; color: #f8fafc; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif;">
   
   <!-- UNIVERSAL MASTER HEADER BAR -->
   <header class="master-header-bar" style="background: #0f172a; color: #ffffff; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10000; border-bottom: 1px solid #1e293b; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
@@ -33,7 +33,7 @@
           <span id="header_user_initials">U</span>
         </div>
         <span id="header_user_name" class="user-trigger-name" style="color: #ffffff;">User Account</span>
-        <span id="header_user_role" class="role-pill superadmin" style="background: #10b981; color: #042f2e; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;">SUPERADMIN</span>
+        <span id="header_user_role" class="role-pill admin" style="background: #34d399; color: #064e3b; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;">CENTER MANAGER</span>
         <span style="font-size: 0.75rem; opacity: 0.85; color: #94a3b8;">▼</span>
       </button>
 
@@ -59,23 +59,23 @@
   </header>
 
 
-  <!-- SUPERADMIN DEDICATED SIDEBAR MENU -->
+  <!-- CENTER MANAGER DEDICATED SIDEBAR MENU -->
   <aside class="sidebar-drawer" id="sidebar_drawer">
     <div class="sidebar-header">
       <div class="sidebar-brand-title">
         <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 24px; width: auto; border-radius: 50%; margin-right: 8px;">
-        SuperAdmin Master Menu
+        Center Manager Menu
       </div>
       <button type="button" onclick="toggleSidebarMenu(event)" style="background: none; border: none; color: #ffffff; font-size: 1.3rem; cursor: pointer;">&times;</button>
     </div>
     <nav class="sidebar-nav-menu">
-      <div class="sidebar-nav-group"><a href="/dashboard/superadmin" class="sidebar-nav-item active"><span>🏠 Dashboard Overview</span></a></div>
-      <div class="sidebar-nav-group"><a href="/users" class="sidebar-nav-item"><span>👥 Master User Accounts (Full Edit)</span></a></div>
-      <div class="sidebar-nav-group"><a href="/batches" class="sidebar-nav-item"><span>🗓️ Batches & Courses</span></a></div>
-      <div class="sidebar-nav-group"><a href="/enquiries" class="sidebar-nav-item"><span>📥 Admission Enquiries & Leads</span></a></div>
-      <div class="sidebar-nav-group"><a href="/candidates" class="sidebar-nav-item"><span>🎓 Candidate Directory</span></a></div>
-      <div class="sidebar-nav-group"><a href="/reports" class="sidebar-nav-item"><span>📊 Financial Reports & Analytics</span></a></div>
-      <div class="sidebar-nav-group"><a href="/profile" class="sidebar-nav-item"><span>⚙️ Portal Settings & Master CMS</span></a></div>
+      <div class="sidebar-nav-group"><a href="/dashboard/admin" class="sidebar-nav-item active"><span>🏠 Campus Dashboard</span></a></div>
+      <div class="sidebar-nav-group"><a href="/users" class="sidebar-nav-item"><span>👥 Campus Users Directory (Read-Only)</span></a></div>
+      <div class="sidebar-nav-group"><a href="/batches" class="sidebar-nav-item"><span>🗓️ Campus Batches & Schedules</span></a></div>
+      <div class="sidebar-nav-group"><a href="/candidates" class="sidebar-nav-item"><span>🎓 Candidate Admissions</span></a></div>
+      <div class="sidebar-nav-group"><a href="/enquiries" class="sidebar-nav-item"><span>📥 Campus Leads & Inquiries</span></a></div>
+      <div class="sidebar-nav-group"><a href="/reports" class="sidebar-nav-item"><span>💰 Campus Fee Collections</span></a></div>
+      <div class="sidebar-nav-group"><a href="/profile" class="sidebar-nav-item"><span>⚙️ Center Profile</span></a></div>
     </nav>
   </aside>
   <div class="sidebar-overlay" id="sidebar_overlay" onclick="toggleSidebarMenu(event)"></div>
@@ -83,193 +83,71 @@
   <main class="main-content-container" style="padding: 1.8rem 1.5rem; max-width: 1440px; margin: auto;">
     <div style="margin-bottom: 1.8rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
       <div>
-        <h1 style="margin: 0; font-size: 1.65rem; font-weight: 900; color: #ffffff;">SuperAdmin Master Dashboard & CMS</h1>
+        <h1 style="margin: 0; font-size: 1.65rem; font-weight: 900; color: #ffffff;">Campus Operations Dashboard</h1>
         <p style="margin: 4px 0 0; color: #94a3b8; font-size: 0.88rem;">
-          <span style="color: #10b981; font-weight: 700;">Master Portal</span> &rarr; Complete oversight of all centers, candidates, revenue, users, and homepage slider banners.
+          <span style="color: #34d399; font-weight: 700;">Branch Management</span> &rarr; Campus batches, student admissions, fees, and staff oversight.
         </p>
       </div>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button class="btn btn-sm btn-primary" onclick="openPortalCmsModal()" style="background: #9333ea; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer;">🎨 Edit Homepage Slides & CMS</button>
-        <a href="/users" class="btn btn-sm btn-primary" style="background: #1e3a8a; color: #fff; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-weight: 700;">👥 Master Users Control</a>
-        <button class="btn btn-sm" onclick="loadSuperAdminDashboard()" style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; font-weight: 700; border-radius: 8px; padding: 8px 14px; cursor: pointer;">🔄 Live Refresh</button>
+      <div style="display: flex; gap: 10px;">
+        <a href="/batches" class="btn btn-sm btn-primary" style="background: #059669; color: #fff; text-decoration: none; padding: 7px 14px; border-radius: 8px; font-weight: 700;">+ New Batch</a>
+        <a href="/candidates" class="btn btn-sm btn-primary" style="background: #1e3a8a; color: #fff; text-decoration: none; padding: 7px 14px; border-radius: 8px; font-weight: 700;">+ Candidates</a>
       </div>
     </div>
 
-    <!-- 6 KPI METRIC CARDS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <!-- 4 CENTER KPI CARDS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #ea580c; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">👥</div>
-          <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Total Candidates</span>
-        </div>
-        <div id="stat_sa_candidates" style="font-size: 1.6rem; font-weight: 900; color: #fff;">38</div>
-        <div style="margin-top: 6px; color: #10b981; font-size: 0.78rem; font-weight: 700;">+10% ↗ This Month</div>
+        <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Active Campus Batches</span>
+        <div style="font-size: 1.7rem; font-weight: 900; color: #fff; margin-top: 4px;">39</div>
+        <div style="color: #38bdf8; font-size: 0.78rem; font-weight: 700; margin-top: 4px;">Scheduled In Classrooms</div>
       </div>
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🗓️</div>
-          <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Active Batches</span>
-        </div>
-        <div id="stat_sa_batches" style="font-size: 1.6rem; font-weight: 900; color: #fff;">39</div>
-        <div style="margin-top: 6px; color: #38bdf8; font-size: 0.78rem; font-weight: 700;">Across All Centers</div>
+        <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Total Candidates</span>
+        <div style="font-size: 1.7rem; font-weight: 900; color: #fff; margin-top: 4px;">38</div>
+        <div style="color: #34d399; font-size: 0.78rem; font-weight: 700; margin-top: 4px;">Active Roster</div>
       </div>
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #9333ea; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📥</div>
-          <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Admission Leads</span>
-        </div>
-        <div id="stat_sa_leads" style="font-size: 1.6rem; font-weight: 900; color: #fff;">5</div>
-        <div style="margin-top: 6px; color: #c084fc; font-size: 0.78rem; font-weight: 700;">Online Enquiries</div>
+        <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Campus Leads</span>
+        <div style="font-size: 1.7rem; font-weight: 900; color: #fff; margin-top: 4px;">5</div>
+        <div style="color: #c084fc; font-size: 0.78rem; font-weight: 700; margin-top: 4px;">Counseling Followups</div>
       </div>
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #059669; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🎓</div>
-          <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Enrolled Trainees</span>
-        </div>
-        <div id="stat_sa_enrolled" style="font-size: 1.6rem; font-weight: 900; color: #fff;">2</div>
-        <div style="margin-top: 6px; color: #34d399; font-size: 0.78rem; font-weight: 700;">Confirmed Admissions</div>
-      </div>
-      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #16a34a; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">💰</div>
-          <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Fee Revenue</span>
-        </div>
-        <div id="stat_sa_revenue" style="font-size: 1.6rem; font-weight: 900; color: #fff;">₹9,300</div>
-        <div style="margin-top: 6px; color: #86efac; font-size: 0.78rem; font-weight: 700;">Total: ₹14,450</div>
-      </div>
-      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🏢</div>
-          <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">User Accounts</span>
-        </div>
-        <div id="stat_sa_users" style="font-size: 1.6rem; font-weight: 900; color: #fff;">54</div>
-        <div style="margin-top: 6px; color: #7dd3fc; font-size: 0.78rem; font-weight: 700;">Full System Access</div>
+        <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">Fee Collected</span>
+        <div style="font-size: 1.7rem; font-weight: 900; color: #fff; margin-top: 4px;">₹9,300</div>
+        <div style="color: #86efac; font-size: 0.78rem; font-weight: 700; margin-top: 4px;">Campus Realization</div>
       </div>
     </div>
 
-    <!-- MAIN 2-COL LAYOUT -->
+    <!-- CENTER MAIN 2-COL -->
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        <!-- QUICK LEADS FEED -->
-        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 24px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-            <h2 style="margin: 0; font-size: 1.2rem; font-weight: 900; color: #fff;">⚡ Recent Quick Queries & Admission Leads</h2>
-            <a href="/enquiries" style="color: #c084fc; font-weight: 700; text-decoration: none; font-size: 0.88rem;">View All Leads &rarr;</a>
-          </div>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
-              <thead>
-                <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
-                  <th style="padding: 10px;">Candidate</th>
-                  <th style="padding: 10px;">Mobile</th>
-                  <th style="padding: 10px;">Course</th>
-                  <th style="padding: 10px;">Status</th>
-                  <th style="padding: 10px; text-align: right;">Action</th>
-                </tr>
-              </thead>
-              <tbody id="sa_leads_tbody">
-                <tr><td colspan="5" style="padding: 15px; text-align: center; color: #64748b;">Loading leads...</td></tr>
-              </tbody>
-            </table>
-          </div>
+      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h2 style="margin: 0; font-size: 1.15rem; font-weight: 900; color: #fff;">⚡ Campus Admission Leads</h2>
+          <a href="/enquiries" style="color: #38bdf8; font-weight: 700; text-decoration: none; font-size: 0.85rem;">View All Leads &rarr;</a>
         </div>
-
-        <!-- REVENUE CHART -->
-        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 24px;">
-          <h2 style="margin: 0 0 16px; font-size: 1.15rem; font-weight: 900; color: #fff;">Revenue & Admission Statistic</h2>
-          <div style="height: 200px; width: 100%;"><canvas id="sa_revenue_chart" style="width: 100%; height: 100%;"></canvas></div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+                <th style="padding: 10px;">Name</th>
+                <th style="padding: 10px;">Mobile</th>
+                <th style="padding: 10px;">Course</th>
+                <th style="padding: 10px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin_leads_tbody">
+              <tr><td colspan="4" style="padding: 15px; text-align: center; color: #64748b;">Loading campus inquiries...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- RIGHT COL: ATTENDANCE + CALENDAR -->
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 20px;">
-          <h2 style="margin: 0 0 16px; font-size: 1.15rem; font-weight: 900; color: #fff;">Student Attendance Roster</h2>
-          <div style="display: flex; height: 24px; border-radius: 6px; overflow: hidden; margin-bottom: 16px; background: #0f172a; padding: 3px; gap: 3px;">
-            <div style="flex: 87; background: #10b981; border-radius: 4px;"></div>
-            <div style="flex: 40; background: #f97316; border-radius: 4px;"></div>
-            <div style="flex: 20; background: #a855f7; border-radius: 4px;"></div>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: #cbd5e1;">
-            <div style="display: flex; justify-content: space-between;"><span>🟢 Present Rate:</span><strong>87%</strong></div>
-            <div style="display: flex; justify-content: space-between;"><span>🟠 Absent Rate:</span><strong>40%</strong></div>
-            <div style="display: flex; justify-content: space-between;"><span>🟣 Late/Half Day:</span><strong>20%</strong></div>
-          </div>
-        </div>
-
-        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 20px;">
-          <h2 style="margin: 0 0 12px; font-size: 1.15rem; font-weight: 900; color: #fff;">Master Batch Calendar</h2>
-          <div id="sa_calendar_grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 0.8rem;"></div>
-        </div>
+      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px 20px;">
+        <h2 style="margin: 0 0 12px; font-size: 1.15rem; font-weight: 900; color: #fff;">Campus Batch Timings</h2>
+        <div id="admin_calendar_grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 0.8rem;"></div>
       </div>
     </div>
   </main>
-
-  <!-- MASTER MODAL: HOMEPAGE SLIDER & PORTAL CMS MANAGER -->
-  <div id="modal_portal_cms" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999999; align-items: center; justify-content: center;">
-    <div class="modal-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; max-width: 680px; width: 92%; padding: 2rem; box-shadow: 0 20px 45px rgba(0,0,0,0.4); position: relative; max-height: 90vh; overflow-y: auto;">
-      <button type="button" onclick="closeModal('modal_portal_cms')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
-      
-      <div style="margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #0f172a;">🎨 Master Portal CMS & Homepage Slider Manager</h2>
-        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Upload new slider images, update banner headings, announcement alerts, and contact details directly.</p>
-      </div>
-
-      <div id="modal_cms_alert" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1.2rem; font-weight: 700; font-size: 0.9rem;"></div>
-
-      <form id="form_portal_cms" onsubmit="submitPortalCms(event)" style="display: flex; flex-direction: column; gap: 16px;">
-        
-        <!-- SLIDE 1 MANAGER -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px;">
-          <strong style="color: #1e3a8a; font-size: 0.95rem; display: block; margin-bottom: 8px;">🖼️ Homepage Banner Slide 1</strong>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
-            <div>
-              <label style="font-size: 0.8rem; font-weight: 700; color: #475569;">Slide 1 Main Heading</label>
-              <input type="text" id="cms_slide1_title" class="form-control" placeholder="Transform Your Future with Professional Skill Training" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-            </div>
-            <div>
-              <label style="font-size: 0.8rem; font-weight: 700; color: #475569;">Slide 1 Tagline</label>
-              <input type="text" id="cms_slide1_subtitle" class="form-control" placeholder="Govt. Recognized Certification & 100% Placement Support" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-            </div>
-          </div>
-          <div>
-            <label style="font-size: 0.8rem; font-weight: 700; color: #475569;">Upload New Slide 1 Photo (JPG/PNG)</label>
-            <input type="file" id="cms_slide1_file" accept="image/*" class="form-control" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-          </div>
-        </div>
-
-        <!-- SLIDE 2 MANAGER -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px;">
-          <strong style="color: #1e3a8a; font-size: 0.95rem; display: block; margin-bottom: 8px;">🖼️ Homepage Banner Slide 2</strong>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
-            <div>
-              <label style="font-size: 0.8rem; font-weight: 700; color: #475569;">Slide 2 Main Heading</label>
-              <input type="text" id="cms_slide2_title" class="form-control" placeholder="Modern Computer Labs & Practical Training" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-            </div>
-            <div>
-              <label style="font-size: 0.8rem; font-weight: 700; color: #475569;">Slide 2 Tagline</label>
-              <input type="text" id="cms_slide2_subtitle" class="form-control" placeholder="Computer IT, Hotel Management, Healthcare GDA" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-            </div>
-          </div>
-          <div>
-            <label style="font-size: 0.8rem; font-weight: 700; color: #475569;">Upload New Slide 2 Photo (JPG/PNG)</label>
-            <input type="file" id="cms_slide2_file" accept="image/*" class="form-control" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-          </div>
-        </div>
-
-        <!-- BROADCAST ANNOUNCEMENT ALERT -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px;">
-          <strong style="color: #1e3a8a; font-size: 0.95rem; display: block; margin-bottom: 8px;">📢 Live Broadcast Announcement (Appears on All Dashboards)</strong>
-          <input type="text" id="cms_broadcast_text" class="form-control" placeholder="e.g. Admissions Open for September 2026 Batches! Limited Seats Available." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-        </div>
-
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="submit" id="btn_save_portal_cms" class="btn btn-primary" style="padding: 10px 24px; border-radius: 8px; background: #9333ea; color: #fff; font-weight: 800; border: none; cursor: pointer;">Save & Publish to Live Portal</button>
-          <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_portal_cms')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   
   <!-- UNIVERSAL MODAL: CHANGE PASSWORD -->

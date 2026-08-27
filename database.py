@@ -105,8 +105,13 @@ def get_db_connection():
         conn = psycopg2.connect(url, cursor_factory=RealDictCursor)
         return conn
     else:
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH, timeout=60.0)
         conn.row_factory = sqlite3.Row
+        try:
+            conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA busy_timeout=60000;")
+        except Exception:
+            pass
         return conn
 
 def password_to_ascii(password: str) -> str:
@@ -673,35 +678,37 @@ def register_user(username=None, password="grtc@123", full_name="", mobile="", e
     clean_email = (email or "").strip().lower()
     uname = (username or clean_mob or clean_email).strip().lower()
     
+    p_raw = str(password or "grtc@123").strip()
+    p_hash = hash_password(p_raw)
+    
     # Check duplicate
-    cursor.execute("SELECT id FROM users WHERE LOWER(username) = ? OR mobile = ? OR (email != '' AND LOWER(email) = ?)", (uname, clean_mob, clean_email))
+    if IS_POSTGRES:
+        cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(%s) OR (mobile != '' AND mobile = %s) OR (email != '' AND LOWER(email) = %s)", (uname, clean_mob, clean_email))
+    else:
+        cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?) OR (mobile != '' AND mobile = ?) OR (email != '' AND LOWER(email) = ?)", (uname, clean_mob, clean_email))
+        
     existing = cursor.fetchone()
     if existing:
         conn.close()
         raise ValueError("User with this mobile/username/email already exists.")
         
-    p_raw = str(password or "grtc@123").strip()
-    validate_password(p_raw)
-    p_store = password_to_ascii(p_raw)
-    
     if IS_POSTGRES:
         cursor.execute("""
-        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, candidate_id, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active') RETURNING id
-        """, (uname, p_store, full_name, clean_mob, clean_email, role, center_name, candidate_id))
-        uid = cursor.fetchone()["id"]
+        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, candidate_id, status, plain_password)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'active', %s) RETURNING id
+        """, (uname, p_hash, full_name, clean_mob, clean_email, role, center_name, candidate_id, p_raw))
+        row = cursor.fetchone()
+        uid = row["id"] if isinstance(row, dict) else row[0]
     else:
         cursor.execute("""
-        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, candidate_id, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
-        """, (uname, p_store, full_name, clean_mob, clean_email, role, center_name, candidate_id))
-        uid = cursor.cursor.lastrowid
+        INSERT INTO users (username, password_hash, full_name, mobile, email, role, center_name, candidate_id, status, plain_password)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+        """, (uname, p_hash, full_name, clean_mob, clean_email, role, center_name, candidate_id, p_raw))
+        uid = cursor.lastrowid
 
     conn.commit()
-    cursor.execute("SELECT * FROM users WHERE id = ?", (uid,))
-    user = cursor.fetchone()
     conn.close()
-    return user
+    return get_user_by_id(uid)
 
 def get_all_users(role=None):
     conn = get_db_connection()
@@ -730,7 +737,7 @@ def update_user(uid, data):
     fields = []
     values = []
     
-    allowed = ["full_name", "mobile", "email", "role", "center_name", "status", "profile_picture", "plain_password", "password_hash"]
+    allowed = ["username", "full_name", "mobile", "email", "role", "center_name", "status", "profile_picture", "plain_password", "password_hash"]
     for k in allowed:
         if k in data:
             if IS_POSTGRES:
@@ -771,16 +778,23 @@ def update_user(uid, data):
     return get_user_by_id(uid)
 
 def delete_user(uid):
+    try:
+        uid_int = int(str(uid).strip())
+    except Exception:
+        return False
+        
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM users WHERE id = ?", (uid,))
-    deleted = cursor.rowcount > 0
-    
-    conn.commit()
-    conn.close()
-    return deleted
-
-# ================= SETTINGS =================
+    try:
+        if IS_POSTGRES:
+            cursor.execute("DELETE FROM users WHERE id = %s", (uid_int,))
+        else:
+            cursor.execute("DELETE FROM users WHERE id = ?", (uid_int,))
+        deleted = cursor.rowcount > 0
+        conn.commit()
+        return deleted
+    finally:
+        conn.close()
 
 def get_settings():
     conn = get_db_connection()
@@ -1378,11 +1392,23 @@ def get_all_users_for_superadmin(current_user_role: str = "superadmin"):
     role = (current_user_role or "guest").lower()
     
     try:
-        # STRICT RULE: ONLY superadmin gets real plain_password. All other roles get masked '********'
+        # 1. SuperAdmin: Full access to all accounts + plain passwords
         if role == "superadmin":
             cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, plain_password, password_hash, profile_picture FROM users ORDER BY id ASC")
+        # 2. Director: Hierarchy below (Admin, Staff, Student) - Read-only, Masked Passwords
+        elif role == "director":
+            if IS_POSTGRES:
+                cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, '********' as password_hash, profile_picture FROM users WHERE role NOT IN ('superadmin', 'director') ORDER BY id ASC")
+            else:
+                cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, '********' as password_hash, profile_picture FROM users WHERE role NOT IN ('superadmin', 'director') ORDER BY id ASC")
+        # 3. Center Manager / Admin: Hierarchy below (Staff, Student) - Read-only, Masked Passwords
+        elif role in ["admin", "center_manager", "manager"]:
+            if IS_POSTGRES:
+                cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, '********' as password_hash, profile_picture FROM users WHERE role IN ('staff', 'student') ORDER BY id ASC")
+            else:
+                cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, '********' as password_hash, profile_picture FROM users WHERE role IN ('staff', 'student') ORDER BY id ASC")
         else:
-            cursor.execute("SELECT id, username, full_name, mobile, email, role, center_name, status, created_at, '********' as plain_password, '********' as password_hash, profile_picture FROM users ORDER BY id ASC")
+            return []
             
         rows = cursor.fetchall()
         result = []

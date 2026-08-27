@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Master User Accounts & Security Control - GRTC Live Portal</title>
+  <title>Staff & Trainees Directory - GRTC Live Portal</title>
   <link rel="icon" type="image/jpeg" href="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg">
-  <link rel="stylesheet" href="/static/css/style.css?v=8.0">
+  <link rel="stylesheet" href="/static/css/style.css?v=10.0">
 </head>
-<body id="page_users_superadmin" style="background: #f8fafc; color: #0f172a; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif;">
+<body id="page_users_directory" style="background: #f8fafc; color: #0f172a; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif;">
   
   <!-- UNIVERSAL MASTER HEADER BAR -->
   <header class="master-header-bar" style="background: #0f172a; color: #ffffff; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10000; border-bottom: 1px solid #1e293b; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
@@ -29,22 +29,22 @@
     <!-- Right Side Interactive User Profile Badge & Dropdown -->
     <div class="user-profile-menu-wrapper" id="header_user_bar" onclick="toggleUserProfileDropdown(event)" tabindex="0">
       <button type="button" class="user-profile-trigger" id="user_profile_trigger" style="pointer-events: none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
-        <div class="user-avatar-circle" id="header_user_avatar" style="width: 28px; height: 28px; background: #ea580c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900; color: #fff;">
-          <span id="header_user_initials">U</span>
+        <div class="user-avatar-circle" id="header_user_avatar" style="width: 28px; height: 28px; background: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900; color: #fff;">
+          <span id="header_user_initials">M</span>
         </div>
-        <span id="header_user_name" class="user-trigger-name" style="color: #ffffff;">User Account</span>
-        <span id="header_user_role" class="role-pill superadmin" style="background: #10b981; color: #042f2e; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;">SUPERADMIN</span>
+        <span id="header_user_name" class="user-trigger-name" style="color: #ffffff;">Management</span>
+        <span id="header_user_role" class="role-pill admin" style="background: #0284c7; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;">MANAGEMENT</span>
         <span style="font-size: 0.75rem; opacity: 0.85; color: #94a3b8;">▼</span>
       </button>
 
       <div class="user-dropdown-menu" id="user_profile_dropdown">
         <div class="user-dropdown-header">
-          <div class="user-avatar-circle" id="dropdown_user_avatar" style="width: 38px; height: 38px; background: #ea580c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 900; color: #fff;">
-            <span id="dropdown_user_initials">U</span>
+          <div class="user-avatar-circle" id="dropdown_user_avatar" style="width: 38px; height: 38px; background: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 900; color: #fff;">
+            <span id="dropdown_user_initials">M</span>
           </div>
           <div class="dropdown-user-details">
-            <strong id="dropdown_user_fullname">User Account</strong>
-            <small id="dropdown_user_username">id: username</small>
+            <strong id="dropdown_user_fullname">Management User</strong>
+            <small id="dropdown_user_username">id: management</small>
           </div>
         </div>
         <div class="dropdown-divider"></div>
@@ -58,188 +58,157 @@
   </header>
 
 
-  <!-- SUPERADMIN SIDEBAR MENU -->
+  <!-- MANAGEMENT DIRECTORY SIDEBAR MENU -->
   <aside class="sidebar-drawer" id="sidebar_drawer">
     <div class="sidebar-header">
       <div class="sidebar-brand-title">
         <img src="/static/img/categories/01_Logo_and_Branding/GRTC LOGO.jpeg" alt="GRTC Logo" style="height: 24px; width: auto; border-radius: 50%; margin-right: 8px;">
-        SuperAdmin Menu
+        Management Menu
       </div>
       <button type="button" onclick="toggleSidebarMenu(event)" style="background: none; border: none; color: #ffffff; font-size: 1.3rem; cursor: pointer;">&times;</button>
     </div>
     <nav class="sidebar-nav-menu">
-      <div class="sidebar-nav-group"><a href="/dashboard/superadmin" class="sidebar-nav-item"><span>🏠 Dashboard Overview</span></a></div>
-      <div class="sidebar-nav-group"><a href="/users/superadmin" class="sidebar-nav-item active"><span>👥 Master User Accounts (Full Edit)</span></a></div>
-      <div class="sidebar-nav-group"><a href="/batches" class="sidebar-nav-item"><span>🗓️ Batches & Courses</span></a></div>
-      <div class="sidebar-nav-group"><a href="/enquiries" class="sidebar-nav-item"><span>📥 Admission Leads</span></a></div>
-      <div class="sidebar-nav-group"><a href="/candidates" class="sidebar-nav-item"><span>🎓 Candidate Directory</span></a></div>
-      <div class="sidebar-nav-group"><a href="/reports" class="sidebar-nav-item"><span>📊 Financial Reports</span></a></div>
-      <div class="sidebar-nav-group"><a href="/profile" class="sidebar-nav-item"><span>⚙️ Portal Settings & CMS</span></a></div>
+      <div class="sidebar-nav-group"><a href="/dashboard" class="sidebar-nav-item"><span>🏠 Dashboard</span></a></div>
+      <div class="sidebar-nav-group"><a href="/users/directory" class="sidebar-nav-item active"><span>👥 Staff & Trainees Directory</span></a></div>
+      <div class="sidebar-nav-group"><a href="/batches" class="sidebar-nav-item"><span>🗓️ Campus Batches</span></a></div>
+      <div class="sidebar-nav-group"><a href="/candidates" class="sidebar-nav-item"><span>🎓 Candidate Admissions</span></a></div>
+      <div class="sidebar-nav-group"><a href="/enquiries" class="sidebar-nav-item"><span>📥 Admission Enquiries</span></a></div>
+      <div class="sidebar-nav-group"><a href="/reports" class="sidebar-nav-item"><span>📊 Reports & Collections</span></a></div>
+      <div class="sidebar-nav-group"><a href="/profile" class="sidebar-nav-item"><span>⚙️ Profile Settings</span></a></div>
     </nav>
   </aside>
   <div class="sidebar-overlay" id="sidebar_overlay" onclick="toggleSidebarMenu(event)"></div>
 
   <main class="main-content-container" style="padding: 1.8rem 1.5rem; max-width: 1400px; margin: auto;">
+    
+    <!-- PAGE HEADER -->
     <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
       <div>
-        <h1 style="margin: 0; font-size: 1.6rem; font-weight: 900; color: #1e3a8a;">👥 Master User Accounts & Security Control (Root Access)</h1>
+        <h1 style="margin: 0; font-size: 1.6rem; font-weight: 900; color: #1e3a8a;">👥 Staff & Trainees Directory</h1>
         <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">
-          <span style="color: #10b981; font-weight: 800;">Root Authority</span> &bull; Edit candidate/staff names, reset passwords, change roles, or register new user accounts.
+          <span style="color: #0284c7; font-weight: 800;">Hierarchy Directory</span> &bull; View candidate trainees and staff members in your operational scope.
         </p>
       </div>
       <div style="display: flex; gap: 10px;">
-        <button class="btn btn-sm btn-primary" onclick="openCreateUserModal()" style="background: #059669; color: #fff; border: none; font-weight: 800; padding: 8px 16px; border-radius: 8px; cursor: pointer;">+ Add New User</button>
-        <button class="btn btn-sm btn-outline-secondary" onclick="loadSuperAdminUsersPage()" style="font-weight: 700; border-radius: 8px; padding: 8px 14px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;">🔄 Live Refresh</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadManagementDirectoryPage()" style="font-weight: 700; border-radius: 8px; padding: 8px 14px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;">🔄 Live Refresh</button>
       </div>
     </div>
 
-    <!-- ROLE FILTER TABS -->
-    <div style="display: flex; gap: 8px; margin-bottom: 1.2rem; flex-wrap: wrap;">
-      <button class="btn btn-sm btn-primary" id="btn_sa_role_all" onclick="filterSuperAdminUsersRole('', this)">All Roles</button>
-      <button class="btn btn-sm btn-outline-secondary" id="btn_sa_role_superadmin" onclick="filterSuperAdminUsersRole('superadmin', this)">SuperAdmin</button>
-      <button class="btn btn-sm btn-outline-secondary" id="btn_sa_role_director" onclick="filterSuperAdminUsersRole('director', this)">Director</button>
-      <button class="btn btn-sm btn-outline-secondary" id="btn_sa_role_admin" onclick="filterSuperAdminUsersRole('admin', this)">Center Managers</button>
-      <button class="btn btn-sm btn-outline-secondary" id="btn_sa_role_staff" onclick="filterSuperAdminUsersRole('staff', this)">Staff</button>
-      <button class="btn btn-sm btn-outline-secondary" id="btn_sa_role_student" onclick="filterSuperAdminUsersRole('student', this)">Students</button>
+    <!-- SEARCH & ROLE FILTER CONTROL BAR -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 12px;">
+      
+      <!-- TOP ROW: INTERACTIVE SEARCH BOX -->
+      <div style="position: relative; width: 100%;">
+        <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: #64748b;">🔍</span>
+        <input type="text" id="dir_search_input" oninput="handleDirectorySearchInput(event)" placeholder="Search directory by candidate name, mobile, login ID, role, or center..." style="width: 100%; padding: 10px 40px 10px 42px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; outline: none; box-sizing: border-box; background: #f8fafc; transition: all 0.2s;">
+        <button type="button" id="dir_search_clear_btn" onclick="clearDirectorySearch()" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; color: #94a3b8; cursor: pointer;">&times;</button>
+      </div>
+
+      <!-- BOTTOM ROW: USERWISE ROLE FILTER SECTIONS -->
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="dir_filter_tabs">
+          
+          <button type="button" class="btn btn-sm btn-primary" id="dir_tab_all" onclick="filterDirectorySection('', this)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; border-radius: 8px; padding: 6px 14px;">
+            <span>🌐 All Members</span>
+            <span id="dir_count_all" style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
+          </button>
+
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="dir_tab_admin" onclick="filterDirectorySection('admin', this)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; border-radius: 8px; padding: 6px 14px;">
+            <span>🛡️ Center Managers</span>
+            <span id="dir_count_admin" style="background: #e2e8f0; color: #334155; padding: 1px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
+          </button>
+
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="dir_tab_staff" onclick="filterDirectorySection('staff', this)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; border-radius: 8px; padding: 6px 14px;">
+            <span>💼 Front Desk Staff</span>
+            <span id="dir_count_staff" style="background: #e2e8f0; color: #334155; padding: 1px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
+          </button>
+
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="dir_tab_student" onclick="filterDirectorySection('student', this)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; border-radius: 8px; padding: 6px 14px;">
+            <span>🎓 Student Trainees</span>
+            <span id="dir_count_student" style="background: #e2e8f0; color: #334155; padding: 1px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
+          </button>
+
+        </div>
+
+        <!-- COUNTER SUMMARY -->
+        <div id="dir_filter_summary" style="font-size: 0.84rem; color: #64748b; font-weight: 600;">
+          Showing <span id="dir_visible_count" style="color: #1e3a8a; font-weight: 800;">0</span> records
+        </div>
+      </div>
+
     </div>
 
-    <!-- USERS TABLE -->
+    <!-- DIRECTORY TABLE -->
     <div style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto;">
       <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
         <thead>
           <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
             <th style="padding: 12px 14px;">ID</th>
             <th style="padding: 12px 14px;">Full Name</th>
-            <th style="padding: 12px 14px;">Username / ID</th>
-            <th style="padding: 12px 14px;">Mobile</th>
-            <th style="padding: 12px 14px;">Role</th>
-            <th style="padding: 12px 14px;">Plain Password</th>
-            <th style="padding: 12px 14px;">Created</th>
-            <th style="padding: 12px 14px; text-align: right;">Master Actions</th>
+            <th style="padding: 12px 14px;">Username / Login ID</th>
+            <th style="padding: 12px 14px;">Mobile Contact</th>
+            <th style="padding: 12px 14px;">Role Section</th>
+            <th style="padding: 12px 14px;">Assigned Center</th>
+            <th style="padding: 12px 14px;">Registered Date</th>
+            <th style="padding: 12px 14px; text-align: right;">Action</th>
           </tr>
         </thead>
-        <tbody id="users_table_body">
-          <tr><td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">Loading master user accounts...</td></tr>
+        <tbody id="directory_table_body">
+          <tr><td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">Loading directory roster...</td></tr>
         </tbody>
       </table>
     </div>
   </main>
 
-  <!-- UNIVERSAL MODAL: EDIT USER (SUPERADMIN FULL EDIT) -->
-  <div id="modal_edit_user" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999999; align-items: center; justify-content: center;">
-    <div class="modal-card" style="background: #ffffff; color: #0f172a; border-radius: 14px; max-width: 540px; width: 92%; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto;">
-      <button type="button" onclick="closeModal('modal_edit_user')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
-      <div style="margin-bottom: 1.2rem;">
-        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; color: #0f172a;">✏️ Edit User Account <span id="edit_user_id_display" style="color: #1e3a8a;">#</span></h2>
-        <p style="margin: 4px 0 0; color: #64748b; font-size: 0.88rem;">Update candidate/staff name, username, role permissions, or password.</p>
-      </div>
-      <div id="modal_edit_user_alert" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
-      <form id="form_edit_user" onsubmit="submitEditUserModal(event)" style="display: flex; flex-direction: column; gap: 12px;">
-        <input type="hidden" id="edit_user_id">
-        <div>
-          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Full Name *</label>
-          <input type="text" id="edit_user_fullname" class="form-control" required placeholder="Full Name of User" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-weight: 700;">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div>
-            <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Username / Login ID *</label>
-            <input type="text" id="edit_user_username" class="form-control" required placeholder="e.g. rahul123" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-family: monospace;">
-          </div>
-          <div>
-            <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Mobile Contact</label>
-            <input type="text" id="edit_user_mobile" class="form-control" placeholder="10 digit mobile" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
-          </div>
-        </div>
-        <div>
-          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Email Address</label>
-          <input type="email" id="edit_user_email" class="form-control" placeholder="user@grtc.in" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div>
-            <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">User Role *</label>
-            <select id="edit_user_role" class="form-control" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-weight: 700;">
-              <option value="student">STUDENT</option>
-              <option value="staff">STAFF</option>
-              <option value="admin">ADMIN / MANAGER</option>
-              <option value="center_manager">CENTER MANAGER</option>
-              <option value="director">DIRECTOR</option>
-              <option value="superadmin">SUPERADMIN</option>
-            </select>
-          </div>
-          <div>
-            <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Account Status *</label>
-            <select id="edit_user_status" class="form-control" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-weight: 700;">
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Assigned Center / Branch</label>
-          <input type="text" id="edit_user_center" class="form-control" placeholder="Main Campus" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
-        </div>
-        <div>
-          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px; font-size: 0.88rem;">Reset Password <span style="color: #64748b; font-weight: 400;">(leave blank to keep current)</span></label>
-          <input type="text" id="edit_user_password" class="form-control" placeholder="Enter new password (optional)" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
-        </div>
-        <div style="margin-top: 8px; display: flex; gap: 10px;">
-          <button type="submit" id="btn_save_edit_user" class="btn btn-primary" style="flex: 1; font-weight: 800; padding: 10px 18px; border-radius: 8px; background: #1e3a8a; color: #fff; border: none; cursor: pointer;">Save Changes</button>
-          <button type="button" class="btn btn-outline-secondary" onclick="closeModal('modal_edit_user')" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- UNIVERSAL MODAL: RICH USER INFO -->
-  <div id="modal_user_info" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999999; align-items: center; justify-content: center;">
-    <div class="modal-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; max-width: 520px; width: 92%; padding: 2rem; box-shadow: 0 20px 45px rgba(0,0,0,0.35); position: relative;">
-      <button type="button" onclick="closeModal('modal_user_info')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+  <!-- READ-ONLY MODAL: USER INFO & CONTACT DIALOG -->
+  <div id="modal_dir_user_info" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999999; align-items: center; justify-content: center;">
+    <div class="modal-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; max-width: 500px; width: 92%; padding: 2rem; box-shadow: 0 20px 45px rgba(0,0,0,0.35); position: relative;">
+      <button type="button" onclick="closeModal('modal_dir_user_info')" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; font-weight: 700;">&times;</button>
+      
       <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 1.5rem; padding-bottom: 1.2rem; border-bottom: 1px solid #e2e8f0;">
-        <div id="info_user_avatar_circle" style="width: 58px; height: 58px; border-radius: 50%; background: #ea580c; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.15); flex-shrink: 0;">
+        <div id="dir_info_avatar_circle" style="width: 58px; height: 58px; border-radius: 50%; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.15); flex-shrink: 0;">
           <span>U</span>
         </div>
         <div style="flex: 1; min-width: 0;">
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <h2 id="info_user_fullname_title" style="margin: 0; font-size: 1.25rem; font-weight: 900; color: #0f172a; line-height: 1.2;">User Name</h2>
-            <span id="info_user_id_text" style="font-size: 0.8rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">#50</span>
+            <h2 id="dir_info_fullname_title" style="margin: 0; font-size: 1.25rem; font-weight: 900; color: #0f172a; line-height: 1.2;">User Name</h2>
+            <span id="dir_info_id_text" style="font-size: 0.8rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">#50</span>
           </div>
-          <p id="info_user_username_sub" style="margin: 3px 0 6px; color: #64748b; font-size: 0.85rem; font-family: monospace;">Login ID: username</p>
+          <p id="dir_info_username_sub" style="margin: 3px 0 6px; color: #64748b; font-size: 0.85rem; font-family: monospace;">Login ID: username</p>
           <div style="display: flex; gap: 6px; align-items: center;">
-            <span id="info_user_role_badge" class="role-pill superadmin" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;">SUPERADMIN</span>
-            <span id="info_user_status_badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 800; background: #dcfce7; color: #15803d;">ACTIVE</span>
+            <span id="dir_info_role_badge" class="role-pill student" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;">STUDENT</span>
           </div>
         </div>
       </div>
+
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; font-size: 0.88rem;">
         <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px;">
           <span style="color: #64748b; font-weight: 600;">Username / ID:</span>
-          <strong id="info_val_username" style="color: #1e3a8a; font-family: monospace;">username</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px;">
-          <span style="color: #64748b; font-weight: 600;">Plain Password:</span>
-          <span id="info_val_password"><code style="color: #d97706; font-weight: 900; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">password</code></span>
+          <strong id="dir_info_val_username" style="color: #1e3a8a; font-family: monospace;">username</strong>
         </div>
         <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px;">
           <span style="color: #64748b; font-weight: 600;">Mobile Contact:</span>
-          <strong id="info_val_mobile" style="color: #0f172a;">9876543210</strong>
+          <strong id="dir_info_val_mobile" style="color: #0f172a;">9876543210</strong>
         </div>
         <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px;">
           <span style="color: #64748b; font-weight: 600;">Email Address:</span>
-          <strong id="info_val_email" style="color: #0f172a;">user@grtc.in</strong>
+          <strong id="dir_info_val_email" style="color: #0f172a;">user@grtc.in</strong>
         </div>
         <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px;">
           <span style="color: #64748b; font-weight: 600;">Assigned Center:</span>
-          <strong id="info_val_center" style="color: #0f172a;">Main Campus</strong>
+          <strong id="dir_info_val_center" style="color: #0f172a;">Main Campus</strong>
         </div>
         <div style="display: flex; justify-content: space-between;">
           <span style="color: #64748b; font-weight: 600;">Registered On:</span>
-          <span id="info_val_created" style="color: #64748b; font-weight: 700;">2026-08-21</span>
+          <span id="dir_info_val_created" style="color: #64748b; font-weight: 700;">2026-08-21</span>
         </div>
       </div>
+
+      <!-- 1-CLICK CONTACT & CLOSE ACTIONS ONLY -->
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button type="button" id="info_btn_edit_trigger" class="btn btn-sm btn-primary" style="background: #1e3a8a; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; cursor: pointer;">✏️ Edit User</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="closeModal('modal_user_info')" style="padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Close</button>
+        <a id="dir_info_btn_call" href="#" class="btn btn-sm" style="background: #0284c7; color: #fff; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">📞 Call</a>
+        <a id="dir_info_btn_whatsapp" href="#" target="_blank" class="btn btn-sm" style="background: #059669; color: #fff; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">💬 WhatsApp</a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="closeModal('modal_dir_user_info')" style="padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">Close</button>
       </div>
     </div>
   </div>
@@ -285,7 +254,7 @@
       </div>
       <div id="modal_avatar_alert_box" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;"></div>
       <div style="display: flex; justify-content: center; margin-bottom: 1.2rem;">
-        <div class="user-avatar-circle" id="modal_preview_avatar_circle" style="width: 84px; height: 84px; font-size: 2.4rem; font-weight: 900; background: #ea580c; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">U</div>
+        <div class="user-avatar-circle" id="modal_preview_avatar_circle" style="width: 84px; height: 84px; font-size: 2.4rem; font-weight: 900; background: #0284c7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">M</div>
       </div>
       <div style="margin-bottom: 1.2rem; text-align: left;">
         <input type="file" id="modal_input_photo" accept="image/jpeg,image/png,image/webp" onchange="previewAvatarFile(event, 'modal_preview_avatar_circle')" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; box-sizing: border-box;">
@@ -299,7 +268,7 @@
   </div>
 
   
-  <script src="/static/js/app.js?v=8.0"></script>
+  <script src="/static/js/app.js?v=10.0"></script>
   <script>
     function toggleSidebarMenu(e) {
       if (e) { if (e.stopPropagation) e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
@@ -353,7 +322,7 @@
       if (profilePicUrl && profilePicUrl !== "null" && profilePicUrl !== "undefined" && profilePicUrl.trim() !== "") {
         el.innerHTML = '<img src="' + profilePicUrl + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">';
       } else {
-        el.innerHTML = '<span>' + ((fallbackLetter || "U").toUpperCase()) + '</span>';
+        el.innerHTML = '<span>' + ((fallbackLetter || "M").toUpperCase()) + '</span>';
       }
     }
 
@@ -421,8 +390,6 @@
     function initHeaderUserProfile() {
       var cachedAvatar = localStorage.getItem("userAvatar");
       var cachedName = localStorage.getItem("userName");
-      var cachedRole = localStorage.getItem("userRole");
-
       if (cachedAvatar && cachedAvatar.trim() !== "") {
         renderAvatarCircle("header_user_avatar", cachedAvatar);
         renderAvatarCircle("dropdown_user_avatar", cachedAvatar);
@@ -433,7 +400,6 @@
         if (elN) elN.innerText = cachedName;
         if (elDN) elDN.innerText = cachedName;
       }
-
       var token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
       var headers = token ? { "Authorization": "Bearer " + token } : {};
       fetch("/api/auth/me", { headers: headers }).then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {

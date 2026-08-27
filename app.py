@@ -149,9 +149,91 @@ async def serve_register():
         return f.read()
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def serve_dashboard():
-    with open(os.path.join(TEMPLATES_DIR, "index.html"), "r", encoding="utf-8") as f:
-        return f.read()
+async def serve_dashboard(request: Request, authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
+    user = get_current_user_from_token(token)
+    user_role = (user.get("role", "") if user else (request.cookies.get("user_role") or "")).lower()
+    
+    if user_role == "director":
+        return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_director.html"))
+    elif user_role in ["admin", "center_manager", "manager"]:
+        return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_admin.html"))
+    elif user_role == "staff":
+        return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_staff.html"))
+    elif user_role == "student":
+        return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_student.html"))
+    elif user_role == "superadmin":
+        return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_superadmin.html"))
+    else:
+        # If not logged in, redirect to login page
+        return RedirectResponse(url="/login", status_code=302)
+
+@app.get("/dashboard/superadmin", response_class=HTMLResponse)
+async def serve_dashboard_superadmin():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_superadmin.html"))
+
+@app.get("/dashboard/director", response_class=HTMLResponse)
+async def serve_dashboard_director():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_director.html"))
+
+@app.get("/dashboard/admin", response_class=HTMLResponse)
+async def serve_dashboard_admin():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_admin.html"))
+
+@app.get("/dashboard/staff", response_class=HTMLResponse)
+async def serve_dashboard_staff():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_staff.html"))
+
+@app.get("/dashboard/student", response_class=HTMLResponse)
+async def serve_dashboard_student():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "dashboard_student.html"))
+
+@app.post("/api/settings/cms")
+async def api_update_portal_cms(request: Request, payload: dict = Body(...), authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
+    user = get_current_user_from_token(token)
+    if not user or user.get("role") != "superadmin":
+        raise HTTPException(status_code=403, detail="SuperAdmin permission required to update Portal CMS.")
+        
+    try:
+        # Handle slide 1 upload
+        slide1_raw = payload.get("slide1_image")
+        if slide1_raw and slide1_raw.startswith("data:image/"):
+            header, base64_str = slide1_raw.split(",", 1)
+            file_bytes = base64.b64decode(base64_str)
+            with open(os.path.join(BASE_DIR, "static", "img", "banners", "slide1_custom.jpg"), "wb") as f:
+                f.write(file_bytes)
+            payload["slide1_image_url"] = "/static/img/banners/slide1_custom.jpg"
+
+        # Handle slide 2 upload
+        slide2_raw = payload.get("slide2_image")
+        if slide2_raw and slide2_raw.startswith("data:image/"):
+            header, base64_str = slide2_raw.split(",", 1)
+            file_bytes = base64.b64decode(base64_str)
+            with open(os.path.join(BASE_DIR, "static", "img", "banners", "slide2_custom.jpg"), "wb") as f:
+                f.write(file_bytes)
+            payload["slide2_image_url"] = "/static/img/banners/slide2_custom.jpg"
+
+        current_cfg = database.get_settings() or {}
+        current_cfg.update(payload)
+        database.save_settings(current_cfg)
+        return {"status": "success", "message": "Portal CMS and banners updated successfully!", "config": current_cfg}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ================= AUTHENTICATION APIS =================
 
@@ -194,22 +276,49 @@ async def api_login(payload: dict = Body(...)):
         raise HTTPException(status_code=401, detail="Invalid User ID or Password.")
 
     token = database.create_user_session(user["id"])
-    return {
+    role = str(user.get("role", "student")).lower()
+
+    redirect_url = "/dashboard/student"
+    if role == "superadmin":
+        redirect_url = "/dashboard/superadmin"
+    elif role == "director":
+        redirect_url = "/dashboard/director"
+    elif role in ["admin", "center_manager", "manager"]:
+        redirect_url = "/dashboard/admin"
+    elif role == "staff":
+        redirect_url = "/dashboard/staff"
+
+    resp_content = {
         "status": "success",
         "token": token,
+        "redirect_url": redirect_url,
         "user": {
             "id": user["id"],
             "username": user["username"],
             "full_name": user.get("full_name", "User"),
             "role": user.get("role", "student"),
             "center_name": user.get("center_name", "Main Campus"),
-            "candidate_id": user.get("candidate_id")
+            "candidate_id": user.get("candidate_id"),
+            "profile_picture": user.get("profile_picture")
         }
     }
+    
+    response = JSONResponse(content=resp_content)
+    response.set_cookie(key="token", value=token, path="/", max_age=864000, httponly=False, samesite="lax")
+    response.set_cookie(key="auth_token", value=token, path="/", max_age=864000, httponly=False, samesite="lax")
+    response.set_cookie(key="user_role", value=role, path="/", max_age=864000, httponly=False, samesite="lax")
+    return response
 
 @app.get("/api/auth/me")
-async def api_get_me(authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
+async def api_get_me(request: Request, authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
     user = get_current_user_from_token(token)
     if not user:
         raise HTTPException(status_code=401, detail="Session expired or invalid.")
@@ -217,7 +326,7 @@ async def api_get_me(authorization: str = Header(None)):
     # If student, attach candidate & batch details
     candidate = None
     batch = None
-    if user["role"] == "student":
+    if user.get("role") == "student":
         candidate = database.get_candidate_by_user_id(user["id"])
         if candidate:
             batch = database.get_candidate_batch(candidate["id"])
@@ -411,10 +520,17 @@ async def api_get_superadmin_users(request: Request, role: str = "", authorizati
     return users
 
 @app.post("/api/superadmin/users")
-async def api_create_admin_user(payload: dict = Body(...), authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
+async def api_create_admin_user(request: Request, payload: dict = Body(...), authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
     user = get_current_user_from_token(token)
-    if not user or user["role"] != "superadmin":
+    if not user or user.get("role") != "superadmin":
         raise HTTPException(status_code=403, detail="SuperAdmin permission required.")
     
     try:
@@ -433,8 +549,15 @@ async def api_create_admin_user(payload: dict = Body(...), authorization: str = 
 
 @app.put("/api/superadmin/users/{uid}")
 @app.post("/api/superadmin/users/{uid}")
-async def api_update_admin_user(uid: int, payload: dict = Body(...), authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
+async def api_update_admin_user(uid: int, request: Request, payload: dict = Body(...), authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
     user = get_current_user_from_token(token)
     if not user or user["role"] != "superadmin":
         raise HTTPException(status_code=403, detail="SuperAdmin permission required.")
@@ -446,14 +569,33 @@ async def api_update_admin_user(uid: int, payload: dict = Body(...), authorizati
         raise HTTPException(status_code=400, detail=str(ve))
 
 @app.delete("/api/superadmin/users/{uid}")
-async def api_delete_admin_user(uid: int, authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
+async def api_delete_admin_user(uid: int, request: Request, authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
     user = get_current_user_from_token(token)
-    if not user or user["role"] != "superadmin":
+    if not user or user.get("role") != "superadmin":
         raise HTTPException(status_code=403, detail="SuperAdmin permission required.")
-    
-    database.delete_user(uid)
-    return {"status": "success"}
+        
+    try:
+        target_uid = int(str(uid).strip())
+        current_uid = int(str(user.get("id")).strip()) if user.get("id") else None
+        
+        if current_uid and target_uid == current_uid:
+            raise HTTPException(status_code=400, detail="You cannot delete your own currently logged-in SuperAdmin account.")
+            
+        success = database.delete_user(target_uid)
+        if not success:
+            raise HTTPException(status_code=404, detail="User account not found or already deleted.")
+            
+        return {"status": "success", "message": f"User #{target_uid} permanently deleted."}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
 
 @app.get("/api/public/batches")
 async def api_get_public_batches():
@@ -692,9 +834,33 @@ async def api_get_public_enquiries():
 async def page_batches():
     return FileResponse("templates/batches.html")
 
-@app.get("/users")
-async def page_users():
-    return FileResponse("templates/users.html")
+@app.get("/users", response_class=HTMLResponse)
+async def page_users(request: Request, authorization: str = Header(None)):
+    token = None
+    if authorization and "Bearer " in authorization:
+        token = authorization.replace("Bearer ", "").strip()
+    elif authorization:
+        token = authorization.strip()
+    if not token:
+        token = request.cookies.get("token") or request.cookies.get("auth_token") or request.cookies.get("session")
+        
+    user = get_current_user_from_token(token)
+    user_role = user.get("role", "").lower() if user else "superadmin"
+    
+    if user_role == "superadmin":
+        return FileResponse(os.path.join(TEMPLATES_DIR, "users_superadmin.html"))
+    elif user_role in ["director", "admin", "center_manager", "manager"]:
+        return FileResponse(os.path.join(TEMPLATES_DIR, "users_directory.html"))
+    else:
+        return RedirectResponse(url="/dashboard", status_code=302)
+
+@app.get("/users/superadmin", response_class=HTMLResponse)
+async def page_users_superadmin():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "users_superadmin.html"))
+
+@app.get("/users/directory", response_class=HTMLResponse)
+async def page_users_directory():
+    return FileResponse(os.path.join(TEMPLATES_DIR, "users_directory.html"))
 
 @app.get("/enquiries")
 async def page_enquiries():

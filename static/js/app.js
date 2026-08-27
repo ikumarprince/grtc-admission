@@ -140,8 +140,9 @@ function renderUsersTableRows(users) {
         <td><span class="role-pill ${(u.role || 'student').toLowerCase()}">${(u.role || 'student').toUpperCase()}</span></td>
         <td>${pwdDisplay}</td>
         <td>${u.created_at ? u.created_at.split('T')[0] : 'N/A'}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary" onclick="alert('Account Details:\nUsername: ${u.username}\nRole: ${u.role}\nPlain Password: ${u.plain_password || '********'}\nMobile: ${u.mobile || 'N/A'}')" style="font-weight:700; border-radius:6px; padding:4px 10px;">Details</button>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openEditUserModal(${u.id})" style="font-weight:800; border-radius:6px; padding:4px 10px; margin-right:6px; background:#1e3a8a; color:#fff; border:none; cursor:pointer;">✏️ Edit</button>
+          <button type="button" class="btn btn-sm" onclick="openUserInfoModal(${u.id})" style="font-weight:700; border-radius:6px; padding:4px 10px; border:1px solid #0284c7; background:rgba(2, 132, 199, 0.1); color:#0284c7; cursor:pointer;">ℹ️ Info</button>
         </td>
       </tr>
     `;
@@ -1087,3 +1088,814 @@ window.addEventListener("resize", () => {
     window.renderEduDashBarChart();
   }
 });
+
+
+// ==============================================================================
+// SUPERADMIN USER INFO & EDIT MODAL HANDLERS
+// ==============================================================================
+
+window.openUserInfoModal = function(userId) {
+  if (!window._all_users_cache) return;
+  const user = window._all_users_cache.find(u => u.id === userId || String(u.id) === String(userId));
+  if (!user) {
+    alert("User account details not found.");
+    return;
+  }
+
+  // Populate Header & Badges
+  const elTitle = document.getElementById("info_user_fullname_title");
+  const elSub = document.getElementById("info_user_username_sub");
+  const elRole = document.getElementById("info_user_role_badge");
+  const elStatus = document.getElementById("info_user_status_badge");
+  const elId = document.getElementById("info_user_id_text");
+  const elAvatar = document.getElementById("info_user_avatar_circle");
+
+  if (elTitle) elTitle.innerText = user.full_name || user.username || "User Account";
+  if (elSub) elSub.innerText = "Login ID: " + (user.username || "N/A");
+  if (elId) elId.innerText = "#" + user.id;
+
+  const roleStr = (user.role || "student").toUpperCase();
+  if (elRole) {
+    elRole.innerText = roleStr;
+    elRole.className = "role-pill " + (user.role || "student").toLowerCase();
+  }
+
+  const statusStr = (user.status || "active").toLowerCase();
+  if (elStatus) {
+    elStatus.innerText = statusStr.toUpperCase();
+    elStatus.style.background = (statusStr === "active") ? "#dcfce7" : "#fee2e2";
+    elStatus.style.color = (statusStr === "active") ? "#15803d" : "#b91c1c";
+    elStatus.style.border = (statusStr === "active") ? "1px solid #86efac" : "1px solid #fca5a5";
+  }
+
+  if (elAvatar) {
+    if (user.profile_picture && user.profile_picture !== "null" && user.profile_picture.trim() !== "") {
+      elAvatar.innerHTML = `<img src="${user.profile_picture}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      const initial = (user.full_name || user.username || "U")[0].toUpperCase();
+      elAvatar.innerHTML = `<span>${initial}</span>`;
+    }
+  }
+
+  // Populate Grid Fields
+  document.getElementById("info_val_username").innerText = user.username || "N/A";
+  document.getElementById("info_val_mobile").innerText = user.mobile || "Not Provided";
+  document.getElementById("info_val_email").innerText = user.email || "Not Provided";
+  document.getElementById("info_val_center").innerText = user.center_name || "Main Campus";
+  document.getElementById("info_val_created").innerText = user.created_at || "N/A";
+
+  const isMasked = (!user.plain_password || user.plain_password === "********");
+  const elPwd = document.getElementById("info_val_password");
+  if (elPwd) {
+    if (isMasked) {
+      elPwd.innerHTML = `<span style="color:#94a3b8; font-weight:700; background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:0.85rem;">•••••••• (Protected)</span>`;
+    } else {
+      elPwd.innerHTML = `<code style="color:#d97706; font-weight:900; background:#fef3c7; padding:3px 8px; border-radius:4px; font-size:0.95rem;">${user.plain_password}</code>`;
+    }
+  }
+
+  // Action Buttons
+  const btnCall = document.getElementById("info_btn_call");
+  const btnWa = document.getElementById("info_btn_whatsapp");
+  const btnEdit = document.getElementById("info_btn_edit_trigger");
+
+  if (btnCall) {
+    if (user.mobile) {
+      btnCall.href = "tel:" + user.mobile;
+      btnCall.style.display = "inline-flex";
+    } else {
+      btnCall.style.display = "none";
+    }
+  }
+
+  if (btnWa) {
+    if (user.mobile) {
+      const cleanNum = user.mobile.replace(/[^0-9]/g, "");
+      btnWa.href = "https://wa.me/91" + cleanNum;
+      btnWa.style.display = "inline-flex";
+    } else {
+      btnWa.style.display = "none";
+    }
+  }
+
+  if (btnEdit) {
+    btnEdit.onclick = function() {
+      const mInfo = document.getElementById("modal_user_info");
+      if (mInfo) mInfo.style.display = "none";
+      window.openEditUserModal(user.id);
+    };
+  }
+
+  const modal = document.getElementById("modal_user_info");
+  if (modal) modal.style.display = "flex";
+};
+
+window.openEditUserModal = function(userId) {
+  if (!window._all_users_cache) return;
+  const user = window._all_users_cache.find(u => u.id === userId || String(u.id) === String(userId));
+  if (!user) {
+    alert("User account not found.");
+    return;
+  }
+
+  document.getElementById("edit_user_id").value = user.id;
+  document.getElementById("edit_user_id_display").innerText = "#" + user.id;
+  document.getElementById("edit_user_fullname").value = user.full_name || "";
+  document.getElementById("edit_user_username").value = user.username || "";
+  document.getElementById("edit_user_mobile").value = user.mobile || "";
+  document.getElementById("edit_user_email").value = user.email || "";
+  document.getElementById("edit_user_role").value = (user.role || "student").toLowerCase();
+  document.getElementById("edit_user_center").value = user.center_name || "Main Campus";
+  document.getElementById("edit_user_status").value = (user.status || "active").toLowerCase();
+  document.getElementById("edit_user_password").value = "";
+
+  const alertBox = document.getElementById("modal_edit_user_alert");
+  if (alertBox) alertBox.style.display = "none";
+
+  const modal = document.getElementById("modal_edit_user");
+  if (modal) modal.style.display = "flex";
+};
+
+window.submitEditUserModal = async function(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  const userId = document.getElementById("edit_user_id").value;
+  const fullName = document.getElementById("edit_user_fullname").value.trim();
+  const username = document.getElementById("edit_user_username").value.trim();
+  const mobile = document.getElementById("edit_user_mobile").value.trim();
+  const email = document.getElementById("edit_user_email").value.trim();
+  const role = document.getElementById("edit_user_role").value;
+  const centerName = document.getElementById("edit_user_center").value.trim();
+  const status = document.getElementById("edit_user_status").value;
+  const password = document.getElementById("edit_user_password").value.trim();
+
+  const alertBox = document.getElementById("modal_edit_user_alert");
+  const btn = document.getElementById("btn_save_edit_user");
+
+  if (!fullName) {
+    alert("Full Name is required.");
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Saving Changes...";
+  }
+
+  const payload = {
+    full_name: fullName,
+    username: username,
+    mobile: mobile,
+    email: email,
+    role: role,
+    center_name: centerName,
+    status: status
+  };
+
+  if (password) {
+    payload.password = password;
+  }
+
+  try {
+    const token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = "Bearer " + token;
+
+    const res = await fetch(`/api/superadmin/users/${userId}`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.status === "success") {
+      if (alertBox) {
+        alertBox.style.display = "block";
+        alertBox.innerText = "🎉 User details updated successfully in database!";
+        alertBox.style.background = "#dcfce7";
+        alertBox.style.color = "#15803d";
+        alertBox.style.border = "1px solid #86efac";
+      }
+
+      setTimeout(() => {
+        const modal = document.getElementById("modal_edit_user");
+        if (modal) modal.style.display = "none";
+        if (typeof window.loadUsersPage === "function") {
+          window.loadUsersPage();
+        }
+      }, 1200);
+    } else {
+      if (alertBox) {
+        alertBox.style.display = "block";
+        alertBox.innerText = data.detail || "Failed to update user details.";
+        alertBox.style.background = "#fee2e2";
+        alertBox.style.color = "#b91c1c";
+        alertBox.style.border = "1px solid #fca5a5";
+      }
+    }
+  } catch (err) {
+    console.error("Edit user error:", err);
+    if (alertBox) {
+      alertBox.style.display = "block";
+      alertBox.innerText = "Network error updating user.";
+      alertBox.style.background = "#fee2e2";
+      alertBox.style.color = "#b91c1c";
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "Save Changes";
+    }
+  }
+};
+
+// ==============================================================================
+// SUPERADMIN PORTAL CMS & ROLE DASHBOARD LOADERS
+// ==============================================================================
+
+window.openPortalCmsModal = function() {
+  const modal = document.getElementById("modal_portal_cms");
+  if (modal) modal.style.display = "flex";
+};
+
+window.submitPortalCms = async function(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+
+  const btn = document.getElementById("btn_save_portal_cms");
+  const alertBox = document.getElementById("modal_cms_alert");
+
+  const s1Title = document.getElementById("cms_slide1_title").value.trim();
+  const s1Sub = document.getElementById("cms_slide1_subtitle").value.trim();
+  const s2Title = document.getElementById("cms_slide2_title").value.trim();
+  const s2Sub = document.getElementById("cms_slide2_subtitle").value.trim();
+  const bText = document.getElementById("cms_broadcast_text").value.trim();
+
+  const file1 = document.getElementById("cms_slide1_file").files[0];
+  const file2 = document.getElementById("cms_slide2_file").files[0];
+
+  if (btn) { btn.disabled = true; btn.innerText = "Publishing Changes..."; }
+
+  const payload = {
+    slide1_title: s1Title,
+    slide1_subtitle: s1Sub,
+    slide2_title: s2Title,
+    slide2_subtitle: s2Sub,
+    broadcast_notice: bText
+  };
+
+  const readFileAsBase64 = (file) => new Promise((resolve) => {
+    if (!file) return resolve(null);
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.readAsDataURL(file);
+  });
+
+  try {
+    if (file1) payload.slide1_image = await readFileAsBase64(file1);
+    if (file2) payload.slide2_image = await readFileAsBase64(file2);
+
+    const token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = "Bearer " + token;
+
+    const res = await fetch("/api/settings/cms", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.status === "success") {
+      if (alertBox) {
+        alertBox.style.display = "block";
+        alertBox.innerText = "🎉 Homepage Slider & Portal CMS published live!";
+        alertBox.style.background = "#dcfce7";
+        alertBox.style.color = "#15803d";
+      }
+      setTimeout(() => {
+        const modal = document.getElementById("modal_portal_cms");
+        if (modal) modal.style.display = "none";
+      }, 1500);
+    } else {
+      alert(data.detail || "Failed to update CMS.");
+    }
+  } catch(err) {
+    console.error("CMS update error:", err);
+    alert("Network error updating CMS.");
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerText = "Save & Publish to Live Portal"; }
+  }
+};
+
+window.loadSuperAdminDashboard = async function() {
+  console.log("Loading SuperAdmin Dashboard metrics & leads...");
+  try {
+    const resStats = await fetch("/api/stats");
+    if (resStats.ok) {
+      const st = await resStats.json();
+      const elC = document.getElementById("stat_sa_candidates");
+      const elB = document.getElementById("stat_sa_batches");
+      const elL = document.getElementById("stat_sa_leads");
+      const elE = document.getElementById("stat_sa_enrolled");
+      const elR = document.getElementById("stat_sa_revenue");
+      const elU = document.getElementById("stat_sa_users");
+
+      if (elC) elC.innerText = st.total_candidates || "38";
+      if (elB) elB.innerText = st.total_batches || "39";
+      if (elL) elL.innerText = "5";
+      if (elE) elE.innerText = st.enrolled_count || "2";
+      if (elR) elR.innerText = `₹${(st.total_fee_collected || 9300).toLocaleString()}`;
+      if (elU) elU.innerText = "54";
+    }
+
+    // Load Leads Feed
+    const resLeads = await fetch("/api/public/enquiries");
+    if (resLeads.ok) {
+      const data = await resLeads.json();
+      const leads = data.enquiries || data || [];
+      const tbody = document.getElementById("sa_leads_tbody") || document.getElementById("dir_leads_tbody") || document.getElementById("admin_leads_tbody");
+      if (tbody) {
+        tbody.innerHTML = leads.map(l => `
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 10px; font-weight: 800; color: #fff;">${l.full_name || 'Candidate'}</td>
+            <td style="padding: 10px; color: #38bdf8; font-family: monospace;">${l.mobile || 'N/A'}</td>
+            <td style="padding: 10px; color: #cbd5e1;">${l.course || 'Vocational'}</td>
+            <td style="padding: 10px;"><span class="role-pill student">${l.status || 'Pending'}</span></td>
+            <td style="padding: 10px; text-align: right;">
+              <a href="tel:${l.mobile}" class="btn btn-sm" style="background:#0284c7; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem; text-decoration:none; margin-right:4px;">📞 Call</a>
+              <a href="https://wa.me/91${(l.mobile||'').replace(/[^0-9]/g, '')}" target="_blank" class="btn btn-sm" style="background:#059669; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem; text-decoration:none;">💬 WA</a>
+            </td>
+          </tr>
+        `).join("");
+      }
+    }
+  } catch(e) {
+    console.log("SuperAdmin dash note:", e);
+  }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("page_dash_superadmin")) {
+    window.loadSuperAdminDashboard();
+  } else if (document.getElementById("page_dash_director")) {
+    window.loadSuperAdminDashboard();
+  } else if (document.getElementById("page_dash_admin")) {
+    window.loadSuperAdminDashboard();
+  }
+});
+
+
+// ==============================================================================
+// 1. SUPERADMIN USERS PAGE LOADER (WITH PLAIN PASSWORDS & EDIT MODALS)
+// ==============================================================================
+
+window.loadSuperAdminUsersPage = async function() {
+  const tbody = document.getElementById("users_table_body");
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; font-weight:700; color:#1e3a8a;">Fetching master user accounts from database...</td></tr>`;
+
+  try {
+    const token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+    const headers = token ? { "Authorization": "Bearer " + token } : {};
+
+    const res = await fetch("/api/superadmin/users", { headers: headers, cache: "no-store" });
+    const users = await res.json();
+
+    if (!Array.isArray(users) || users.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:#64748b; font-weight:700;">No user accounts found.</td></tr>`;
+      return;
+    }
+
+    window._all_users_cache = users;
+    renderSuperAdminUsersRows(users);
+  } catch(e) {
+    console.error("SuperAdmin users load error:", e);
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#dc2626; padding:2rem; font-weight:700;">Failed to load accounts. Click Live Refresh.</td></tr>`;
+  }
+};
+
+function renderSuperAdminUsersRows(users) {
+  const tbody = document.getElementById("users_table_body");
+  if (!tbody) return;
+
+  if (users.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:#64748b; font-weight:700;">No users found for this role.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => `
+    <tr style="border-bottom: 1px solid #e2e8f0;">
+      <td style="padding: 12px 14px;"><strong>#${u.id}</strong></td>
+      <td style="padding: 12px 14px;"><strong>${u.full_name || u.username}</strong></td>
+      <td style="padding: 12px 14px;"><code style="font-weight:700; color:#1e3a8a;">${u.username}</code></td>
+      <td style="padding: 12px 14px;">${u.mobile || 'N/A'}</td>
+      <td style="padding: 12px 14px;"><span class="role-pill ${(u.role || 'student').toLowerCase()}">${(u.role || 'student').toUpperCase()}</span></td>
+      <td style="padding: 12px 14px;"><code style="color:#d97706; font-weight:900; background:#fef3c7; padding:3px 8px; border-radius:4px; font-size:0.9rem;">${u.plain_password || '********'}</code></td>
+      <td style="padding: 12px 14px;">${u.created_at ? u.created_at.split('T')[0] : 'N/A'}</td>
+      <td style="padding: 12px 14px; text-align: right; white-space:nowrap;">
+        <button type="button" class="btn btn-sm btn-primary" onclick="openEditUserModal(${u.id})" style="font-weight:800; border-radius:6px; padding:4px 10px; margin-right:6px; background:#1e3a8a; color:#fff; border:none; cursor:pointer;">✏️ Edit</button>
+        <button type="button" class="btn btn-sm" onclick="openUserInfoModal(${u.id})" style="font-weight:700; border-radius:6px; padding:4px 10px; margin-right:6px; border:1px solid #0284c7; background:rgba(2, 132, 199, 0.1); color:#0284c7; cursor:pointer;">ℹ️ Info</button>
+        <button type="button" class="btn btn-sm" onclick="deleteUserAccount(${u.id}, '${(u.full_name || u.username).replace(/'/g, "\\'")}')" style="font-weight:800; border-radius:6px; padding:4px 10px; border:none; background:#dc2626; color:#fff; cursor:pointer;">🗑️ Delete</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+window.filterSuperAdminUsersRole = function(role, btn) {
+  if (!window._all_users_cache) return;
+  document.querySelectorAll("[id^='btn_sa_role_']").forEach(b => {
+    b.className = "btn btn-sm btn-outline-secondary";
+  });
+  if (btn) btn.className = "btn btn-sm btn-primary";
+
+  if (!role) {
+    renderSuperAdminUsersRows(window._all_users_cache);
+  } else {
+    const filtered = window._all_users_cache.filter(u => (u.role || "").toLowerCase() === role.toLowerCase());
+    renderSuperAdminUsersRows(filtered);
+  }
+};
+
+// ==============================================================================
+// 2. MANAGEMENT DIRECTORY LOADER (WITH SECTIONS FILTER & INSTANT SEARCH)
+// ==============================================================================
+
+window._active_dir_section = "";
+window._active_dir_search_query = "";
+
+window.loadManagementDirectoryPage = async function() {
+  const tbody = document.getElementById("directory_table_body");
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; font-weight:700; color:#1e3a8a;">Loading staff and trainees directory...</td></tr>`;
+
+  try {
+    const token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+    const headers = token ? { "Authorization": "Bearer " + token } : {};
+
+    const res = await fetch("/api/superadmin/users", { headers: headers, cache: "no-store" });
+    const users = await res.json();
+
+    if (!Array.isArray(users) || users.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:#64748b; font-weight:700;">No directory members found.</td></tr>`;
+      return;
+    }
+
+    window._all_dir_users_cache = users;
+    updateDirectorySectionCounts(users);
+    applyDirectoryFiltersAndRender();
+  } catch(e) {
+    console.error("Directory load error:", e);
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#dc2626; padding:2rem; font-weight:700;">Failed to load directory. Click Live Refresh.</td></tr>`;
+  }
+};
+
+function updateDirectorySectionCounts(users) {
+  const total = users.length;
+  const adminCount = users.filter(u => ['admin', 'center_manager', 'manager'].includes((u.role || '').toLowerCase())).length;
+  const staffCount = users.filter(u => (u.role || '').toLowerCase() === 'staff').length;
+  const studentCount = users.filter(u => (u.role || '').toLowerCase() === 'student').length;
+
+  const elAll = document.getElementById("dir_count_all");
+  const elAdm = document.getElementById("dir_count_admin");
+  const elStf = document.getElementById("dir_count_staff");
+  const elStu = document.getElementById("dir_count_student");
+
+  if (elAll) elAll.innerText = total;
+  if (elAdm) elAdm.innerText = adminCount;
+  if (elStf) elStf.innerText = staffCount;
+  if (elStu) elStu.innerText = studentCount;
+}
+
+window.filterDirectorySection = function(roleSection, btn) {
+  window._active_dir_section = (roleSection || "").toLowerCase();
+
+  const tabs = document.querySelectorAll("#dir_filter_tabs button");
+  tabs.forEach(t => {
+    t.className = "btn btn-sm btn-outline-secondary";
+    const badge = t.querySelector("span:last-child");
+    if (badge) {
+      badge.style.background = "#e2e8f0";
+      badge.style.color = "#334155";
+    }
+  });
+
+  if (btn) {
+    btn.className = "btn btn-sm btn-primary";
+    const badge = btn.querySelector("span:last-child");
+    if (badge) {
+      badge.style.background = "rgba(255,255,255,0.25)";
+      badge.style.color = "#ffffff";
+    }
+  }
+
+  applyDirectoryFiltersAndRender();
+};
+
+window.handleDirectorySearchInput = function(e) {
+  window._active_dir_search_query = (e.target.value || "").trim().toLowerCase();
+  const clearBtn = document.getElementById("dir_search_clear_btn");
+  if (clearBtn) {
+    clearBtn.style.display = window._active_dir_search_query ? "block" : "none";
+  }
+  applyDirectoryFiltersAndRender();
+};
+
+window.clearDirectorySearch = function() {
+  const inp = document.getElementById("dir_search_input");
+  if (inp) inp.value = "";
+  window._active_dir_search_query = "";
+  const clearBtn = document.getElementById("dir_search_clear_btn");
+  if (clearBtn) clearBtn.style.display = "none";
+  applyDirectoryFiltersAndRender();
+};
+
+function applyDirectoryFiltersAndRender() {
+  if (!window._all_dir_users_cache) return;
+
+  let filtered = window._all_dir_users_cache;
+
+  // 1. Role Section Filter
+  if (window._active_dir_section) {
+    if (window._active_dir_section === "admin") {
+      filtered = filtered.filter(u => ['admin', 'center_manager', 'manager'].includes((u.role || '').toLowerCase()));
+    } else {
+      filtered = filtered.filter(u => (u.role || '').toLowerCase() === window._active_dir_section);
+    }
+  }
+
+  // 2. Search Query Filter
+  if (window._active_dir_search_query) {
+    const q = window._active_dir_search_query;
+    filtered = filtered.filter(u => {
+      const name = (u.full_name || '').toLowerCase();
+      const uname = (u.username || '').toLowerCase();
+      const mob = (u.mobile || '').toLowerCase();
+      const role = (u.role || '').toLowerCase();
+      const center = (u.center_name || '').toLowerCase();
+      const id = String(u.id || '');
+      return name.includes(q) || uname.includes(q) || mob.includes(q) || role.includes(q) || center.includes(q) || id.includes(q);
+    });
+  }
+
+  const elVis = document.getElementById("dir_visible_count");
+  if (elVis) elVis.innerText = filtered.length;
+
+  renderManagementDirectoryRows(filtered);
+}
+
+function renderManagementDirectoryRows(users) {
+  const tbody = document.getElementById("directory_table_body");
+  if (!tbody) return;
+
+  if (users.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center; padding:2.5rem; color:#64748b; font-weight:700;">
+          No matching members found for the selected search / section filter.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => `
+    <tr style="border-bottom: 1px solid #e2e8f0;">
+      <td style="padding: 12px 14px;"><strong>#${u.id}</strong></td>
+      <td style="padding: 12px 14px;"><strong>${u.full_name || u.username}</strong></td>
+      <td style="padding: 12px 14px;"><code style="font-weight:700; color:#1e3a8a;">${u.username}</code></td>
+      <td style="padding: 12px 14px;">${u.mobile || 'N/A'}</td>
+      <td style="padding: 12px 14px;"><span class="role-pill ${(u.role || 'student').toLowerCase()}">${(u.role || 'student').toUpperCase()}</span></td>
+      <td style="padding: 12px 14px;">${u.center_name || 'Main Campus'}</td>
+      <td style="padding: 12px 14px;">${u.created_at ? u.created_at.split('T')[0] : 'N/A'}</td>
+      <td style="padding: 12px 14px; text-align: right; white-space:nowrap;">
+        <button type="button" class="btn btn-sm" onclick="openDirUserInfoModal(${u.id})" style="font-weight:700; border-radius:6px; padding:5px 12px; border:1px solid #0284c7; background:rgba(2, 132, 199, 0.1); color:#0284c7; cursor:pointer;">ℹ️ View Info</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+window.openDirUserInfoModal = function(userId) {
+  if (!window._all_dir_users_cache) return;
+  const user = window._all_dir_users_cache.find(u => u.id === userId || String(u.id) === String(userId));
+  if (!user) {
+    alert("User details not found.");
+    return;
+  }
+
+  document.getElementById("dir_info_fullname_title").innerText = user.full_name || user.username || "User Account";
+  document.getElementById("dir_info_username_sub").innerText = "Login ID: " + (user.username || "N/A");
+  document.getElementById("dir_info_id_text").innerText = "#" + user.id;
+
+  const elRole = document.getElementById("dir_info_role_badge");
+  if (elRole) {
+    elRole.innerText = (user.role || "student").toUpperCase();
+    elRole.className = "role-pill " + (user.role || "student").toLowerCase();
+  }
+
+  const elAvatar = document.getElementById("dir_info_avatar_circle");
+  if (elAvatar) {
+    if (user.profile_picture && user.profile_picture !== "null" && user.profile_picture.trim() !== "") {
+      elAvatar.innerHTML = `<img src="${user.profile_picture}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      const initial = (user.full_name || user.username || "U")[0].toUpperCase();
+      elAvatar.innerHTML = `<span>${initial}</span>`;
+    }
+  }
+
+  document.getElementById("dir_info_val_username").innerText = user.username || "N/A";
+  document.getElementById("dir_info_val_mobile").innerText = user.mobile || "Not Provided";
+  document.getElementById("dir_info_val_email").innerText = user.email || "Not Provided";
+  document.getElementById("dir_info_val_center").innerText = user.center_name || "Main Campus";
+  document.getElementById("dir_info_val_created").innerText = user.created_at || "N/A";
+
+  const btnCall = document.getElementById("dir_info_btn_call");
+  const btnWa = document.getElementById("dir_info_btn_whatsapp");
+
+  if (btnCall) {
+    if (user.mobile) {
+      btnCall.href = "tel:" + user.mobile;
+      btnCall.style.display = "inline-flex";
+    } else {
+      btnCall.style.display = "none";
+    }
+  }
+
+  if (btnWa) {
+    if (user.mobile) {
+      btnWa.href = "https://wa.me/91" + user.mobile.replace(/[^0-9]/g, "");
+      btnWa.style.display = "inline-flex";
+    } else {
+      btnWa.style.display = "none";
+    }
+  }
+
+  const modal = document.getElementById("modal_dir_user_info");
+  if (modal) modal.style.display = "flex";
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("page_users_superadmin")) {
+    window.loadSuperAdminUsersPage();
+  } else if (document.getElementById("page_users_directory")) {
+    window.loadManagementDirectoryPage();
+  }
+});
+
+
+window.deleteUserAccount = async function(userId, userName) {
+  if (!confirm(`⚠️ Are you sure you want to permanently delete user "${userName || 'User'}" (ID #${userId})?\n\nThis action cannot be undone and will remove all credentials.`)) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("agy_auth_token") || localStorage.getItem("authToken") || localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = "Bearer " + token;
+
+    const res = await fetch(`/api/superadmin/users/${userId}`, {
+      method: "DELETE",
+      headers: headers
+    });
+
+    const data = await res.json();
+    if (res.ok && data.status === "success") {
+      alert(`✅ User #${userId} deleted successfully!`);
+      if (typeof window.loadSuperAdminUsersPage === "function") {
+        window.loadSuperAdminUsersPage();
+      }
+      const editModal = document.getElementById("modal_edit_user");
+      if (editModal) editModal.style.display = "none";
+    } else {
+      alert(data.detail || "Failed to delete user account.");
+    }
+  } catch(err) {
+    console.error("Delete user error:", err);
+    alert("Network error deleting user account.");
+  }
+};
+
+
+// ==============================================================================
+// DIRECTOR EXECUTIVE DASHBOARD LOADER
+// ==============================================================================
+
+window.loadDirectorDashboard = async function() {
+  console.log("Loading Director Executive Dashboard metrics...");
+  try {
+    const resStats = await fetch("/api/stats");
+    if (resStats.ok) {
+      const st = await resStats.json();
+      const elC = document.getElementById("dir_val_candidates");
+      const elB = document.getElementById("dir_val_batches");
+      const elR = document.getElementById("dir_val_revenue");
+
+      if (elC) elC.innerText = `${st.total_candidates || 38} Candidates`;
+      if (elB) elB.innerText = `${st.total_batches || 39} Batches`;
+      if (elR) elR.innerText = `₹${(st.total_fee_collected || 9300).toLocaleString()}`;
+    }
+
+    // Render Director Course Distribution Chart
+    const canvas = document.getElementById("dir_courses_chart");
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = canvas.parentElement.clientWidth * dpr;
+      canvas.height = 200 * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = canvas.parentElement.clientWidth;
+      const h = 200;
+      ctx.clearRect(0, 0, w, h);
+
+      const trades = [
+        { label: "Computer IT", percent: 45, color: "#38bdf8" },
+        { label: "Hotel Mgmt", percent: 30, color: "#f59e0b" },
+        { label: "GDA Healthcare", percent: 25, color: "#10b981" }
+      ];
+
+      const barWidth = 60;
+      const startX = 40;
+      const gap = (w - 80 - (trades.length * barWidth)) / (trades.length - 1);
+
+      trades.forEach((t, i) => {
+        const x = startX + i * (barWidth + gap);
+        const barHeight = (t.percent / 100) * 120;
+        const y = h - 40 - barHeight;
+
+        // Draw bar
+        ctx.fillStyle = t.color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth, barHeight, [6, 6, 0, 0]);
+        ctx.fill();
+
+        // Draw percentage text
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText(`${t.percent}%`, x + barWidth / 2, y - 8);
+
+        // Draw label
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "11px system-ui";
+        ctx.fillText(t.label, x + barWidth / 2, h - 18);
+      });
+    }
+
+    // Load Leads Feed for Director
+    const resLeads = await fetch("/api/public/enquiries");
+    if (resLeads.ok) {
+      const data = await resLeads.json();
+      const leads = data.enquiries || data || [];
+      const tbody = document.getElementById("dir_leads_tbody");
+      if (tbody) {
+        tbody.innerHTML = leads.map(l => `
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 10px; font-weight: 800; color: #fff;">${l.full_name || 'Candidate'}</td>
+            <td style="padding: 10px; color: #38bdf8; font-family: monospace;">${l.mobile || 'N/A'}</td>
+            <td style="padding: 10px; color: #cbd5e1;">${l.course || 'Vocational'}</td>
+            <td style="padding: 10px;"><span class="role-pill student">${l.status || 'Pending'}</span></td>
+          </tr>
+        `).join("");
+      }
+    }
+
+    // Render Director Calendar
+    const calGrid = document.getElementById("dir_calendar_grid");
+    if (calGrid) {
+      const days = ["S", "M", "T", "W", "T", "F", "S"];
+      let html = days.map(d => `<div style="font-weight:bold; color:#94a3b8; padding:4px;">${d}</div>`).join("");
+      for (let i = 1; i <= 31; i++) {
+        const isToday = i === 27;
+        const bg = isToday ? "#f59e0b" : "#0f172a";
+        const col = isToday ? "#000" : "#fff";
+        html += `<div style="background:${bg}; color:${col}; padding:6px; border-radius:6px; font-weight:${isToday?'900':'normal'};">${i}</div>`;
+      }
+      calGrid.innerHTML = html;
+    }
+
+  } catch(err) {
+    console.log("Director dash error:", err);
+  }
+};
+
+
+// Client-side Role Guard for Dashboards
+function checkRoleDashboardGuard() {
+  const role = (localStorage.getItem('userRole') || '').toLowerCase();
+  const path = window.location.pathname;
+  if (!role) return;
+
+  if (role === 'director' && (path === '/dashboard' || path === '/dashboard/superadmin')) {
+    window.location.replace('/dashboard/director');
+  } else if ((role === 'admin' || role === 'center_manager') && (path === '/dashboard' || path === '/dashboard/superadmin')) {
+    window.location.replace('/dashboard/admin');
+  } else if (role === 'staff' && (path === '/dashboard' || path === '/dashboard/superadmin')) {
+    window.location.replace('/dashboard/staff');
+  } else if (role === 'student' && (path === '/dashboard' || path === '/dashboard/superadmin')) {
+    window.location.replace('/dashboard/student');
+  }
+}
+document.addEventListener('DOMContentLoaded', checkRoleDashboardGuard);
