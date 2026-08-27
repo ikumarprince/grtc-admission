@@ -511,6 +511,7 @@ def create_user_session(user_id):
 def get_user_id_from_session(token):
     if not token:
         return None
+    token = str(token).strip()
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -520,7 +521,19 @@ def get_user_id_from_session(token):
             cursor.execute("SELECT user_id FROM user_sessions WHERE token = ?", (token,))
         row = cursor.fetchone()
         if row:
-            return row["user_id"] if isinstance(row, dict) else row[0]
+            if isinstance(row, dict):
+                val = row.get("user_id") or row.get("id") or list(row.values())[0]
+            elif isinstance(row, (tuple, list)):
+                val = row[0]
+            else:
+                try:
+                    val = row["user_id"]
+                except Exception:
+                    val = row[0]
+            try:
+                return int(val)
+            except (ValueError, TypeError):
+                return None
         return None
     finally:
         conn.close()
@@ -540,6 +553,15 @@ def delete_user_session(token):
         conn.close()
 
 def get_user_by_id(uid):
+    if uid is None:
+        return None
+    try:
+        if isinstance(uid, dict):
+            uid = uid.get("id") or uid.get("user_id")
+        uid = int(str(uid).strip())
+    except (ValueError, TypeError):
+        return None
+
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -693,6 +715,15 @@ def get_all_users(role=None):
     return rows
 
 def update_user(uid, data):
+    if uid is None:
+        return None
+    try:
+        if isinstance(uid, dict):
+            uid = uid.get("id") or uid.get("user_id")
+        uid = int(str(uid).strip())
+    except (ValueError, TypeError):
+        return None
+        
     conn = get_db_connection()
     cursor = conn.cursor()
     
